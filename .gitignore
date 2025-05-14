@@ -1,0 +1,55 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local Environment Variables
+.env.local
+.env.*.local
+!.env.example
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Cypress e2e tests
+/cypress/videos/
+/cypress/screenshots/
+
+# Optional: Vercel
+.vercel
+
+# Optional: Supabase (if local development files are generated)
+# supabase/migrations/
+# supabase/.temp/
