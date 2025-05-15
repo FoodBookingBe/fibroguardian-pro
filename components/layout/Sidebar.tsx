@@ -82,6 +82,7 @@ export default function Sidebar() {
     { href: '/dashboard', label: 'Dashboard', iconName: 'home' },
     { href: '/taken', label: 'Mijn Taken', iconName: 'tasks' },
     { href: '/reflecties', label: 'Mijn Reflecties', iconName: 'journal' },
+    { href: '/overzicht', label: 'Dag & Week Overzicht', iconName: 'chart' },
     { href: '/rapporten', label: 'Mijn Rapporten', iconName: 'chart' },
     { href: '/mijn-specialisten', label: 'Mijn Specialisten', iconName: 'users' },
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },

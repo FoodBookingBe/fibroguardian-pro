@@ -91,25 +91,44 @@ export default function ProfileForm() {
       
       if (uploadError) throw uploadError;
       
-      // Get public URL
-      const { data: urlData } = supabaseClient.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-      
-      // Update profile with avatar URL
-      if (urlData) {
-        setAvatarUrl(urlData.publicUrl);
+      try {
+        // Check if the bucket exists, if not create it
+        const { data: buckets } = await supabaseClient.storage.listBuckets();
+        const profilesBucketExists = buckets?.some(bucket => bucket.name === 'profiles');
         
-        // Update in database
-        const { error: updateError } = await supabaseClient
+        if (!profilesBucketExists) {
+          const { error: createBucketError } = await supabaseClient.storage.createBucket('profiles', {
+            public: true
+          });
+          
+          if (createBucketError) throw createBucketError;
+        }
+        
+        // Get public URL
+        const { data: urlData } = supabaseClient.storage
           .from('profiles')
-          .update({ avatar_url: urlData.publicUrl })
-          .eq('id', user.id);
+          .getPublicUrl(filePath);
         
-        if (updateError) throw updateError;
-        
-        setSuccess('Profielfoto bijgewerkt');
-        setTimeout(() => setSuccess(null), 3000);
+        // Update profile with avatar URL
+        if (urlData) {
+          setAvatarUrl(urlData.publicUrl);
+          
+          // Update in database
+          const { error: updateError } = await supabaseClient
+            .from('profiles')
+            .update({ avatar_url: urlData.publicUrl })
+            .eq('id', user.id);
+          
+          if (updateError) throw updateError;
+          
+          setSuccess('Profielfoto bijgewerkt');
+          setTimeout(() => setSuccess(null), 3000);
+        } else {
+          throw new Error('Kon geen publieke URL krijgen voor de profielfoto');
+        }
+      } catch (storageError: any) {
+        console.error('Storage error:', storageError);
+        throw new Error(`Fout bij het verwerken van de profielfoto: ${storageError.message}`);
       }
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
