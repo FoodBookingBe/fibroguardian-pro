@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { format, parseISO, isToday, isThisWeek, addDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -159,7 +158,6 @@ export default function OverzichtClient({
   }
   
   return (
-    <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Overzicht</h1>
         
@@ -391,6 +389,5 @@ export default function OverzichtClient({
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 }

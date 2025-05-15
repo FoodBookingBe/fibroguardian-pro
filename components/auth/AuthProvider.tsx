@@ -84,9 +84,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
     const protectedRoutePrefixes = [
       '/dashboard', '/taken', '/reflecties', '/rapporten', '/instellingen', '/specialisten',
-      '/mijn-specialisten', '/overzicht', '/inzichten', '/auth-test'
+      '/inzichten', '/auth-test'
+    ];
+    
+    // These paths were causing redirection issues, so we handle them separately
+    const specialProtectedPaths = [
+      '/mijn-specialisten', '/overzicht'
     ];
     const isProtectedRoute = protectedRoutePrefixes.some(prefix => pathname.startsWith(prefix));
+
+    const isSpecialProtectedRoute = specialProtectedPaths.some(prefix => pathname.startsWith(prefix));
 
     if (session && isAuthRoute) {
       // User is logged in but on an auth page, redirect to dashboard
@@ -95,6 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else if (!session && isProtectedRoute) {
       // User is not logged in and on a protected page, redirect to login
       console.log('AuthProvider: Unauthenticated user on protected route, redirecting to /auth/login');
+      router.push('/auth/login');
+    } else if (!session && isSpecialProtectedRoute) {
+      // User is not logged in and on a special protected page, redirect to login
+      console.log('AuthProvider: Unauthenticated user on special protected route, redirecting to /auth/login');
       router.push('/auth/login');
     }
   }, [session, loading, router, pathname]);

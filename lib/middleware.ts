@@ -95,7 +95,12 @@ export async function middleware(req: NextRequest) {
   const protectedPaths = [
     '/dashboard', '/taken', '/opdrachten', '/rapporten', 
     '/reflecties', '/specialisten', '/instellingen',
-    '/mijn-specialisten', '/overzicht', '/inzichten', '/auth-test',
+    '/inzichten', '/auth-test',
+  ];
+  
+  // These paths were causing redirection issues, so we handle them separately
+  const specialProtectedPaths = [
+    '/mijn-specialisten', '/overzicht'
   ];
   const authPaths = ['/auth/login', '/auth/register'];
 
@@ -111,6 +116,15 @@ export async function middleware(req: NextRequest) {
   // If trying to access protected path without a user, redirect to login
   if (!user && protectedPaths.some(protectedPath => path.startsWith(protectedPath))) {
     const redirectTo = path === '/' ? '/dashboard' : path; // If root is protected, redirect to dashboard after login
+    url.pathname = '/auth/login';
+    url.searchParams.set('redirectTo', redirectTo);
+    return NextResponse.redirect(url);
+  }
+  
+  // Handle special protected paths that were causing redirection issues
+  // Only redirect to login if user is not authenticated, but don't redirect to dashboard if they are
+  if (!user && specialProtectedPaths.some(specialPath => path.startsWith(specialPath))) {
+    const redirectTo = path;
     url.pathname = '/auth/login';
     url.searchParams.set('redirectTo', redirectTo);
     return NextResponse.redirect(url);
