@@ -89,7 +89,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
           email,
           password,
           options: {
-            emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '',
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               voornaam: voornaam.trim(),
               achternaam: achternaam.trim(),
@@ -209,9 +209,17 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
 
       <button
         onClick={() => {
-          setIsLogin(!isLogin);
-          setMessage(''); // Clear message on mode switch
-          setErrors({}); // Clear errors on mode switch
+          if (isLogin) {
+            router.push('/auth/register');
+          } else {
+            router.push('/auth/login');
+          }
+          // It's good practice to also clear messages/errors if navigation is successful,
+          // but the component will unmount/remount or re-initialize on page navigation,
+          // so explicit clearing here might not be strictly necessary if initialIsLogin handles it.
+          // However, to be safe and handle potential SPA-like transitions if Next.js optimizes:
+          setMessage('');
+          setErrors({});
         }}
         className="mt-4 w-full text-center text-sm text-purple-600 hover:text-purple-800"
       >

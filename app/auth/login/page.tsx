@@ -29,12 +29,6 @@ export default function LoginPage() {
               Wachtwoord vergeten?
           </Link>
         </div>
-        <div className="text-sm text-center text-gray-600">
-          Nog geen account?{' '}
-          <Link href="/auth/register" className="font-medium text-purple-600 hover:text-purple-500 hover:underline">
-            Registreer hier
-          </Link>
-        </div>
       </div>
     </div>
   );

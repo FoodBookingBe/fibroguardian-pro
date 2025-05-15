@@ -25,12 +25,6 @@ export default function RegisterPage() {
         {/* To explicitly set it to register mode, we would need to modify AuthForm or pass a prop. */}
         {/* Explicitly set to register mode */}
         <AuthForm initialIsLogin={false} />
-        <div className="text-sm text-center text-gray-600 mt-6">
-          Al een account?{' '}
-          <Link href="/auth/login" className="font-medium text-purple-600 hover:text-purple-500 hover:underline">
-            Log hier in
-          </Link>
-        </div>
       </div>
     </div>
   );

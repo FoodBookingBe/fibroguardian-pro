@@ -160,23 +160,26 @@ export default function ReflectieForm() {
             Hoe voelt u zich vandaag?
           </label>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Stemming selectie">
-            {stemmingOpties.map((stemming) => (
-              <button
-                key={stemming}
-                type="button"
-                onClick={() => handleStemmingSelect(stemming)}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${
-                  reflectieData.stemming === stemming
-                    ? stemmingKleur(stemming)
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                role="radio"
-                aria-checked={reflectieData.stemming === stemming ? "true" : "false"}
-                aria-label={`Selecteer stemming: ${stemming}`}
-              >
-                {stemming.charAt(0).toUpperCase() + stemming.slice(1)} {/* Capitalize */}
-              </button>
-            ))}
+            {stemmingOpties.map((stemming) => {
+              const isChecked = reflectieData.stemming === stemming;
+              return (
+                <button
+                  key={stemming}
+                  type="button"
+                  onClick={() => handleStemmingSelect(stemming)}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${
+                    isChecked
+                      ? stemmingKleur(stemming)
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  role="radio"
+                  aria-checked={isChecked ? "true" : "false"}
+                  aria-label={`Selecteer stemming: ${stemming}`}
+                >
+                  {stemming.charAt(0).toUpperCase() + stemming.slice(1)} {/* Capitalize */}
+                </button>
+              );
+            })}
           </div>
         </div>
         
