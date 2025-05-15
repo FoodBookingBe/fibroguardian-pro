@@ -82,10 +82,11 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             setMessage('Succesvol ingelogd! Even geduld...');
             
             // Gebruik een korte timeout om zeker te zijn dat cookies zijn opgeslagen
-            setTimeout(() => {
-              // Hard redirect voor volledig pagina refresh
-              window.location.href = '/dashboard';
-            }, 300);
+            // setTimeout(() => {
+            //   // Hard redirect voor volledig pagina refresh
+            //   window.location.href = '/dashboard';
+            // }, 300);
+            // Rely on AuthProvider to redirect based on session state change
           } else {
             setMessage('Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.');
           }
