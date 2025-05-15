@@ -78,9 +78,9 @@ const nextConfig = withPWA({
           {
             key: 'Content-Security-Policy',
             value: process.env.NODE_ENV === 'production'
-              value: process.env.NODE_ENV === 'production'
                 ? "default-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://static.hsappstatic.net; img-src 'self' data: blob: https: *.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com; frame-src https://js.stripe.com;"
-                : "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://static.hsappstatic.net; img-src 'self' data: blob: https: *.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com http://localhost:*; frame-src https://js.stripe.com;",
+                : "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://static.hsappstatic.net; img-src 'self' data: blob: https: *.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com http://localhost:*; frame-src https://js.stripe.com;"
+          },
         ],
       },
     ];
