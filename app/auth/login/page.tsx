@@ -2,6 +2,7 @@
 
 import AuthForm from "@/components/auth/AuthForm"; // Corrected import path
 import Link from 'next/link';
+import Image from 'next/image'; // Import Next.js Image component
 
 export default function LoginPage() {
   return (
@@ -9,10 +10,13 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-xl shadow-2xl">
         <div>
           <Link href="/" className="inline-block mb-6 transition-transform hover:scale-105">
-            <img
-              className="mx-auto h-12 w-auto sm:h-14" // Adjusted size
+            <Image
+              className="mx-auto" // Removed h-12 w-auto sm:h-14, let width/height props control size
               src="/logo.png" // Ensure this logo exists in /public
               alt="FibroGuardian Pro"
+              width={56} // Example width, adjust as needed (sm:h-14 is 56px)
+              height={56} // Example height, adjust to maintain aspect ratio
+              priority // If it's LCP
             />
           </Link>
           <h2 className="text-center text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">

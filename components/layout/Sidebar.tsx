@@ -2,7 +2,7 @@
 import { useState, useEffect, ReactElement } from 'react'; // Added ReactElement
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation'; // Added useRouter
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider'; // Corrected path if needed
 
 // Define an interface for menu items for better type safety
@@ -27,6 +27,7 @@ export default function Sidebar() {
         return;
       }
       try {
+        const supabase = getSupabaseBrowserClient();
         const { data, error } = await supabase
           .from('profiles')
           .select('type')
@@ -107,7 +108,7 @@ export default function Sidebar() {
         id="mobile-menu-button"
         onClick={toggleSidebar}
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white text-gray-600 shadow-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        aria-expanded={isOpen ? "true" : "false"}
+        aria-expanded={isOpen}
         aria-controls="sidebar"
         aria-label={isOpen ? "Sluit menu" : "Open menu"}
       >
@@ -161,6 +162,7 @@ export default function Sidebar() {
             <button
               onClick={async () => {
                 setIsOpen(false); // Close sidebar before sign out
+                const supabase = getSupabaseBrowserClient();
                 await supabase.auth.signOut();
                 router.push('/'); // Use router for navigation
               }}

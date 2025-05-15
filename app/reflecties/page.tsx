@@ -1,4 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -6,20 +6,38 @@ import ReflectiesList from '@/components/reflecties/ReflectiesList';
 import { Reflectie } from '@/types'; // Import type
 
 export default async function ReflectiesPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
   
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session) {
-    redirect('/'); // Redirect to home or login if not authenticated
+  if (!user) {
+    // Middleware should handle redirecting unauthenticated users to login.
+    redirect('/auth/login');
   }
   
   // Haal reflecties op
   const { data, error } = await supabase
     .from('reflecties')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id) // Use user.id
     .order('datum', { ascending: false }) // Show most recent first
     .limit(30); // Limit to a reasonable number for the list
   

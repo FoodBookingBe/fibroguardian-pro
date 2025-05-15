@@ -54,6 +54,7 @@ self.addEventListener('activate', (event) => {
 // Stale-while-revalidate for other assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url); // Create a URL object to easily access pathname
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
@@ -70,7 +71,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For HTML navigation requests, try network first, then cache, then offline page
+  // If it's an auth path, bypass SW fetch handling for navigation and static assets from /auth/
+  // This ensures auth flow always tries network and isn't served stale from cache or as offline.html.
+  // If network fails for /auth/login, user gets browser network error.
+  if (url.pathname.startsWith('/auth/')) {
+    return; // Let browser handle the fetch, bypassing SW's respondWith for these paths
+  }
+
+  // For HTML navigation requests (that are NOT /auth/*), try network first, then cache, then offline page
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)

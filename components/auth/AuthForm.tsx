@@ -1,7 +1,7 @@
 'use client';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation'; // Added useRouter
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { validateEmail, validatePassword } from '@/utils/validation';
 
 export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) { // Accept initialIsLogin prop
@@ -57,17 +57,35 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     try {
       if (isLogin) {
         // Login
-        const { error } = await supabase.auth.signInWithPassword({
+        // Login
+        console.log('AuthForm: Calling signInWithPassword...'); // DEBUG LINE
+        const supabase = getSupabaseBrowserClient();
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
+          // The 'options: { redirectTo: ... }' is not valid for signInWithPassword here.
+          // Redirects are primarily handled by Supabase project settings or client-side routing post-success.
         });
-        if (error) throw error;
-        setMessage('Succesvol ingelogd! Even geduld...');
-        // Redirect will be handled by AuthProvider now
-        // router.push('/dashboard');
+
+        console.log('AuthForm: signInWithPassword response:', { signInData, signInError }); // DEBUG LINE
+
+        if (signInError) {
+          console.error('AuthForm: Login failed with error object:', signInError); // DEBUG LINE
+          setMessage(`Fout bij inloggen: ${signInError.message}`);
+          // Do not proceed to redirect if there's an error
+        } else if (signInData?.user) {
+          setMessage('Succesvol ingelogd! Even geduld...');
+          console.log('AuthForm: Login successful, attempting to redirect to /dashboard via router.push'); // DEBUG LINE
+          router.push('/dashboard'); 
+        } else {
+          // Should not happen if signInError is null and signInData.user is also null/undefined
+          console.error('AuthForm: Login attempt returned no error and no user data.'); // DEBUG LINE
+          setMessage('Onbekende fout bij inloggen. Probeer het opnieuw.');
+        }
       } else {
         // Registratie
-        const { data: signUpData, error } = await supabase.auth.signUp({
+        const supabase = getSupabaseBrowserClient();
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -79,14 +97,19 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             }
           }
         });
-        if (error) throw error;
-        // Note: After signUp, Supabase sends a confirmation email.
-        // The user object in signUpData.user will exist but session might be null until email is confirmed.
-        // The profile creation from options.data usually happens via a DB trigger on auth.users insert.
-        setMessage('Controleer uw e-mail voor de bevestigingslink.');
+        if (signUpError) { // Check signUpError specifically
+          console.error('AuthForm: SignUp failed with error object:', signUpError); // DEBUG LINE
+          setMessage(`Fout bij registratie: ${signUpError.message}`);
+        } else {
+          // Note: After signUp, Supabase sends a confirmation email.
+          // The user object in signUpData.user will exist but session might be null until email is confirmed.
+          // The profile creation from options.data usually happens via a DB trigger on auth.users insert.
+          setMessage('Controleer uw e-mail voor de bevestigingslink.');
+        }
       }
-    } catch (error: any) {
-      setMessage(`Fout: ${error.message}`);
+    } catch (error: any) { // This catch is for unexpected errors, not for Supabase auth errors handled above.
+      console.error('AuthForm: Unexpected error in handleSubmit:', error); // DEBUG LINE
+      setMessage(`Onverwachte fout: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -150,7 +173,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             onChange={(e) => setEmail(e.target.value)}
             className={`form-input ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
             required
-            aria-invalid={!!errors.email}
+            {...(errors.email && { 'aria-invalid': 'true' })}
             aria-describedby={errors.email ? "email-error" : undefined}
           />
           {errors.email && <p id="email-error" className="form-error">{errors.email}</p>}
@@ -167,7 +190,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             onChange={(e) => setPassword(e.target.value)}
             className={`form-input ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
             required
-            aria-invalid={!!errors.password}
+            {...(errors.password && { 'aria-invalid': 'true' })}
             aria-describedby={errors.password ? "password-error" : undefined}
           />
           {errors.password && <p id="password-error" className="form-error">{errors.password}</p>}

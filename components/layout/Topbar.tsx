@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 
 export default function Topbar() {
   const { user } = useAuth();
@@ -14,6 +14,7 @@ export default function Topbar() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (user) {
+        const supabase = getSupabaseBrowserClient();
         const { data, error } = await supabase
           .from('profiles')
           .select('voornaam, achternaam, avatar_url')

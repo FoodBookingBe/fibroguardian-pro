@@ -1,4 +1,4 @@
-update1{
+{
   "name": "fibroguardian-pro",
   "version": "0.1.0",
   "private": true,
@@ -12,6 +12,7 @@ update1{
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.76.1",
     "@tanstack/react-query-devtools": "^5.76.1",
@@ -31,6 +32,7 @@ update1{
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "autoprefixer": "^10.4.16",
+    "critters": "^0.0.23",
     "cypress": "^13.5.1",
     "eslint": "^8.54.0",
     "eslint-config-next": "14.0.3",
