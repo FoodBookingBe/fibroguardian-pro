@@ -5,6 +5,11 @@ import type { NextRequest } from 'next/server';
 // Assuming env-config.ts will export an object with appUrl
 // import { config } from '@/lib/env-config'; // We'll use process.env directly or requestUrl.origin
 
+// The GET handler for code exchange is now primarily handled by app/api/auth/callback/route.ts
+// If this [...supabase] route was intended for other specific GET operations under /api/auth/,
+// those could be added here. Otherwise, this GET handler might be redundant.
+// For now, commenting out the GET handler to rely on the dedicated callback route.
+/*
 export async function GET(req: NextRequest) {
   const { searchParams, origin } = new URL(req.url);
   const code = searchParams.get('code');
@@ -33,7 +38,6 @@ export async function GET(req: NextRequest) {
       await supabase.auth.exchangeCodeForSession(code);
     } catch (error) {
       console.error('Error exchanging code for session in [...supabase] route:', error);
-      // Optionally redirect to an error page or login with an error message
       const errorRedirectUrl = new URL('/auth/login', origin);
       errorRedirectUrl.searchParams.set('error', 'auth_exchange_error');
       errorRedirectUrl.searchParams.set('error_description', 'Failed to exchange auth code.');
@@ -41,9 +45,12 @@ export async function GET(req: NextRequest) {
     }
   }
   
-  // Determine the base URL for redirection
-  // Prefer NEXT_PUBLIC_APP_URL if available, otherwise use the request's origin
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
   
   return NextResponse.redirect(new URL(redirectTo, appUrl));
 }
+*/
+
+// If you need other specific handlers (e.g., POST for signout, GET for user) for /api/auth/*,
+// they can be defined here. For example:
+// export async function POST(req: NextRequest) { /* ... */ }

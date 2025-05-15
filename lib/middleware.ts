@@ -34,7 +34,9 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set('x-nonce', nonce); // Pass nonce to be potentially used by server components
   
   // Set security headers on the response
-  res.headers.set('Content-Security-Policy', cspHeader);
+  // CSP is now primarily managed in next.config.js to avoid conflicts.
+  // If dynamic nonces are strictly needed from middleware, a more complex merging strategy would be required.
+  // res.headers.set('Content-Security-Policy', cspHeader);
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'SAMEORIGIN'); // Or DENY if no framing needed
   res.headers.set('X-XSS-Protection', '1; mode=block'); // Older browsers, CSP is preferred

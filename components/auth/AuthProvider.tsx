@@ -43,9 +43,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
+      
+      // Debug log suggested by user
+      console.log("AUTH SESSION CHECK (initial getSession):", {
+        hasSession: !!currentSession,
+        hasUser: !!currentSession?.user,
+        error: response.error?.message,
+        sessionExpiry: currentSession?.expires_at
+          ? new Date(currentSession.expires_at * 1000).toISOString()
+          : 'No expiry',
+        cookies: typeof document !== 'undefined' ? document.cookie.split(';').filter(c => c.trim().startsWith('sb-')) : 'No document/cookies (server?)',
+      });
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionState) => {
+      console.log("AUTH STATE CHANGE EVENT:", event, {
+        hasSession: !!sessionState,
+        hasUser: !!sessionState?.user,
+        sessionExpiry: sessionState?.expires_at
+          ? new Date(sessionState.expires_at * 1000).toISOString()
+          : 'No expiry',
+        cookies: typeof document !== 'undefined' ? document.cookie.split(';').filter(c => c.trim().startsWith('sb-')) : 'No document/cookies (server?)',
+      });
+      handleAuthStateChange(event, sessionState);
+    });
     
     return () => {
       subscription?.unsubscribe();
@@ -60,13 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const protectedRoutePrefixes = ['/dashboard', '/taken', '/reflecties', '/rapporten', '/instellingen', '/specialisten'];
     const isProtectedRoute = protectedRoutePrefixes.some(prefix => pathname.startsWith(prefix));
 
-    // TEMPORARILY DISABLE REDIRECTING LOGGED-IN USER FROM AUTH PAGE
-    // if (session && isAuthRoute) {
-    //   // User is logged in but on an auth page, redirect to dashboard
-    //   console.log('AuthProvider: Logged in user on auth route, redirecting to /dashboard');
-    //   router.push('/dashboard');
-    // } else 
-    if (!session && isProtectedRoute) {
+    if (session && isAuthRoute) {
+      // User is logged in but on an auth page, redirect to dashboard
+      console.log('AuthProvider: Logged in user on auth route, redirecting to /dashboard with hard navigation');
+      window.location.href = '/dashboard';
+    } else if (!session && isProtectedRoute) {
       // User is not logged in and on a protected page, redirect to login
       console.log('AuthProvider: Unauthenticated user on protected route, redirecting to /auth/login');
       router.push('/auth/login');

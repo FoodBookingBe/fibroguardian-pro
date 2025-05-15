@@ -56,30 +56,29 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
 
     try {
       if (isLogin) {
-        // Login
-        // Login
-        console.log('AuthForm: Calling signInWithPassword...'); // DEBUG LINE
+        console.log('Login attempt starting with email:', email); // Add logging
         const supabase = getSupabaseBrowserClient();
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
-          // The 'options: { redirectTo: ... }' is not valid for signInWithPassword here.
-          // Redirects are primarily handled by Supabase project settings or client-side routing post-success.
         });
 
-        console.log('AuthForm: signInWithPassword response:', { signInData, signInError }); // DEBUG LINE
+        console.log('Login result:', {
+          success: !!signInData?.user,
+          error: signInError ? signInError.message : null,
+          session: !!signInData?.session
+        });
 
         if (signInError) {
-          console.error('AuthForm: Login failed with error object:', signInError); // DEBUG LINE
           setMessage(`Fout bij inloggen: ${signInError.message}`);
-          // Do not proceed to redirect if there's an error
         } else if (signInData?.user) {
           setMessage('Succesvol ingelogd! Even geduld...');
-          console.log('AuthForm: Login successful, attempting to redirect to /dashboard via router.push'); // DEBUG LINE
-          router.push('/dashboard'); 
+          console.log('Login successful, redirecting to dashboard');
+          
+          // Force a hard navigation instead of client-side navigation
+          window.location.href = '/dashboard';
+          // Alternative: router.push('/dashboard')
         } else {
-          // Should not happen if signInError is null and signInData.user is also null/undefined
-          console.error('AuthForm: Login attempt returned no error and no user data.'); // DEBUG LINE
           setMessage('Onbekende fout bij inloggen. Probeer het opnieuw.');
         }
       } else {
