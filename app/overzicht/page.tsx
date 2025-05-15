@@ -1,9 +1,11 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import OverzichtClient from './overzicht-client';
+import { format, parseISO } from 'date-fns';
+import { nl } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0; // Disable caching
 
 export default async function OverzichtPage() {
   const supabase = createServerComponentClient({ cookies });
@@ -11,7 +13,8 @@ export default async function OverzichtPage() {
   // Controleer of gebruiker is ingelogd
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    redirect('/auth/login');
+    console.log('No session found, redirecting to login');
+    return redirect('/auth/login');
   }
   
   // Haal gebruikersprofiel op
@@ -23,7 +26,7 @@ export default async function OverzichtPage() {
   
   if (profileError || !profile) {
     console.error('Error fetching profile:', profileError);
-    redirect('/dashboard?error=profile_not_found');
+    return redirect('/dashboard?error=profile_not_found');
   }
   
   // Haal taken op voor de huidige week
@@ -74,16 +77,88 @@ export default async function OverzichtPage() {
   }
   
   return (
-    <div>
-      <OverzichtClient 
-        user={session.user}
-        userProfile={profile}
-        tasks={tasks || []}
-        taskLogs={taskLogs || []}
-        reflecties={reflecties || []}
-        startOfWeek={startOfWeek.toISOString()}
-        endOfWeek={endOfWeek.toISOString()}
-      />
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Dag & Week Overzicht</h1>
+      
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">
+          Week van {format(startOfWeek, 'd MMMM', { locale: nl })} tot {format(endOfWeek, 'd MMMM', { locale: nl })}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-purple-50 p-4 rounded-md">
+            <h3 className="text-sm font-medium text-purple-700 mb-1">Taken deze week</h3>
+            <p className="text-2xl font-bold text-purple-800">
+              {tasks?.length || 0}
+            </p>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded-md">
+            <h3 className="text-sm font-medium text-blue-700 mb-1">Uitgevoerde taken</h3>
+            <p className="text-2xl font-bold text-blue-800">
+              {taskLogs?.length || 0}
+            </p>
+          </div>
+          
+          <div className="bg-amber-50 p-4 rounded-md">
+            <h3 className="text-sm font-medium text-amber-700 mb-1">Reflecties</h3>
+            <p className="text-2xl font-bold text-amber-800">
+              {reflecties?.length || 0}
+            </p>
+          </div>
+        </div>
+        
+        <p className="text-gray-600">
+          Bekijk gedetailleerde statistieken en inzichten over uw taken, energie- en pijnniveaus.
+          Gebruik de navigatie om te schakelen tussen dag- en weekweergave.
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-3">Recente Taken</h2>
+          
+          {!taskLogs || taskLogs.length === 0 ? (
+            <p className="text-gray-500">Geen taken uitgevoerd deze week.</p>
+          ) : (
+            <div className="space-y-4">
+              {taskLogs.slice(0, 3).map(log => (
+                <div key={log.id} className="border-l-4 border-purple-500 pl-4 py-2">
+                  <h4 className="font-medium text-gray-800">{log.tasks?.titel || 'Onbekende taak'}</h4>
+                  <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-600">
+                    <span>
+                      {format(parseISO(log.start_tijd), 'dd/MM - HH:mm')}
+                    </span>
+                    <span>•</span>
+                    <span>Pijn: {log.pijn_score}/20</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-3">Recente Reflecties</h2>
+          
+          {!reflecties || reflecties.length === 0 ? (
+            <p className="text-gray-500">Geen reflecties toegevoegd deze week.</p>
+          ) : (
+            <div className="space-y-4">
+              {reflecties.slice(0, 3).map(reflectie => (
+                <div key={reflectie.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-800">
+                      {format(parseISO(reflectie.datum), 'EEEE d MMMM', { locale: nl })}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-gray-600">{reflectie.notitie}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

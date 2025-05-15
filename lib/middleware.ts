@@ -95,6 +95,7 @@ export async function middleware(req: NextRequest) {
   const protectedPaths = [
     '/dashboard', '/taken', '/opdrachten', '/rapporten', 
     '/reflecties', '/specialisten', '/instellingen',
+    '/mijn-specialisten', '/overzicht', '/inzichten', '/auth-test',
   ];
   const authPaths = ['/auth/login', '/auth/register'];
 
