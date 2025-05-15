@@ -1,13 +1,34 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+// import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
+import { createServerClient } from '@supabase/ssr'; // New import for App Router
 import { cookies } from 'next/headers';
 import DailyPlanner from '@/components/dashboard/DailyPlanner';
 import HealthMetrics from '@/components/dashboard/HealthMetrics';
 import AIInsights from '@/components/dashboard/AIInsights';
 import QuickActions from '@/components/dashboard/QuickActions';
 import SessionStatus from '@/components/debug/SessionStatus';
+import { Database } from '@/types/database'; // Assuming you have this type
+
 export default async function Dashboard() {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        // If you need to set/remove cookies in Server Actions within this component/page:
+        // set(name: string, value: string, options: CookieOptions) {
+        //   cookieStore.set({ name, value, ...options });
+        // },
+        // remove(name: string, options: CookieOptions) {
+        //   cookieStore.delete({ name, ...options });
+        // },
+      },
+    }
+  );
   
   // Authentication is now handled by app/dashboard/layout.tsx
   // but we still need session data here for page content

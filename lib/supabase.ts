@@ -23,34 +23,14 @@ export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
 
   if (!supabaseInstance) {
     // Voeg deze debug logging toe
-    console.log("Creating new Supabase client instance");
-    supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!, {
-      // Explicieter cookie management
-      cookies: {
-        get(name) {
-          const cookiePair = document.cookie
-            .split('; ')
-            .find((row) => row.startsWith(`${name}=`));
-          const cookieValue = cookiePair ? cookiePair.split('=')[1] : undefined;
-          console.log(`[Supabase Cookies GET] Name: ${name}, Raw Value: ${cookieValue}`);
-          return cookieValue;
-        },
-        set(name, value, options) {
-          // Voeg SameSite en andere attributen toe
-          let cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 7}`;
-          if (options.domain) cookie += `; domain=${options.domain}`;
-          if (options.maxAge) cookie += `; max-age=${options.maxAge}`;
-          if (options.secure) cookie += '; secure';
-          if (options.sameSite) cookie += `; samesite=${options.sameSite}`;
-          document.cookie = cookie;
-        },
-        remove(name, options) {
-          const cookieString = `${name}=; path=/; max-age=0`;
-          // if (options.domain) cookieString += `; domain=${options.domain}`; // domain not typically needed for removal by path
-          document.cookie = cookieString;
-        },
-      },
-    });
+    console.log("Creating new Supabase client instance (default cookie handling)");
+    supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!);
+    // Reverted to default cookie handling by removing the custom 'cookies' object.
+    // The @supabase/ssr library's createBrowserClient is generally expected to handle
+    // cookie operations correctly by default in a Next.js environment.
+    // The "Failed to parse cookie string: SyntaxError: Unexpected token 'b', "base64-eyJ"..."
+    // error suggests that the custom cookie 'get' method, or how cookies were being set,
+    // might have been interfering with the expected format.
   }
   return supabaseInstance!;
 };
