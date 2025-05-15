@@ -15,10 +15,10 @@ export async function middleware(req: NextRequest) {
   
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' https://js.stripe.com 'unsafe-eval'; 
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-    img-src 'self' data: blob: https: *.supabase.co; 
-    font-src 'self' data: https://fonts.gstatic.com; 
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://static.hsappstatic.net;
+    img-src 'self' data: blob: https: *.supabase.co;
+    font-src 'self' data: https://fonts.gstatic.com;
     connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com ${process.env.NODE_ENV === 'development' ? 'http://localhost:* ws://localhost:*' : ''};
     frame-src https://js.stripe.com;
     object-src 'none';
@@ -34,9 +34,7 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set('x-nonce', nonce); // Pass nonce to be potentially used by server components
   
   // Set security headers on the response
-  // CSP is now primarily managed in next.config.js to avoid conflicts.
-  // If dynamic nonces are strictly needed from middleware, a more complex merging strategy would be required.
-  // res.headers.set('Content-Security-Policy', cspHeader);
+  res.headers.set('Content-Security-Policy', cspHeader); // Ensure this line is active
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'SAMEORIGIN'); // Or DENY if no framing needed
   res.headers.set('X-XSS-Protection', '1; mode=block'); // Older browsers, CSP is preferred
