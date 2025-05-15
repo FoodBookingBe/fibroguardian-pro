@@ -15,10 +15,14 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true
 });
-
-export const useAuth = () => useContext(AuthContext);
-
+ 
+export const useAuth = () => {
+  // console.log('[AuthProvider] useAuth called, consuming context.'); // This might be too noisy if called often
+  return useContext(AuthContext);
+};
+ 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  console.log('[AuthProvider] AuthProvider component rendering/re-rendering'); // Log when AuthProvider itself renders
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
