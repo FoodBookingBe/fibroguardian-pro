@@ -1,17 +1,13 @@
-import { redirect } from 'next/navigation';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import ProfileForm from '@/components/settings/ProfileForm';
 
-export default async function InstellingenPage() {
-  // Minimal content for diagnostics
-  // Simulate auth check
-  const user = null; // Replace with actual auth check later
-  if (!user) {
-    // redirect('/auth/login'); // Comment out redirect for now to simplify
-  }
-
+export default function InstellingenPage() {
   return (
-    <div>
-      <h1>Instellingen Pagina</h1>
-      <p>Deze pagina is onder constructie.</p>
-    </div>
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-purple-800 mb-6">Instellingen</h1>
+        <ProfileForm />
+      </div>
+    </DashboardLayout>
   );
 }

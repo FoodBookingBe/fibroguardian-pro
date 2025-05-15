@@ -80,7 +80,7 @@ export default function Sidebar() {
   const specialistMenuItems: MenuItem[] = [
     { href: '/dashboard', label: 'Dashboard', iconName: 'home' }, // Common dashboard
     { href: '/specialisten/patienten', label: 'Mijn Patiënten', iconName: 'users' },
-    // { href: '/specialisten/taken', label: 'Taken Toewijzen', iconName: 'tasks' }, // Often done from patient detail
+    { href: '/specialisten/taken', label: 'Taken Toewijzen', iconName: 'tasks' },
     { href: '/specialisten/inzichten', label: 'Patiënt Inzichten', iconName: 'chart' }, // Aggregate insights
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
   ];

@@ -1,278 +1,407 @@
 'use client';
-import { useState, ChangeEvent } from 'react'; // Added ChangeEvent
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
-// Assuming ErrorAlert is part of error-handler or a separate component
-import { handleSupabaseError } from '@/lib/error-handler'; 
+import { getSupabaseBrowserClient } from '@/lib/supabase'; // Corrected import
 
 type RapportType = 'daily' | 'weekly' | 'monthly' | 'custom';
 type RapportFormat = 'pdf' | 'csv';
 
-interface ErrorAlertProps {
-  error: { userMessage: string, technicalMessage?: string, action?: string } | string | null;
-}
-
-const ErrorAlert = ({ error }: ErrorAlertProps) => {
-  if (!error) return null;
-  const message = typeof error === 'string' ? error : error.userMessage;
-  return <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded-md">{message}</div>;
-};
-
 export default function RapportGenerator() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ReturnType<typeof handleSupabaseError> | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
+  // Datum helpers
   const vandaag = new Date();
   const eenWeekTerug = new Date();
   eenWeekTerug.setDate(vandaag.getDate() - 7);
   const eenMaandTerug = new Date();
   eenMaandTerug.setMonth(vandaag.getMonth() - 1);
   
-  const formatDateForInput = (date: Date): string => { // Renamed for clarity
+  const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
   
   const [rapportData, setRapportData] = useState({
     type: 'weekly' as RapportType,
     format: 'pdf' as RapportFormat,
-    startDatum: formatDateForInput(eenWeekTerug),
-    eindDatum: formatDateForInput(vandaag),
+    startDatum: formatDate(eenWeekTerug),
+    eindDatum: formatDate(vandaag),
     includeTasken: true,
     includeMetrieken: true,
     includeReflecties: true,
     includeInzichten: true,
   });
   
+  // Update rapport type en pas datums aan
   const handleTypeChange = (type: RapportType) => {
-    let newStartDatum = rapportData.startDatum;
-    const newEindDatum = formatDateForInput(vandaag); // Always set end date to today for predefined types
+    let startDatum = rapportData.startDatum;
     
     switch (type) {
       case 'daily':
-        newStartDatum = formatDateForInput(vandaag);
+        startDatum = formatDate(vandaag);
         break;
       case 'weekly':
-        newStartDatum = formatDateForInput(eenWeekTerug);
+        startDatum = formatDate(eenWeekTerug);
         break;
       case 'monthly':
-        newStartDatum = formatDateForInput(eenMaandTerug);
+        startDatum = formatDate(eenMaandTerug);
         break;
-      // For 'custom', keep existing dates or let user pick
+      // Voor custom behouden we de bestaande startdatum
     }
     
     setRapportData(prev => ({
       ...prev,
       type,
-      startDatum: newStartDatum,
-      eindDatum: newEindDatum, // Update end date for daily, weekly, monthly
+      startDatum,
+      eindDatum: formatDate(vandaag),
     }));
   };
   
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Handle checkbox changes
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setRapportData(prev => ({ ...prev, [name]: checked }));
+    setRapportData(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
   
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Handle algemene changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setRapportData(prev => ({ ...prev, [name]: value }));
+    setRapportData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
   
+  // Generate rapport
   const handleGenerateRapport = async () => {
-    if (!user) {
-      setError({userMessage: "U moet ingelogd zijn om een rapport te genereren."});
-      return;
-    }
-    
     setLoading(true);
     setError(null);
     
-    setError(null);
-    
     try {
+      // Validatie
       if (!rapportData.startDatum || !rapportData.eindDatum) {
         throw new Error('Start- en einddatum zijn verplicht');
       }
+      
       if (new Date(rapportData.startDatum) > new Date(rapportData.eindDatum)) {
-        throw new Error('Startdatum kan niet na de einddatum liggen.');
+        throw new Error('Startdatum moet voor einddatum liggen');
       }
-      if (!rapportData.includeTasken && !rapportData.includeMetrieken &&
+      
+      if (!rapportData.includeTasken && !rapportData.includeMetrieken && 
           !rapportData.includeReflecties && !rapportData.includeInzichten) {
-        throw new Error('Selecteer ten minste één type gegevens om op te nemen in het rapport.');
+        throw new Error('Selecteer ten minste één type gegevens om op te nemen in het rapport');
       }
       
-      const supabase = getSupabaseBrowserClient(); // Get client instance once for all queries in this try block
-      const dataToFetch: any = { rapportConfig: rapportData };
+      const supabaseClient = getSupabaseBrowserClient(); // Corrected usage
+      const { data: { user } } = await supabaseClient.auth.getUser();
       
+      if (!user) {
+        throw new Error('Niet ingelogd');
+      }
+      
+      // Data ophalen voor het rapport
+      const data: any = {};
+      
+      // Taken
       if (rapportData.includeTasken) {
-        const { data, error } = await supabase.from('tasks').select('*').eq('user_id', user.id)
-          .gte('created_at', `${rapportData.startDatum}T00:00:00Z`)
-          .lte('created_at', `${rapportData.eindDatum}T23:59:59Z`);
-        if (error) throw error;
-        dataToFetch.taken = data;
+        const { data: taken, error: takenError } = await supabaseClient
+          .from('tasks')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (takenError) throw takenError;
+        data.taken = taken;
       }
       
+      // Task logs (metrieken)
       if (rapportData.includeMetrieken) {
-        const { data, error } = await supabase.from('task_logs').select('*, tasks(titel)')
+        const { data: logs, error: logsError } = await supabaseClient
+          .from('task_logs')
+          .select('*')
           .eq('user_id', user.id)
-          .gte('start_tijd', `${rapportData.startDatum}T00:00:00Z`)
-          .lte('start_tijd', `${rapportData.eindDatum}T23:59:59Z`);
-        if (error) throw error;
-        dataToFetch.logs = data;
+          .gte('start_tijd', rapportData.startDatum)
+          .lte('start_tijd', `${rapportData.eindDatum}T23:59:59`);
+        
+        if (logsError) throw logsError;
+        data.logs = logs;
       }
       
+      // Reflecties
       if (rapportData.includeReflecties) {
-        const { data, error } = await supabase.from('reflecties').select('*').eq('user_id', user.id)
+        const { data: reflecties, error: reflectiesError } = await supabaseClient
+          .from('reflecties')
+          .select('*')
+          .eq('user_id', user.id)
           .gte('datum', rapportData.startDatum)
           .lte('datum', rapportData.eindDatum);
-        if (error) throw error;
-        dataToFetch.reflecties = data;
+        
+        if (reflectiesError) throw reflectiesError;
+        data.reflecties = reflecties;
       }
       
+      // Inzichten
       if (rapportData.includeInzichten) {
-        const { data, error } = await supabase.from('inzichten').select('*').eq('user_id', user.id)
-          .gte('created_at', `${rapportData.startDatum}T00:00:00Z`)
-          .lte('created_at', `${rapportData.eindDatum}T23:59:59Z`);
-        if (error) throw error;
-        dataToFetch.inzichten = data;
+        const { data: inzichten, error: inzichtenError } = await supabaseClient
+          .from('inzichten')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('created_at', `${rapportData.startDatum}T00:00:00`)
+          .lte('created_at', `${rapportData.eindDatum}T23:59:59`);
+        
+        if (inzichtenError) throw inzichtenError;
+        data.inzichten = inzichten;
       }
       
-      const { data: profiel, error: profielError } = await supabase.from('profiles').select('voornaam, achternaam, email').eq('id', user.id).single();
+      // Gebruiker info ophalen
+      const { data: profiel, error: profielError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
       if (profielError) throw profielError;
-      dataToFetch.profiel = profiel;
+      data.profiel = profiel;
       
-      // Store data in localStorage for the preview page to access
-      localStorage.setItem('fibroGuardianRapportData', JSON.stringify(dataToFetch));
+      // Opslaan in lokale storage voor het rapport
+      localStorage.setItem('rapportData', JSON.stringify(data));
+      localStorage.setItem('rapportOpties', JSON.stringify(rapportData));
       
+      // Navigeer naar de rapport preview pagina
       router.push(`/rapporten/preview?format=${rapportData.format}`);
-    } catch (err: any) {
+    } catch (error: any) {
+      console.error('Fout bij genereren rapport:', error);
+      setError(error.message || 'Er is een fout opgetreden bij het genereren van het rapport');
     } finally {
       setLoading(false);
     }
   };
   
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-6 text-gray-800">Rapport Genereren</h2>
+    <section className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold mb-6">Rapport Genereren</h2>
       
-      {error && <ErrorAlert error={error} />}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
       
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Type Rapport</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {(['daily', 'weekly', 'monthly', 'custom'] as RapportType[]).map(type => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => handleTypeChange(type)}
-                className={`px-3 py-2.5 rounded-md flex flex-col items-center justify-center text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 ${
-                  rapportData.type === type ? 'bg-purple-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                aria-pressed={rapportData.type === type ? "true" : "false"}
-              >
-                {/* Icons can be added here similar to the original example */}
-                <span className="capitalize">{type === 'daily' ? 'Dagelijks' : type === 'weekly' ? 'Wekelijks' : type === 'monthly' ? 'Maandelijks' : 'Aangepast'}</span>
-              </button>
-            ))}
-          </div>
+      <div className="mb-6">
+        <label className="block text-gray-700 font-medium mb-2">
+          Type Rapport
+        </label>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button
+            type="button"
+            onClick={() => handleTypeChange('daily')}
+            className={`px-4 py-3 rounded-md flex flex-col items-center justify-center transition-colors ${
+              rapportData.type === 'daily'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            aria-pressed={rapportData.type === 'daily' ? "true" : "false"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>Dagelijks</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleTypeChange('weekly')}
+            className={`px-4 py-3 rounded-md flex flex-col items-center justify-center transition-colors ${
+              rapportData.type === 'weekly'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            aria-pressed={rapportData.type === 'weekly' ? "true" : "false"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Wekelijks</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleTypeChange('monthly')}
+            className={`px-4 py-3 rounded-md flex flex-col items-center justify-center transition-colors ${
+              rapportData.type === 'monthly'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            aria-pressed={rapportData.type === 'monthly' ? "true" : "false"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Maandelijks</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleTypeChange('custom')}
+            className={`px-4 py-3 rounded-md flex flex-col items-center justify-center transition-colors ${
+              rapportData.type === 'custom'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            aria-pressed={rapportData.type === 'custom' ? "true" : "false"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span>Aangepast</span>
+          </button>
         </div>
-        
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${rapportData.type === 'daily' ? 'opacity-60 pointer-events-none' : ''}`}>
-          <div>
-            <label htmlFor="startDatum" className="form-label">Startdatum</label>
-            <input
-              type="date"
-              id="startDatum"
-              name="startDatum"
-              value={rapportData.startDatum}
-              onChange={handleChange}
-              max={rapportData.eindDatum}
-              className="form-input"
-              disabled={rapportData.type === 'daily'}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="eindDatum" className="form-label">Einddatum</label>
-            <input
-              type="date"
-              id="eindDatum"
-              name="eindDatum"
-              value={rapportData.eindDatum}
-              onChange={handleChange}
-              min={rapportData.startDatum}
-              max={formatDateForInput(vandaag)}
-              className="form-input"
-              disabled={rapportData.type === 'daily'}
-              required
-            />
-          </div>
-        </div>
-        
-        <div>
-          <label className="form-label">Formaat</label>
-          <div className="flex space-x-4">
-            {(['pdf', 'csv'] as RapportFormat[]).map(format => (
-              <label key={format} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="format"
-                  value={format}
-                  checked={rapportData.format === format}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                />
-                <span className="text-sm text-gray-700">{format.toUpperCase()}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        
-        <div>
-          <label className="form-label">Te includeren gegevens</label>
-          <div className="space-y-2">
-            {(['includeTasken', 'includeMetrieken', 'includeReflecties', 'includeInzichten'] as const).map(item => (
-              <label key={item} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name={item}
-                  checked={rapportData[item]}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                />
-                <span className="text-sm text-gray-700">
-                  {item === 'includeTasken' ? 'Taken en opdrachten' :
-                   item === 'includeMetrieken' ? 'Gezondheidsmetrieken' :
-                   item === 'includeReflecties' ? 'Dagelijkse reflecties' : 'AI inzichten'}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-        
-        <button
-          type="button"
-          onClick={handleGenerateRapport}
-          disabled={loading}
-          className="w-full btn-primary py-2.5 mt-2" // Adjusted padding
-        >
-          {loading ? (
-            <span className="flex items-center justify-center">
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Rapport genereren...
-            </span>
-          ) : (
-            'Rapport Genereren'
-          )}
-        </button>
       </div>
+      
+      {/* Periode selectie */}
+      <div className={`mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 ${rapportData.type === 'daily' ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div>
+          <label htmlFor="startDatum" className="block text-gray-700 font-medium mb-2">
+            Startdatum
+          </label>
+          <input
+            type="date"
+            id="startDatum"
+            name="startDatum"
+            value={rapportData.startDatum}
+            onChange={handleChange}
+            max={rapportData.eindDatum}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            disabled={rapportData.type === 'daily'}
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="eindDatum" className="block text-gray-700 font-medium mb-2">
+            Einddatum
+          </label>
+          <input
+            type="date"
+            id="eindDatum"
+            name="eindDatum"
+            value={rapportData.eindDatum}
+            onChange={handleChange}
+            min={rapportData.startDatum}
+            max={formatDate(vandaag)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            disabled={rapportData.type === 'daily'}
+          />
+        </div>
+      </div>
+      
+      {/* Rapport instellingen */}
+      <div className="mb-6">
+        <label className="block text-gray-700 font-medium mb-2">
+          Formaat
+        </label>
+        <div className="flex space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="format"
+              value="pdf"
+              checked={rapportData.format === 'pdf'}
+              onChange={handleChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500"
+            />
+            <span>PDF</span>
+          </label>
+          
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="format"
+              value="csv"
+              checked={rapportData.format === 'csv'}
+              onChange={handleChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500"
+            />
+            <span>CSV (Excel)</span>
+          </label>
+        </div>
+      </div>
+      
+      {/* Inhoud selectie */}
+      <div className="mb-6">
+        <label className="block text-gray-700 font-medium mb-2">
+          Te includeren gegevens
+        </label>
+        <div className="space-y-2">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              name="includeTasken"
+              checked={rapportData.includeTasken}
+              onChange={handleCheckboxChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+            />
+            <span>Taken en opdrachten</span>
+          </label>
+          
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              name="includeMetrieken"
+              checked={rapportData.includeMetrieken}
+              onChange={handleCheckboxChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+            />
+            <span>Gezondheidsmetrieken (pijn, vermoeidheid, etc.)</span>
+          </label>
+          
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              name="includeReflecties"
+              checked={rapportData.includeReflecties}
+              onChange={handleCheckboxChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+            />
+            <span>Dagelijkse reflecties</span>
+          </label>
+          
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              name="includeInzichten"
+              checked={rapportData.includeInzichten}
+              onChange={handleCheckboxChange}
+              className="mr-2 h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+            />
+            <span>AI inzichten</span>
+          </label>
+        </div>
+      </div>
+      
+      {/* Genereer knop */}
+      <button
+        type="button"
+        onClick={handleGenerateRapport}
+        disabled={loading}
+        className={`w-full py-3 mt-4 rounded-md text-white font-medium ${
+          loading ? 'bg-purple-300' : 'bg-purple-600 hover:bg-purple-700'
+        } transition-colors`}
+      >
+        {loading ? (
+          <span className="flex items-center justify-center">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Rapport genereren...
+          </span>
+        ) : (
+          'Rapport Genereren'
+        )}
+      </button>
     </section>
   );
 }
