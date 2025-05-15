@@ -3,52 +3,92 @@ import { useState, useEffect } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
+import { Task } from '@/types'; // Assuming Task type is defined in types/index.ts or similar
+
 interface TaskFormProps {
-  taskId?: string;
-  initialType?: 'taak' | 'opdracht';
+  taskId?: string; // For identifying the task to edit
+  initialData?: Partial<Task>; // For pre-populating the form when editing
+  isEditing?: boolean; // To explicitly indicate edit mode
+  initialType?: 'taak' | 'opdracht'; // Default type for new tasks
 }
 
-export default function TaskForm({ taskId, initialType = 'taak' }: TaskFormProps) {
+export default function TaskForm({ taskId, initialData, isEditing = false, initialType = 'taak' }: TaskFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [taskData, setTaskData] = useState({
-    type: initialType,
-    titel: '',
-    beschrijving: '',
-    duur: 15,
-    hartslag_doel: '',
-    herhaal_patroon: 'eenmalig',
-    dagen_van_week: [] as string[],
-    metingen: ['energie', 'pijn', 'vermoeidheid'] as string[],
-    notities: '',
-    labels: [] as string[]
+  // Initialize state: if initialData and isEditing, use that, otherwise use defaults.
+  const [taskData, setTaskData] = useState(() => {
+    if (isEditing && initialData) {
+      return {
+        type: initialData.type || initialType,
+        titel: initialData.titel || '',
+        beschrijving: initialData.beschrijving || '',
+        duur: initialData.duur || 15,
+        hartslag_doel: initialData.hartslag_doel || '',
+        herhaal_patroon: initialData.herhaal_patroon || 'eenmalig',
+        dagen_van_week: initialData.dagen_van_week || [],
+        metingen: initialData.metingen || ['energie', 'pijn', 'vermoeidheid'],
+        notities: initialData.notities || '',
+        labels: initialData.labels || [],
+        // Ensure all fields from Task type that are part of the form are covered
+      };
+    }
+    return {
+      type: initialType,
+      titel: '',
+      beschrijving: '',
+      duur: 15,
+      hartslag_doel: '',
+      herhaal_patroon: 'eenmalig',
+      dagen_van_week: [] as string[],
+      metingen: ['energie', 'pijn', 'vermoeidheid'] as string[],
+      notities: '',
+      labels: [] as string[]
+    };
   });
-
-  // Haal bestaande taak op als we aan het bewerken zijn
+  
+  // Haal bestaande taak op als we aan het bewerken zijn AND initialData was not provided
   useEffect(() => {
     async function fetchTask() {
-      if (!taskId) return;
+      // Only fetch if taskId is present, we are in editing mode, AND initialData was NOT supplied
+      if (!taskId || !isEditing || initialData) return;
 
+      setLoading(true); // Indicate loading while fetching
       try {
         const supabaseClient = getSupabaseBrowserClient();
-        const { data, error } = await supabaseClient
+        const { data, error: fetchError } = await supabaseClient // Renamed error to avoid conflict
           .from('tasks')
           .select('*')
           .eq('id', taskId)
           .single();
 
-        if (error) throw error;
-        if (data) setTaskData(data);
-      } catch (error) {
-        console.error('Fout bij ophalen taak:', error);
+        if (fetchError) throw fetchError;
+        if (data) {
+          // Map fetched data to taskData structure
+          setTaskData({
+            type: data.type || initialType,
+            titel: data.titel || '',
+            beschrijving: data.beschrijving || '',
+            duur: data.duur || 15,
+            hartslag_doel: data.hartslag_doel || '',
+            herhaal_patroon: data.herhaal_patroon || 'eenmalig',
+            dagen_van_week: data.dagen_van_week || [],
+            metingen: data.metingen || ['energie', 'pijn', 'vermoeidheid'],
+            notities: data.notities || '',
+            labels: data.labels || [],
+          });
+        }
+      } catch (err) { // Catch renamed error
+        console.error('Fout bij ophalen taak:', err);
         setError('De taak kon niet worden geladen');
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchTask();
-  }, [taskId]);
+  }, [taskId, isEditing, initialData, initialType]); // Add initialData & initialType to dependency array
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

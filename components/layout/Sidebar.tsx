@@ -23,9 +23,11 @@ export default function Sidebar() {
   useEffect(() => {
     const fetchProfileType = async () => {
       if (!user) {
+        console.log('[Sidebar] fetchProfileType: No user, setting profileType to null.');
         setProfileType(null); // Reset if no user
         return;
       }
+      console.log('[Sidebar] fetchProfileType: Fetching profile type for user ID:', user.id);
       try {
         const supabase = getSupabaseBrowserClient();
         const { data, error } = await supabase
@@ -34,15 +36,22 @@ export default function Sidebar() {
           .eq('id', user.id)
           .single();
         
-        if (error) throw error;
+        console.log('[Sidebar] fetchProfileType: Supabase response - data:', data, 'error:', error);
+
+        if (error) {
+          console.error('[Sidebar] fetchProfileType: Error from Supabase:', error);
+          throw error; // Re-throw to be caught by the catch block
+        }
         
         if (data && (data.type === 'patient' || data.type === 'specialist')) {
           setProfileType(data.type);
+          console.log('[Sidebar] fetchProfileType: Profile type set to:', data.type);
         } else {
           setProfileType(null); // Fallback or if type is unexpected
+          console.log('[Sidebar] fetchProfileType: Data received but type is not patient/specialist or data is null. Data:', data);
         }
       } catch (error) {
-        console.error('Fout bij ophalen profieltype:', error);
+        console.error('[Sidebar] Fout bij ophalen profieltype (in catch block):', error);
         setProfileType(null);
       }
     };

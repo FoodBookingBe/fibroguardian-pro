@@ -3,7 +3,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 // import RapportList from '@/components/rapporten/RapportList'; // Assuming a component to list reports
-// import RapportGenerator from '@/components/rapporten/RapportGenerator'; // Assuming a component to generate reports
+import RapportGenerator from '@/components/rapporten/RapportGenerator'; // Assuming a component to generate reports
+import DashboardLayout from '@/components/layout/DashboardLayout'; // Import DashboardLayout
 
 export default async function RapportenPage() {
   const cookieStore = cookies();
@@ -39,17 +40,19 @@ export default async function RapportenPage() {
   //   .order('created_at', { ascending: false });
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Mijn Rapporten</h1>
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-6">
+        <header className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Mijn Rapporten</h1>
         <Link href="/rapporten/nieuw" className="btn-primary">
           Nieuw Rapport
         </Link>
       </header>
-      {/* <RapportGenerator userId={user.id} /> */}
+      <RapportGenerator />
       {/* <RapportList rapporten={rapporten || []} /> */}
-      <p>Hier komt de functionaliteit voor het beheren en genereren van rapporten.</p>
-      <p>Veronderstelt componenten zoals `RapportGenerator` en `RapportList`.</p>
+      {/* <p>Hier komt de functionaliteit voor het beheren en genereren van rapporten.</p>
+      <p>Veronderstelt componenten zoals `RapportGenerator` en `RapportList`.</p> */}
     </div>
+    </DashboardLayout>
   );
 }
