@@ -7,14 +7,18 @@ import AIInsights from '@/components/dashboard/AIInsights';
 import QuickActions from '@/components/dashboard/QuickActions';
 import SessionStatus from '@/components/debug/SessionStatus';
 export default async function Dashboard() {
-  // const supabase = createServerComponentClient({ cookies }); // No longer needed here if layout handles auth
+  const supabase = createServerComponentClient({ cookies });
   
   // Authentication is now handled by app/dashboard/layout.tsx
-  // const { data: { session } } = await supabase.auth.getSession();
+  // but we still need session data here for page content
+  const { data: { session } } = await supabase.auth.getSession();
   
-  // if (!session) {
-  //   return null;
-  // }
+  if (!session) {
+    // This case should ideally be handled by the layout redirecting,
+    // but as a safeguard or if layout logic changes:
+    // redirect('/auth/login'); // Or handle appropriately
+    return null; // Or some fallback UI
+  }
   
   // Haal benodigde data op
   // (je dashboard data ophaling logic hier)
