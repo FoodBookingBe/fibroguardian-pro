@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 // Assuming ErrorAlert is part of error-handler or a separate component
 // For now, I'll use a simple error display. If ErrorAlert is a specific component, it needs to be created.
-import { handleSupabaseError } from '@/lib/error-handler'; 
-import { supabase } from '@/lib/supabase';
+import { handleSupabaseError } from '@/lib/error-handler';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 
 type Stemming = 'zeer goed' | 'goed' | 'neutraal' | 'matig' | 'slecht' | 'zeer slecht';
 
@@ -79,6 +79,7 @@ export default function ReflectieForm() {
         return;
       }
       
+      const supabase = getSupabaseBrowserClient(); // Get client instance
       const { data: bestaandeReflectie, error: checkError } = await supabase
         .from('reflecties')
         .select('id')

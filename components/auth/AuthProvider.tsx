@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Session, User, AuthSessionResponse } from '@supabase/supabase-js';
+import { Session, User, AuthError } from '@supabase/supabase-js'; // AuthError might be useful for error handling
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation'; // Added
 
@@ -34,7 +34,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setLoading(true);
     const supabase = getSupabaseBrowserClient();
-    supabase.auth.getSession().then((response: AuthSessionResponse) => {
+    supabase.auth.getSession().then((response: { data: { session: Session | null }, error: AuthError | null }) => {
+      if (response.error) {
+        console.error("Error getting session in AuthProvider:", response.error.message);
+        // Optionally handle error, e.g., clear session, set error state
+      }
       const currentSession = response.data.session;
       setSession(currentSession);
       setUser(currentSession?.user ?? null);

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, QueryKey, QueryFunctionContext } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { handleSupabaseError } from '@/lib/error-handler';
 import { PostgrestError } from '@supabase/supabase-js';
 import { Task, TaskLog, Profile, Reflectie, Inzicht } from '@/types'; // Assuming these types exist
@@ -12,162 +12,182 @@ type SupabaseRawQueryFnResult<T> = Promise<{ data: T | null; error: PostgrestErr
 type UserProvidedSupabaseQueryFn<TData> = () => SupabaseRawQueryFnResult<TData>;
 
 // Wrapper hook
+// Wrapper hook
 export function useSupabaseQuery<
-  TQueryFnData = unknown, // Data type returned by the Supabase client method
+  TActualData, // Core data type from Supabase if successful (e.g., Task[] or Task)
   TError = PostgrestError | Error,
-  TData = TQueryFnData, // Data type returned by useQuery (after select, if any)
+  // TFinalData is what the hook user ultimately gets. Defaults to TActualData | null.
+  TFinalData = TActualData | null,
   TQueryKey extends QueryKey = QueryKey
 >(
-  // All options for React Query's useQuery are passed in a single object
-  options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>
+  // options.queryFn returns a Supabase promise-like object.
+  // The TQueryFnData for the underlying useQuery will be TActualData | null.
+  options: Omit<UseQueryOptions<TActualData | null, TError, TFinalData, TQueryKey>, 'queryFn'> & {
+    queryFn: () => PromiseLike<{ data: TActualData | null; error: PostgrestError | null }>;
+  }
 ) {
-  // Extract the user's Supabase query function from the options
-  const userQueryFn = options.queryFn as unknown as UserProvidedSupabaseQueryFn<TQueryFnData>;
+  // This function is passed to React Query's useQuery.
+  // It must return Promise<TActualData | null> based on the useQuery signature below.
+  const reactQueryCompatibleQueryFn = async (): Promise<TActualData | null> => {
+    const supabasePromise = options.queryFn();
+    const supabaseResult = await supabasePromise; // supabaseResult is { data: TActualData | null, error: ... }
 
-  // Create a new queryFn that React Query will actually execute
-  const reactQueryFn = async (context: QueryFunctionContext<TQueryKey>): Promise<TQueryFnData> => {
-    // Execute the user's Supabase query function
-    const { data, error } = await userQueryFn(); 
-    if (error) {
-      console.error(`Supabase query error for key "${String(options.queryKey)}":`, error);
-      throw error; // Throw error for React Query to handle
+    if (supabaseResult.error) {
+      console.error(`Supabase query error for key "${String(options.queryKey)}":`, supabaseResult.error);
+      const errInfo = handleSupabaseError(supabaseResult.error, `query-${String(options.queryKey)}`);
+      throw errInfo;
     }
-    return data as TQueryFnData;
+    return supabaseResult.data; // This is TActualData | null
   };
 
-  return useQuery<TQueryFnData, TError, TData, TQueryKey>({
+  // The first generic to useQuery is TQueryFnData (what reactQueryCompatibleQueryFn returns).
+  // The third generic is TData (what the useQuery hook returns, TFinalData in our case).
+  return useQuery<TActualData | null, TError, TFinalData, TQueryKey>({
     ...options,
-    queryFn: reactQueryFn, // Use the wrapped queryFn
+    queryFn: reactQueryCompatibleQueryFn,
   });
 }
-
 // --- Specific Hooks ---
 
 // Specifieke hook voor taken
 export function useTasks(userId: string | undefined) {
-  return useSupabaseQuery<Task[], PostgrestError | Error>({ // Specify TQueryFnData and TError
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    Task[], // TActualData: Supabase will provide Task[] or null for the data field
+    PostgrestError | Error,
+    Task[]  // TFinalData: We want the hook to return Task[] (non-null)
+  >({
     queryKey: ['tasks', userId],
-    queryFn: async () => await supabase
+    queryFn: () => supabase
       .from('tasks')
-      .select('*')
+      .select<'*', Task>('*') // Explicitly type the select
       .eq('user_id', userId!)
       .order('created_at', { ascending: false }),
     enabled: !!userId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, 'taken-ophalen');
-      console.error(`Fout bij ophalen taken voor user ${userId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
+    select: (data: Task[] | null): Task[] => data || [],
   });
 }
 
 // Hook voor specifieke taak
 export function useTask(taskId: string | null | undefined) {
-  return useSupabaseQuery<Task | null, PostgrestError | Error>({ // TQueryFnData can be Task or null
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    Task, // TActualData: Supabase will provide Task or null for the data field
+    PostgrestError | Error,
+    Task | null // TFinalData: We want Task | null, which matches TActualData | null
+  >({
     queryKey: ['task', taskId],
-    queryFn: async () => taskId
-      ? await supabase
+    queryFn: () => taskId
+      ? supabase
           .from('tasks')
-          .select('*')
+          .select<'*', Task>('*') // Explicitly type the select
           .eq('id', taskId)
           .single()
       : Promise.resolve({ data: null, error: null }),
     enabled: !!taskId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `taak-ophalen-${taskId}`);
-      console.error(`Fout bij ophalen taak ${taskId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
   });
 }
 
 // Hook voor logs van een taak
 export function useTaskLogs(taskId: string | undefined) {
-  return useSupabaseQuery<TaskLog[], PostgrestError | Error>({
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    TaskLog[], // TActualData
+    PostgrestError | Error,
+    TaskLog[]  // TFinalData
+  >({
     queryKey: ['taskLogs', taskId],
-    queryFn: async () => await supabase
+    queryFn: () => supabase
       .from('task_logs')
-      .select('*')
+      .select<'*', TaskLog>('*') // Explicitly type the select
       .eq('task_id', taskId!)
       .order('created_at', { ascending: false }),
     enabled: !!taskId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `logs-ophalen-taak-${taskId}`);
-      console.error(`Fout bij ophalen logs voor taak ${taskId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
+    select: (data: TaskLog[] | null): TaskLog[] => data || [],
   });
 }
 
 // Hook voor recente logs van een gebruiker
 export function useRecentLogs(userId: string | undefined, limit: number = 5) {
-  // Define a more specific type for the data if tasks are joined
   type RecentLogWithTask = TaskLog & { tasks: { titel: string } | null };
-  return useSupabaseQuery<RecentLogWithTask[], PostgrestError | Error>({
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    RecentLogWithTask[], // TActualData
+    PostgrestError | Error,
+    RecentLogWithTask[]  // TFinalData
+  >({
     queryKey: ['recentLogs', userId, limit],
-    queryFn: async () => await supabase
+    queryFn: () => supabase
       .from('task_logs')
-      .select('*, tasks(titel)')
+      // For custom select strings like this, ensure RecentLogWithTask matches the output structure.
+      // The generic on select might be more complex or rely on Supabase's schema typing if available.
+      // Assuming RecentLogWithTask is correctly defined for '*, tasks(titel)'
+      .select<'*, tasks(titel)', RecentLogWithTask>('*, tasks(titel)')
       .eq('user_id', userId!)
       .order('created_at', { ascending: false })
       .limit(limit),
     enabled: !!userId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `recente-logs-ophalen-${userId}`);
-      console.error(`Fout bij ophalen recente logs voor user ${userId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
+    select: (data: RecentLogWithTask[] | null): RecentLogWithTask[] => data || [],
   });
 }
 
 // Hook voor user profile
 export function useUserProfile(userId: string | null | undefined) {
-  return useSupabaseQuery<Profile | null, PostgrestError | Error>({
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    Profile, // TActualData
+    PostgrestError | Error,
+    Profile | null // TFinalData
+  >({
     queryKey: ['profile', userId],
-    queryFn: async () => userId
-      ? await supabase
+    queryFn: () => userId
+      ? supabase
           .from('profiles')
-          .select('*')
+          .select<'*', Profile>('*') // Explicitly type the select
           .eq('id', userId)
           .single()
       : Promise.resolve({ data: null, error: null }),
     enabled: !!userId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `profiel-ophalen-${userId}`);
-      console.error(`Fout bij ophalen profiel ${userId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
   });
 }
 
 // Hook voor reflecties
 export function useReflecties(userId: string | undefined, limit: number = 10) {
-  return useSupabaseQuery<Reflectie[], PostgrestError | Error>({
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    Reflectie[], // TActualData
+    PostgrestError | Error,
+    Reflectie[]  // TFinalData
+  >({
     queryKey: ['reflecties', userId, limit],
-    queryFn: async () => await supabase
+    queryFn: () => supabase
       .from('reflecties')
-      .select('*')
+      .select<'*', Reflectie>('*') // Explicitly type the select
       .eq('user_id', userId!)
       .order('datum', { ascending: false })
       .limit(limit),
     enabled: !!userId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `reflecties-ophalen-${userId}`);
-      console.error(`Fout bij ophalen reflecties voor user ${userId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
+    select: (data: Reflectie[] | null): Reflectie[] => data || [],
   });
 }
 
 // Hook voor inzichten
 export function useInsights(userId: string | undefined, limit: number = 3) {
-  return useSupabaseQuery<Inzicht[], PostgrestError | Error>({
+  const supabase = getSupabaseBrowserClient();
+  return useSupabaseQuery<
+    Inzicht[], // TActualData
+    PostgrestError | Error,
+    Inzicht[]  // TFinalData
+  >({
     queryKey: ['insights', userId, limit],
-    queryFn: async () => await supabase
+    queryFn: () => supabase
       .from('inzichten')
-      .select('*')
+      .select<'*', Inzicht>('*') // Explicitly type the select
       .eq('user_id', userId!)
       .order('created_at', { ascending: false })
       .limit(limit),
     enabled: !!userId,
-    onError: (error: PostgrestError | Error) => {
-      const errInfo = handleSupabaseError(error, `inzichten-ophalen-${userId}`);
-      console.error(`Fout bij ophalen inzichten voor user ${userId}: ${errInfo.technicalMessage || errInfo.userMessage}`);
-    }
+    select: (data: Inzicht[] | null): Inzicht[] => data || [],
   });
 }
 
@@ -181,6 +201,7 @@ interface UpsertTaskVariables {
 
 export function useUpsertTask() {
   const queryClient = useQueryClient();
+  const supabase = getSupabaseBrowserClient();
   return useMutation<Task | null, PostgrestError | Error, UpsertTaskVariables>({
     mutationFn: async ({ task, userId, taskId = null }) => {
       const taskWithUserId = { ...task, user_id: userId };
@@ -215,6 +236,7 @@ interface AddTaskLogVariables {
 
 export function useAddTaskLog() {
   const queryClient = useQueryClient();
+  const supabase = getSupabaseBrowserClient();
   return useMutation<TaskLog | null, PostgrestError | Error, AddTaskLogVariables>({
     mutationFn: async ({ log, userId, taskId }) => {
       const logWithIds = { ...log, user_id: userId, task_id: taskId };
@@ -241,6 +263,7 @@ interface DeleteTaskVariables {
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
+  const supabase = getSupabaseBrowserClient();
   return useMutation<{ success: boolean }, PostgrestError | Error, DeleteTaskVariables>({
     mutationFn: async ({ taskId, userId }) => {
       const { error: logDeleteError } = await supabase

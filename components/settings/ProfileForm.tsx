@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react'; // Added FormEvent, ChangeEvent
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useNotification } from '@/context/NotificationContext';
 import { handleSupabaseError } from '@/lib/error-handler';
@@ -27,7 +27,8 @@ const ProfileForm = () => {
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState<Partial<Profile>>({
+  // Adjusted type for formData to allow string for geboortedatum in state
+  const [formData, setFormData] = useState<Omit<Partial<Profile>, 'geboortedatum'> & { geboortedatum?: string }>({
     voornaam: '',
     achternaam: '',
     postcode: '',
@@ -39,6 +40,7 @@ const ProfileForm = () => {
     const loadProfile = async () => {
       if (!user) return;
       setLoading(true);
+      const supabase = getSupabaseBrowserClient(); // Get client instance
       try {
         const { data, error: fetchError } = await supabase
           .from('profiles')
@@ -109,28 +111,39 @@ const ProfileForm = () => {
         const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `public/${fileName}`; // Path in 'profiles' bucket
 
+        const supabase = getSupabaseBrowserClient(); // Get client instance for storage operation
         const { error: uploadError } = await supabase.storage
           .from('profiles') // Bucket name
           .upload(filePath, avatarFile, { upsert: true }); // upsert true to overwrite if exists
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from('profiles').getPublicUrl(filePath);
+        // Ensure supabase client is available for getPublicUrl
+        const supabaseForUrl = getSupabaseBrowserClient();
+        const { data: urlData } = supabaseForUrl.storage.from('profiles').getPublicUrl(filePath);
         newAvatarUrl = urlData?.publicUrl;
         setUploading(false);
       }
 
       const profileUpdateData: Partial<Profile> = {
         ...formData,
+        // geboortedatum is already a string 'YYYY-MM-DD' or undefined from state,
+        // Supabase client JS can handle this string format for date/timestamp fields.
+        // If your 'geboortedatum' column in Supabase is strictly 'date', this is fine.
+        // If it's 'timestamp', Supabase might store it at midnight UTC.
+        // For consistency, ensure `formData.geboortedatum` is what you intend to save.
+        // The new Date(formData.geboortedatum) was for converting to Date object,
+        // but if the column type handles 'YYYY-MM-DD' string, it's simpler.
+        // Let's keep it as is from formData, assuming the DB column type is `date`.
         geboortedatum: formData.geboortedatum ? new Date(formData.geboortedatum) : undefined,
-        updated_at: new Date(), // Always update timestamp
+        updated_at: new Date(), // Always update timestamp, ensure it's a Date object
       };
       if (newAvatarUrl !== undefined) { // Only include avatar_url if it changed or was set
         profileUpdateData.avatar_url = newAvatarUrl;
       }
 
-
-      const { error: updateError } = await supabase
+      const supabaseUpdate = getSupabaseBrowserClient();
+      const { error: updateError } = await supabaseUpdate
         .from('profiles')
         .update(profileUpdateData)
         .eq('id', user.id);

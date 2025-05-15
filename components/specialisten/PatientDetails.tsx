@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react'; // Added useEffect
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { Profile, TaskLog, Reflectie, Inzicht, Task } from '@/types'; // Added Task type
 import HealthMetricsChart from '@/components/dashboard/HealthMetricsChart'; // Corrected import
@@ -50,6 +50,7 @@ export default function PatientDetails({
     const fetchDataForTab = async (tab: typeof activeTab) => {
       if (!patient?.id) return;
       setLoading(true);
+      const supabase = getSupabaseBrowserClient(); // Get client instance
       try {
         if (tab === 'logs' && logs.length === 0) { // Fetch only if not already loaded
           const { data, error: fetchError } = await supabase.from('task_logs').select('*, tasks(titel)').eq('user_id', patient.id).order('start_tijd', { ascending: false }).limit(50);
@@ -92,12 +93,13 @@ export default function PatientDetails({
     
     setLoading(true);
     setError(null);
+    const supabase = getSupabaseBrowserClient(); // Get client instance
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Niet ingelogd als specialist.');
       
       const { error: deleteError } = await supabase
-        .from('specialist_patienten')
+        .from('specialist_patienten') // Make sure this table name is correct
         .delete()
         .eq('specialist_id', user.id)
         .eq('patient_id', patient.id);

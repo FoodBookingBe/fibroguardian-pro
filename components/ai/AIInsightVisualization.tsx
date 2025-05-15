@@ -107,10 +107,10 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
       {chartData.length > 0 ? (
         <div className="mt-2">
           <div className="mb-2 flex items-center justify-end space-x-1">
-            {(Object.keys(metricsInfo) as Array<keyof typeof metricsInfo>).map(mKey => (
+            {(Object.keys(metricsInfo) as Array<keyof Pick<TaskLog, 'pijn_score' | 'vermoeidheid_score' | 'energie_na' | 'stemming'>>).map(mKey => (
               <button
                 key={mKey}
-                onClick={() => setMetric(mKey)}
+                onClick={() => setMetric(mKey as keyof Pick<TaskLog, 'pijn_score' | 'vermoeidheid_score' | 'energie_na' | 'stemming'>)}
                 className={`px-2 py-0.5 text-xs rounded-md transition-colors ${metric === mKey ? `${metricsInfo[mKey].color.replace('stroke-', 'bg-').replace('text-', 'bg-')} text-white` : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 {metricsInfo[mKey].label}
@@ -124,7 +124,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.3} />
                 <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                 <YAxis domain={currentMetricInfo.domain} tick={{ fontSize: 9 }} />
-                <Tooltip formatter={(value: number) => [`${value}${metric === 'hartslag' ? ' BPM' : ' /20'}`, currentMetricInfo.label]} labelFormatter={(label: string) => `Datum: ${label}`} />
+                <Tooltip formatter={(value: number) => [`${value} /20`, currentMetricInfo.label]} labelFormatter={(label: string) => `Datum: ${label}`} />
                 <Legend verticalAlign="top" height={25} wrapperStyle={{fontSize: "10px"}}/>
                 <Line type="monotone" dataKey={metric} stroke={currentMetricInfo.color} strokeWidth={1.5} activeDot={{ r: 4 }} name={currentMetricInfo.label} dot={false} />
               </LineChart>

@@ -1,4 +1,5 @@
-import { createBrowserClient, SupabaseClient } from '@supabase/ssr'; // Changed import source
+import { createBrowserClient } from '@supabase/ssr'; // Changed import source
+import { SupabaseClient } from '@supabase/supabase-js'; // Import SupabaseClient for type
 import { Database } from '@/types/database';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

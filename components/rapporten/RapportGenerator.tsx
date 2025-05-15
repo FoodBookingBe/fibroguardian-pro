@@ -1,7 +1,7 @@
 'use client';
 import { useState, ChangeEvent } from 'react'; // Added ChangeEvent
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 // Assuming ErrorAlert is part of error-handler or a separate component
 import { handleSupabaseError } from '@/lib/error-handler'; 
@@ -90,6 +90,8 @@ export default function RapportGenerator() {
     setLoading(true);
     setError(null);
     
+    setError(null);
+    
     try {
       if (!rapportData.startDatum || !rapportData.eindDatum) {
         throw new Error('Start- en einddatum zijn verplicht');
@@ -97,23 +99,24 @@ export default function RapportGenerator() {
       if (new Date(rapportData.startDatum) > new Date(rapportData.eindDatum)) {
         throw new Error('Startdatum kan niet na de einddatum liggen.');
       }
-      if (!rapportData.includeTasken && !rapportData.includeMetrieken && 
+      if (!rapportData.includeTasken && !rapportData.includeMetrieken &&
           !rapportData.includeReflecties && !rapportData.includeInzichten) {
         throw new Error('Selecteer ten minste één type gegevens om op te nemen in het rapport.');
       }
       
-      const dataToFetch: any = { rapportConfig: rapportData }; // Include config for the preview page
+      const supabase = getSupabaseBrowserClient(); // Get client instance once for all queries in this try block
+      const dataToFetch: any = { rapportConfig: rapportData };
       
       if (rapportData.includeTasken) {
         const { data, error } = await supabase.from('tasks').select('*').eq('user_id', user.id)
-          .gte('created_at', `${rapportData.startDatum}T00:00:00Z`) // Use ISO string with Z for UTC
+          .gte('created_at', `${rapportData.startDatum}T00:00:00Z`)
           .lte('created_at', `${rapportData.eindDatum}T23:59:59Z`);
         if (error) throw error;
         dataToFetch.taken = data;
       }
       
       if (rapportData.includeMetrieken) {
-        const { data, error } = await supabase.from('task_logs').select('*, tasks(titel)') // Join task title
+        const { data, error } = await supabase.from('task_logs').select('*, tasks(titel)')
           .eq('user_id', user.id)
           .gte('start_tijd', `${rapportData.startDatum}T00:00:00Z`)
           .lte('start_tijd', `${rapportData.eindDatum}T23:59:59Z`);
@@ -142,14 +145,10 @@ export default function RapportGenerator() {
       dataToFetch.profiel = profiel;
       
       // Store data in localStorage for the preview page to access
-      // This is a simple way for client-side report generation.
-      // For server-side PDF/CSV generation, an API route would be needed.
       localStorage.setItem('fibroGuardianRapportData', JSON.stringify(dataToFetch));
       
       router.push(`/rapporten/preview?format=${rapportData.format}`);
     } catch (err: any) {
-      console.error('Fout bij genereren rapport:', err);
-      setError(handleSupabaseError(err, 'rapport-genereren'));
     } finally {
       setLoading(false);
     }
