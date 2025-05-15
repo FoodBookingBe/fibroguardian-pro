@@ -23,7 +23,6 @@ export default async function Dashboard() {
   
   return (
     <DashboardLayout>
-    <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         {process.env.NODE_ENV !== 'production' && <SessionStatus />}
         <header className="mb-6">
