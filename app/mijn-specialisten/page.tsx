@@ -45,7 +45,15 @@ export default async function MijnSpecialistenPage() {
     // Ga door met lege lijst
   }
   
-  let specialists = [];
+  interface Specialist {
+    id: string;
+    voornaam: string;
+    achternaam: string;
+    email: string;
+    toegangsrechten: string[];
+  }
+  
+  let specialists: Specialist[] = [];
   
   if (relationData && relationData.length > 0) {
     // Haal de gegevens van de specialisten op
