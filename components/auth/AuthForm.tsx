@@ -10,10 +10,11 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
   const [password, setPassword] = useState<string>('');
   const [voornaam, setVoornaam] = useState<string>('');
   const [achternaam, setAchternaam] = useState<string>('');
+  const [userType, setUserType] = useState<string>('patient'); // Default to patient
   const [loading, setLoading] = useState<boolean>(false);
   const [isLogin, setIsLogin] = useState<boolean>(initialIsLogin ?? true); // Use prop for initial state
   const [message, setMessage] = useState<string>('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; userType?: string; }>({});
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string; voornaam?: string; achternaam?: string; } = {};
@@ -105,7 +106,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             data: {
               voornaam: voornaam.trim(),
               achternaam: achternaam.trim(),
-              // type: 'patient' // Default type, can be set here or by a trigger
+              type: userType // Set the user type based on selection
             }
           }
         });
@@ -171,6 +172,35 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
                 />
                 {errors.achternaam && <p className="form-error">{errors.achternaam}</p>}
               </div>
+            </div>
+            
+            <div className="mt-4">
+              <label className="form-label">Registreren als</label>
+              <div className="flex space-x-4 mt-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="userType"
+                    value="patient"
+                    checked={userType === 'patient'}
+                    onChange={() => setUserType('patient')}
+                    className="mr-2"
+                  />
+                  <span>Patiënt</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="userType"
+                    value="specialist"
+                    checked={userType === 'specialist'}
+                    onChange={() => setUserType('specialist')}
+                    className="mr-2"
+                  />
+                  <span>Specialist</span>
+                </label>
+              </div>
+              {errors.userType && <p className="form-error">{errors.userType}</p>}
             </div>
           </>
         )}
