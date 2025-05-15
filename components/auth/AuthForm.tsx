@@ -227,7 +227,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             id="password"
             name="password"
             type="password"
-            autoComplete={isLogin ? "current-password" : "new-password"}
+            autoComplete={isLogin ? "current-password" : "new-password section-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={`form-input ${errors.password ? 'border-red-500' : 'border-gray-300'}`}

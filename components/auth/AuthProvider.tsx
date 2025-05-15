@@ -82,7 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password']; 
     const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-    const protectedRoutePrefixes = ['/dashboard', '/taken', '/reflecties', '/rapporten', '/instellingen', '/specialisten'];
+    const protectedRoutePrefixes = [
+      '/dashboard', '/taken', '/reflecties', '/rapporten', '/instellingen', '/specialisten',
+      '/mijn-specialisten', '/overzicht', '/inzichten', '/auth-test'
+    ];
     const isProtectedRoute = protectedRoutePrefixes.some(prefix => pathname.startsWith(prefix));
 
     if (session && isAuthRoute) {
