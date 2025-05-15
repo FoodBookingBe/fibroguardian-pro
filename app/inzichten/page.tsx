@@ -1,44 +1,42 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { Inzicht, TaskLog } from '@/types';
 import AIInsightVisualization from '@/components/ai/AIInsightVisualization';
 import Link from 'next/link';
 
-interface AIInsightsProps {
-  insights?: Inzicht[];
-  limit?: number;
-}
-
-export default function AIInsights({ insights: initialInsights, limit = 3 }: AIInsightsProps) {
-  const [insights, setInsights] = useState<Inzicht[]>(initialInsights || []);
+export default function InzichtenPage() {
+  const router = useRouter();
+  const [insights, setInsights] = useState<Inzicht[]>([]);
   const [logs, setLogs] = useState<Record<string, TaskLog[]>>({});
-  const [loading, setLoading] = useState(!initialInsights);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'dag' | 'week' | 'maand'>('all');
   
   useEffect(() => {
     const fetchInsights = async () => {
-      if (initialInsights && initialInsights.length > 0) {
-        setInsights(initialInsights);
-        setLoading(false);
-        return;
-      }
-      
       try {
         const supabaseClient = getSupabaseBrowserClient();
         const { data: { user } } = await supabaseClient.auth.getUser();
         
         if (!user) {
-          throw new Error('Niet ingelogd');
+          router.push('/auth/login');
+          return;
         }
         
-        const { data, error: fetchError } = await supabaseClient
+        let query = supabaseClient
           .from('inzichten')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .order('created_at', { ascending: false });
+        
+        if (filter !== 'all') {
+          query = query.eq('periode', filter);
+        }
+        
+        const { data, error: fetchError } = await query;
         
         if (fetchError) throw fetchError;
         
@@ -52,7 +50,7 @@ export default function AIInsights({ insights: initialInsights, limit = 3 }: AII
     };
     
     fetchInsights();
-  }, [initialInsights, limit]);
+  }, [router, filter]);
   
   // Fetch logs for a specific insight when expanded
   useEffect(() => {
@@ -104,6 +102,7 @@ export default function AIInsights({ insights: initialInsights, limit = 3 }: AII
       fetchLogsForInsight(expandedInsightId);
     }
   }, [expandedInsightId, insights, logs]);
+  
   // Toggle expanded insight
   const toggleExpand = (id: string) => {
     setExpandedInsightId(prevId => (prevId === id ? null : id));
@@ -118,7 +117,7 @@ export default function AIInsights({ insights: initialInsights, limit = 3 }: AII
       year: 'numeric'
     });
   };
-
+  
   // Helper for trend icon
   const getTrendIcon = (trendType: string | undefined) => {
     switch(trendType?.toLowerCase()) {
@@ -151,53 +150,93 @@ export default function AIInsights({ insights: initialInsights, limit = 3 }: AII
   
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">AI-Inzichten</h2>
-        </div>
+      <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="bg-gray-200 h-24 rounded-md"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">AI-Inzichten</h2>
-        </div>
-        <div className="p-4 bg-red-50 text-red-700 rounded-md">
-          {error}
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">AI-Inzichten</h2>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">AI-Inzichten</h1>
         
-        <div className="flex items-center text-sm text-purple-600">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>Gegenereerd door AI</span>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              filter === 'all'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Alle inzichten
+          </button>
+          <button
+            onClick={() => setFilter('dag')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              filter === 'dag'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Dagelijks
+          </button>
+          <button
+            onClick={() => setFilter('week')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              filter === 'week'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Wekelijks
+          </button>
+          <button
+            onClick={() => setFilter('maand')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              filter === 'maand'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Maandelijks
+          </button>
         </div>
       </div>
       
-      {insights && insights.length > 0 ? (
+      <div className="mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-semibold mb-4">Over AI-Inzichten</h2>
+          <p className="text-gray-700">
+            AI-inzichten analyseren uw activiteiten en gezondheidsgegevens om patronen te identificeren die u kunnen helpen uw dagelijkse activiteiten beter te beheren.
+            Deze inzichten worden automatisch gegenereerd op basis van de gegevens die u invoert bij het uitvoeren van taken.
+          </p>
+          <p className="text-gray-700 mt-2">
+            Hoe meer activiteiten u logt, hoe nauwkeuriger en persoonlijker de inzichten worden.
+          </p>
+        </div>
+      </div>
+      
+      {error && (
+        <div className="mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            {error}
+          </div>
+        </div>
+      )}
+      
+      {insights.length > 0 ? (
         <div className="space-y-6">
           {insights.map(insight => (
-            <div key={insight.id} className="border border-gray-200 rounded-lg overflow-hidden">
+            <div key={insight.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <button
                 type="button"
                 onClick={() => toggleExpand(insight.id)}
-                className="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset"
+                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset"
                 aria-expanded={expandedInsightId === insight.id ? 'true' : 'false'}
                 aria-controls={`insight-details-${insight.id}`}
               >
@@ -245,23 +284,24 @@ export default function AIInsights({ insights: initialInsights, limit = 3 }: AII
               )}
             </div>
           ))}
-          
-          <div className="text-center mt-4">
-            <Link 
-              href="/inzichten"
-              className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-            >
-              Bekijk alle inzichten
-            </Link>
-          </div>
         </div>
       ) : (
-        <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
-          <p className="text-gray-500 mb-2">Nog geen AI-inzichten beschikbaar</p>
-          <p className="text-sm text-gray-400">Log meer activiteiten om gepersonaliseerde inzichten te ontvangen</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Geen inzichten gevonden</h2>
+          <p className="text-gray-500 mb-6">
+            {filter === 'all' 
+              ? 'Er zijn nog geen AI-inzichten beschikbaar.' 
+              : `Er zijn nog geen ${filter === 'dag' ? 'dagelijkse' : filter === 'week' ? 'wekelijkse' : 'maandelijkse'} inzichten beschikbaar.`}
+          </p>
+          <Link 
+            href="/taken"
+            className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors"
+          >
+            Ga naar taken
+          </Link>
         </div>
       )}
     </div>

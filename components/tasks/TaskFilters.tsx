@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Define a callback type for when filters change
 type OnFilterChange = (filters: { type?: string; pattern?: string }) => void;
@@ -9,29 +10,53 @@ interface TaskFiltersProps {
 }
 
 export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
-  const [typeFilter, setTypeFilter] = useState<string>('');
-  const [patternFilter, setPatternFilter] = useState<string>('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Initialize state from URL parameters if available
+  const [typeFilter, setTypeFilter] = useState<string>(searchParams.get('type') || '');
+  const [patternFilter, setPatternFilter] = useState<string>(searchParams.get('pattern') || '');
+
+  // Apply filters when component mounts if URL parameters exist
+  useEffect(() => {
+    if ((searchParams.get('type') || searchParams.get('pattern')) && onFilterChange) {
+      onFilterChange({
+        type: searchParams.get('type') || undefined,
+        pattern: searchParams.get('pattern') || undefined,
+      });
+    }
+  }, [searchParams, onFilterChange]);
 
   const handleApplyFilters = () => {
+    // Create a new URLSearchParams object
+    const params = new URLSearchParams();
+    
+    // Add filters to URL parameters if they have values
+    if (typeFilter) params.set('type', typeFilter);
+    if (patternFilter) params.set('pattern', patternFilter);
+    
+    // Update the URL with the new parameters
+    const newUrl = `/taken${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(newUrl);
+    
+    // Call the callback if provided
     if (onFilterChange) {
       onFilterChange({
         type: typeFilter || undefined,
         pattern: patternFilter || undefined,
       });
     }
-    // If onFilterChange is not provided, this component might just manage state
-    // for other components to read, or trigger a router push with query params.
   };
 
   return (
-    <div className="card mb-6">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h3 className="text-md font-semibold text-gray-700 mb-3">Filter Taken</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label htmlFor="type-filter" className="form-label">Filter op Type:</label>
+          <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 mb-1">Filter op Type:</label>
           <select
             id="type-filter"
-            className="form-input"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
           >
@@ -41,10 +66,10 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
           </select>
         </div>
         <div>
-          <label htmlFor="pattern-filter" className="form-label">Filter op Herhaling:</label>
+          <label htmlFor="pattern-filter" className="block text-sm font-medium text-gray-700 mb-1">Filter op Herhaling:</label>
           <select
             id="pattern-filter"
-            className="form-input"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={patternFilter}
             onChange={(e) => setPatternFilter(e.target.value)}
           >
@@ -59,16 +84,12 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
         <div className="md:self-end">
           <button
             onClick={handleApplyFilters}
-            className="btn-primary w-full"
-            disabled={!onFilterChange} // Disable if no handler is provided
+            className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors w-full"
           >
             Filters Toepassen
           </button>
         </div>
       </div>
-      <p className="mt-4 text-sm text-gray-500">
-        Dit is een placeholder. Implementeer daadwerkelijke filterlogica (bijv. via API call of client-side).
-      </p>
     </div>
   );
 }

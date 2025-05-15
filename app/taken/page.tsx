@@ -1,11 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import TaskList from '@/components/tasks/TaskList';
-import TaskFilters from '@/components/tasks/TaskFilters';
-import AddTaskButton from '@/components/tasks/AddTaskButton';
 import { Task } from '@/types';
-import DashboardLayout from '@/components/layout/DashboardLayout'; // Import DashboardLayout
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import TasksPageClient from '@/components/tasks/TasksPageClient';
 
 export default async function TakenPage() {
   const cookieStore = cookies();
@@ -31,33 +29,25 @@ export default async function TakenPage() {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    // Middleware should handle redirecting unauthenticated users to login.
-    // If for some reason middleware didn't catch it, or if user becomes null
-    // after being authenticated (e.g. token revoked), redirect to login.
     redirect('/auth/login');
   }
   
-  // Taken ophalen
-  const { data: tasksData } = await supabase
+  // Fetch all tasks for the user
+  const { data: tasksData, error } = await supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', user.id) // Use user.id
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching tasks:', error);
+  }
   
   const tasks: Task[] = tasksData || [];
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Mijn Taken</h1>
-          <AddTaskButton />
-        </header>
-        
-        <TaskFilters />
-        
-        <TaskList tasks={tasks} />
-      </div>
+      <TasksPageClient initialTasks={tasks} />
     </DashboardLayout>
   );
 }

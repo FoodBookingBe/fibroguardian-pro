@@ -41,10 +41,40 @@ export default async function Dashboard() {
     return null; // Or some fallback UI
   }
   
-  // Haal benodigde data op
-  // (je dashboard data ophaling logic hier)
-  // For now, let's assume no critical data fetching here that could fail silently.
-  // If there is, it needs robust error handling.
+  // Fetch tasks for the daily planner
+  const { data: tasksData, error: tasksError } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false });
+  
+  if (tasksError) {
+    console.error('Error fetching tasks:', tasksError);
+  }
+  
+  // Fetch task logs for health metrics
+  const { data: logsData, error: logsError } = await supabase
+    .from('task_logs')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('start_tijd', { ascending: false })
+    .limit(30);
+  
+  if (logsError) {
+    console.error('Error fetching task logs:', logsError);
+  }
+  
+  // Fetch insights for AI insights
+  const { data: insightsData, error: insightsError } = await supabase
+    .from('inzichten')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false })
+    .limit(3);
+  
+  if (insightsError) {
+    console.error('Error fetching insights:', insightsError);
+  }
   
   return (
     <DashboardLayout>
@@ -60,16 +90,16 @@ export default async function Dashboard() {
         {/* Dashboard content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <section id="daily-planner" className="lg:col-span-2">
-            <DailyPlanner tasks={[]} userId={session.user.id} />
+            <DailyPlanner tasks={tasksData || []} userId={session.user.id} />
           </section>
 
           <section id="health-metrics">
-            <HealthMetrics logs={[]} />
+            <HealthMetrics logs={logsData || []} />
           </section>
         </div>
 
         <section id="ai-insights" className="mt-8">
-          <AIInsights insights={[]} />
+          <AIInsights insights={insightsData || []} />
         </section>
 
         <section id="quick-actions" className="mt-8">
