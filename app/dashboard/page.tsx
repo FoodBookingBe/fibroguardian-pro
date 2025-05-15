@@ -6,21 +6,23 @@ import HealthMetrics from '@/components/dashboard/HealthMetrics';
 import AIInsights from '@/components/dashboard/AIInsights';
 import QuickActions from '@/components/dashboard/QuickActions';
 import SessionStatus from '@/components/debug/SessionStatus';
-
 export default async function Dashboard() {
-  const supabase = createServerComponentClient({ cookies });
+  // const supabase = createServerComponentClient({ cookies }); // No longer needed here if layout handles auth
   
-  // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
+  // Authentication is now handled by app/dashboard/layout.tsx
+  // const { data: { session } } = await supabase.auth.getSession();
   
-  if (!session) {
-    return null; // DashboardLayout handles redirect
-  }
+  // if (!session) {
+  //   return null;
+  // }
   
   // Haal benodigde data op
   // (je dashboard data ophaling logic hier)
+  // For now, let's assume no critical data fetching here that could fail silently.
+  // If there is, it needs robust error handling.
   
   return (
+    <DashboardLayout>
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         {process.env.NODE_ENV !== 'production' && <SessionStatus />}

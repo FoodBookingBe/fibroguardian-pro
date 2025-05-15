@@ -10,6 +10,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
+  console.log('[Client DashboardLayout] State:', { user: !!user, loading, mounted });
+
   // Voorkomen van hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -17,12 +19,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Redirect naar login als niet ingelogd
   useEffect(() => {
+    console.log('[Client DashboardLayout] Auth state check effect:', { loading, user: !!user, mounted });
     if (!loading && !user && mounted) {
+      console.log('[Client DashboardLayout] Redirecting to /auth/login');
       router.push('/auth/login');
     }
   }, [user, loading, router, mounted]);
 
   if (!mounted || loading) {
+    console.log('[Client DashboardLayout] Rendering spinner');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
@@ -31,9 +36,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   if (!user) {
-    return null; // Zal redirecten naar login
+    console.log('[Client DashboardLayout] User is null after loading, rendering null (AuthProvider should redirect)');
+    return null; // AuthProvider is expected to handle redirect if !session on protected route
   }
 
+  console.log('[Client DashboardLayout] Rendering main layout');
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
