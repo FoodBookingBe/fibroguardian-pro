@@ -45,6 +45,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("Form submitted, validation passed:", validateForm());
     
     // Valideer formulier voor submission
     if (!validateForm()) {
