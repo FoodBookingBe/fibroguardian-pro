@@ -28,10 +28,12 @@ export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
       // Explicieter cookie management
       cookies: {
         get(name) {
-          const cookie = document.cookie
+          const cookiePair = document.cookie
             .split('; ')
             .find((row) => row.startsWith(`${name}=`));
-          return cookie ? cookie.split('=')[1] : undefined;
+          const cookieValue = cookiePair ? cookiePair.split('=')[1] : undefined;
+          console.log(`[Supabase Cookies GET] Name: ${name}, Raw Value: ${cookieValue}`);
+          return cookieValue;
         },
         set(name, value, options) {
           // Voeg SameSite en andere attributen toe
