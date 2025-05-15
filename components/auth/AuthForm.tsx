@@ -56,28 +56,39 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
 
     try {
       if (isLogin) {
-        console.log('Login attempt starting with email:', email); // Add logging
+        console.log('Login attempt starting with email:', email);
         const supabase = getSupabaseBrowserClient();
+        
+        // Inloggen
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
         });
 
-        console.log('Login result:', {
-          success: !!signInData?.user,
-          error: signInError ? signInError.message : null,
-          session: !!signInData?.session
+        console.log('Login response:', {
+          user: !!signInData?.user,
+          session: !!signInData?.session,
+          error: signInError ? signInError.message : null
         });
 
         if (signInError) {
           setMessage(`Fout bij inloggen: ${signInError.message}`);
         } else if (signInData?.user) {
-          setMessage('Succesvol ingelogd! Even geduld...');
-          console.log('Login successful, redirecting to dashboard');
+          // Expliciete sessie controle
+          const { data: sessionData } = await supabase.auth.getSession();
+          console.log('Session check:', { hasSession: !!sessionData.session });
           
-          // Force a hard navigation instead of client-side navigation
-          window.location.href = '/dashboard';
-          // Alternative: router.push('/dashboard')
+          if (sessionData.session) {
+            setMessage('Succesvol ingelogd! Even geduld...');
+            
+            // Gebruik een korte timeout om zeker te zijn dat cookies zijn opgeslagen
+            setTimeout(() => {
+              // Hard redirect voor volledig pagina refresh
+              window.location.href = '/dashboard';
+            }, 300);
+          } else {
+            setMessage('Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.');
+          }
         } else {
           setMessage('Onbekende fout bij inloggen. Probeer het opnieuw.');
         }

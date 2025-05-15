@@ -9,7 +9,7 @@ interface Patient {
   postcode?: string;
   gemeente?: string;
   avatar_url?: string;
-  geboortedatum?: string;
+  geboortedatum?: Date | string;
   created_at: Date | string;
 }
 

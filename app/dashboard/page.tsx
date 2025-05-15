@@ -5,6 +5,7 @@ import DailyPlanner from '@/components/dashboard/DailyPlanner';
 import HealthMetrics from '@/components/dashboard/HealthMetrics';
 import AIInsights from '@/components/dashboard/AIInsights';
 import QuickActions from '@/components/dashboard/QuickActions';
+import SessionStatus from '@/components/debug/SessionStatus';
 
 export default async function Dashboard() {
   const supabase = createServerComponentClient({ cookies });
@@ -22,6 +23,7 @@ export default async function Dashboard() {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
+        {process.env.NODE_ENV !== 'production' && <SessionStatus />}
         <header className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-purple-800">
             Dashboard

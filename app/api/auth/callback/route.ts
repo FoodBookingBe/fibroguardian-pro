@@ -19,7 +19,15 @@ export async function GET(request: NextRequest) {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
+            cookieStore.set({
+              name,
+              value,
+              ...options,
+              // Zorg dat cookies correct worden ingesteld
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true
+            });
           },
           remove(name: string, options: CookieOptions) {
             cookieStore.set({ name, value: '', ...options });
@@ -28,15 +36,17 @@ export async function GET(request: NextRequest) {
       }
     );
     try {
-      await supabase.auth.exchangeCodeForSession(code);
-      // URL to redirect to after successful sign in
-      // This should typically be your dashboard or a welcome page.
-      // Ensure this matches one of your allowed Redirect URLs in Supabase project settings.
-      return NextResponse.redirect(new URL('/dashboard', requestUrl.origin));
+      console.log("Auth callback: exchanging code for session");
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (error) throw error;
+      
+      console.log("Auth callback: session exchange successful, user:", !!data?.user);
+      
+      // Voeg een kleine debug component toe aan de redirect URL
+      return NextResponse.redirect(new URL('/dashboard?auth=success', requestUrl.origin));
     } catch (error) {
       console.error('Error exchanging code for session:', error);
-      // URL to redirect to in case of error
-      // You might want to redirect to an error page or the login page with an error message
       const errorUrl = new URL('/auth/login', requestUrl.origin);
       errorUrl.searchParams.set('error', 'auth_callback_error');
       errorUrl.searchParams.set('error_description', 'Could not exchange code for session. Please try again.');

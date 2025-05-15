@@ -1,5 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr'; // Changed import source
-import { SupabaseClient } from '@supabase/supabase-js'; // Import SupabaseClient for type
+import { createBrowserClient } from '@supabase/ssr';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,17 +18,39 @@ let supabaseInstance: SupabaseClient<Database> | null = null;
 export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
   if (typeof window === 'undefined') {
     // This function should only be called on the client side.
-    // Throw an error or return a mock/dummy client if necessary,
-    // but throwing makes misuse explicit.
     throw new Error("getSupabaseBrowserClient was called on the server. It should only be called on the client side.");
   }
 
   if (!supabaseInstance) {
-    supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!);
+    // Voeg deze debug logging toe
+    console.log("Creating new Supabase client instance");
+    supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+      // Explicieter cookie management
+      cookies: {
+        get(name) {
+          const cookie = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith(`${name}=`));
+          return cookie ? cookie.split('=')[1] : undefined;
+        },
+        set(name, value, options) {
+          // Voeg SameSite en andere attributen toe
+          let cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          if (options.domain) cookie += `; domain=${options.domain}`;
+          if (options.maxAge) cookie += `; max-age=${options.maxAge}`;
+          if (options.secure) cookie += '; secure';
+          if (options.sameSite) cookie += `; samesite=${options.sameSite}`;
+          document.cookie = cookie;
+        },
+        remove(name, options) {
+          const cookieString = `${name}=; path=/; max-age=0`;
+          // if (options.domain) cookieString += `; domain=${options.domain}`; // domain not typically needed for removal by path
+          document.cookie = cookieString;
+        },
+      },
+    });
   }
-  // We are sure supabaseInstance is non-null here due to the logic above
-  // and the check for window !== 'undefined'.
-  return supabaseInstance!; // Added non-null assertion
+  return supabaseInstance!;
 };
 
 // Example for future server-side client (using @supabase/ssr):
