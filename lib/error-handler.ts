@@ -1,7 +1,7 @@
 import { PostgrestError } from '@supabase/supabase-js';
 
 // Interface voor gestructureerde foutberichten
-interface ErrorMessage {
+export interface ErrorMessage { // Added export
   userMessage: string;
   technicalMessage?: string;
   errorCode?: string;

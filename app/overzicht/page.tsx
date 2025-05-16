@@ -1,6 +1,19 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import OverzichtClient from './overzicht-client';
+import { User } from '@supabase/supabase-js'; // Import User type
+import { Profile, Task, TaskLog, Reflectie } from '@/types'; // Import custom types
+
+// Definieer interface voor data passing
+interface OverzichtPageData {
+  user: User;
+  userProfile: Profile;
+  tasks: Task[];
+  taskLogs: TaskLog[];
+  reflecties: Reflectie[];
+  startOfWeek: string;
+  endOfWeek: string;
+}
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable caching
@@ -97,15 +110,27 @@ export default async function OverzichtPage() {
   }
   
   // Gebruik de client component om de UI te renderen
-  return (
-    <OverzichtClient 
-      user={user} 
-      userProfile={profile} 
-      tasks={tasks || []} 
-      taskLogs={taskLogs || []} 
-      reflecties={reflecties || []}
-      startOfWeek={startOfWeek.toISOString()}
-      endOfWeek={endOfWeek.toISOString()}
-    />
-  );
+  // Valideer voordat het wordt doorgegeven
+  const pageData: OverzichtPageData = {
+    user: user!, // We weten dat deze bestaat door eerdere check
+    userProfile: profile as Profile, // Cast to Profile type
+    tasks: (tasks || []) as Task[], // Cast to Task[]
+    taskLogs: (taskLogs || []) as TaskLog[], // Cast to TaskLog[]
+    reflecties: (reflecties || []) as Reflectie[], // Cast to Reflectie[]
+    startOfWeek: startOfWeek.toISOString(),
+    endOfWeek: endOfWeek.toISOString(),
+  };
+
+  // Log problemen in development maar niet in productie
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[Server] OverzichtPage data validation:', {
+      hasUser: !!pageData.user,
+      hasProfile: !!pageData.userProfile,
+      tasksCount: pageData.tasks.length,
+      logsCount: pageData.taskLogs.length,
+      reflectiesCount: pageData.reflecties.length,
+    });
+  }
+
+  return <OverzichtClient {...pageData} />;
 }

@@ -1,0 +1,408 @@
+import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
+import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
+import { ErrorMessage } from '@/lib/error-handler'; 
+
+// Taak toevoegen/bijwerken
+// TData is the type of data returned by the mutationFn on success (e.g., the updated/created task)
+// TVariables is the type of variables passed to the mutationFn (e.g., Partial<Task>)
+export function useUpsertTask(
+  options?: Omit<UseMutationOptions<Task, ErrorMessage, Partial<Task>>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<Task, ErrorMessage, Partial<Task>>({
+    mutationFn: async (task: Partial<Task>) => {
+      const method = task.id ? 'PUT' : 'POST';
+      const url = task.id ? `/api/tasks/${task.id}` : '/api/tasks';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het opslaan van de taak',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+            // errorCode and action can be omitted or set to generic values if not available from API response
+        };
+        throw err; 
+      }
+      
+      return responseData.data || responseData; // API might return { data: Task } or just Task
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate en refetch betreffende queries
+      queryClient.invalidateQueries({ queryKey: ['tasks'] }); 
+      if (variables.id) {
+        queryClient.invalidateQueries({ queryKey: ['task', variables.id] }); 
+      }
+      if (data?.user_id) { // If the task data includes user_id, invalidate tasks for that user
+         queryClient.invalidateQueries({ queryKey: ['tasks', data.user_id] });
+      }
+      // Optionally, update the cache directly with setQueryData
+      if (data?.id) {
+        queryClient.setQueryData(['task', data.id], data);
+      }
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij opslaan taak (ID: ${variables.id || 'new'}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Taak verwijderen
+export function useDeleteTask(
+  options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, string>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<{ message: string }, ErrorMessage, string>({ // TVariables is taskId (string)
+    mutationFn: async (taskId: string) => {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de taak',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      
+      return responseData; // API returns { message: string }
+    },
+    onSuccess: (data, taskId, context) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.removeQueries({ queryKey: ['task', taskId] });
+      // Potentially invalidate user-specific task list if applicable
+      // const { user } = useAuth(); // This hook cannot be used here. Need userId from variables or context.
+      // if (userId) queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
+    },
+    onError: (error: ErrorMessage, taskId) => {
+      console.error(`Fout bij verwijderen taak (ID: ${taskId}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Add other mutation hooks for other resources (reflecties, profiles, etc.) here.
+
+// Profiel bijwerken
+export function useUpdateProfile(
+  options?: Omit<UseMutationOptions<Profile, ErrorMessage, { id: string; data: Partial<Profile> }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<Profile, ErrorMessage, { id: string; data: Partial<Profile> }>({
+    mutationFn: async ({ id, data }) => {
+      const url = `/api/profiles/${id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het bijwerken van het profiel',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData as Profile; // API returns the updated profile
+    },
+    onSuccess: (updatedProfile, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['profile', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }); 
+      
+      queryClient.setQueryData(['profile', variables.id], updatedProfile);
+      const currentMeProfile = queryClient.getQueryData(['profile', 'me']) as Profile | undefined;
+      if (currentMeProfile && currentMeProfile.id === variables.id) {
+        queryClient.setQueryData(['profile', 'me'], updatedProfile);
+      }
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij bijwerken profiel (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Task Log Mutations
+
+// Task Log toevoegen
+export function useAddTaskLog(
+  options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>({
+    mutationFn: async (logData) => {
+      const response = await fetch('/api/task-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logData),
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het opslaan van de log',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData as TaskLog;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.task_id] });
+      queryClient.invalidateQueries({ queryKey: ['recentLogs'] }); 
+      if (data?.user_id) {
+        queryClient.invalidateQueries({ queryKey: ['recentLogs', data.user_id] });
+      }
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij opslaan taaklog voor taak ${variables.task_id}:`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Task Log bijwerken
+export function useUpdateTaskLog(
+  options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }>({
+    mutationFn: async ({ id, data }) => {
+      const url = `/api/task-logs/${id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het bijwerken van de log',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData as TaskLog;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['taskLogs', data.task_id] }); 
+      queryClient.invalidateQueries({ queryKey: ['recentLogs', data.user_id] });
+      queryClient.setQueryData(['taskLog', variables.id], data); 
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij bijwerken taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Task Log verwijderen
+export function useDeleteTaskLog(
+  options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>({
+    mutationFn: async ({ id }) => {
+      const response = await fetch(`/api/task-logs/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de log',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData;
+    },
+    onSuccess: (data, variables) => {
+      if (variables.taskId) {
+        queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.taskId] });
+      }
+      if (variables.userId) {
+        queryClient.invalidateQueries({ queryKey: ['recentLogs', variables.userId] });
+      } else {
+         queryClient.invalidateQueries({ queryKey: ['recentLogs'] }); 
+      }
+      queryClient.removeQueries({ queryKey: ['taskLog', variables.id] });
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij verwijderen taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Reflectie Mutations
+
+// Reflectie toevoegen/bijwerken (POST in API route handles upsert)
+export function useUpsertReflectie(
+  options?: Omit<UseMutationOptions<Reflectie, ErrorMessage, ReflectieFormData>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<Reflectie, ErrorMessage, ReflectieFormData>({
+    mutationFn: async (reflectieData: ReflectieFormData) => { // Use ReflectieFormData for input
+      // The API route POST /api/reflecties handles upsert logic based on user_id and datum.
+      const url = '/api/reflecties';
+      const response = await fetch(url, {
+        method: 'POST', // POST handles upsert logic in the API route
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reflectieData),
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het opslaan van de reflectie',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData as Reflectie;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['reflecties', data.user_id] }); // Invalidate list for user
+      queryClient.invalidateQueries({ queryKey: ['reflecties', data.user_id, variables.datum] }); // Invalidate specific date if key structure allows
+      queryClient.setQueryData(['reflectie', data.id], data); // Update specific reflectie cache
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij opslaan reflectie (Datum: ${variables.datum}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Reflectie verwijderen
+export function useDeleteReflectie(
+  options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; userId?: string }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  
+  return useMutation<{ message: string }, ErrorMessage, { id: string; userId?: string }>({
+    mutationFn: async ({ id }) => {
+      const response = await fetch(`/api/reflecties/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de reflectie',
+            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData;
+    },
+    onSuccess: (data, variables) => {
+      if (variables.userId) {
+        queryClient.invalidateQueries({ queryKey: ['reflecties', variables.userId] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['reflecties'] }); // More general invalidation
+      }
+      queryClient.removeQueries({ queryKey: ['reflectie', variables.id] });
+    },
+    onError: (error: ErrorMessage, variables) => { 
+      console.error(`Fout bij verwijderen reflectie (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Specialist-Patient Relationship Mutations
+
+// Add Specialist-Patient Relationship
+export function useAddSpecialistPatientRelation(
+  options?: Omit<UseMutationOptions<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>({
+    mutationFn: async (variables) => {
+      const response = await fetch('/api/specialist-patienten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables),
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+          userMessage: responseData.error?.message || responseData.message || 'Fout bij toevoegen relatie.',
+          technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData as SpecialistPatient;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate relevant queries, e.g., list of patients for a specialist or specialists for a patient
+      if (variables.specialist_id_to_add) { // Patient added a specialist
+        queryClient.invalidateQueries({ queryKey: ['mySpecialists', data.patient_id] });
+      } else if (variables.patient_email) { // Specialist added a patient
+        queryClient.invalidateQueries({ queryKey: ['myPatients', data.specialist_id] });
+      }
+    },
+    onError: (error: ErrorMessage) => {
+      console.error('Fout bij toevoegen specialist-patiënt relatie:', error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+
+// Delete Specialist-Patient Relationship
+export function useDeleteSpecialistPatientRelation(
+  options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>({
+    mutationFn: async ({ relationshipId }) => {
+      const response = await fetch(`/api/specialist-patienten/${relationshipId}`, {
+        method: 'DELETE',
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        const err: ErrorMessage = {
+          userMessage: responseData.error?.message || responseData.message || 'Fout bij verwijderen relatie.',
+          technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+        };
+        throw err;
+      }
+      return responseData;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate lists of patients and specialists for the affected users
+      // This might require knowing both specialistId and patientId from the deleted relation,
+      // or having the currentUserId to invalidate their specific list.
+      queryClient.invalidateQueries({ queryKey: ['myPatients'] }); // Broad invalidation
+      queryClient.invalidateQueries({ queryKey: ['mySpecialists'] }); // Broad invalidation
+      if (variables.currentUserId) {
+         // More specific invalidations if user type is known
+         queryClient.invalidateQueries({ queryKey: ['myPatients', variables.currentUserId] }); 
+         queryClient.invalidateQueries({ queryKey: ['mySpecialists', variables.currentUserId] });
+      }
+    },
+    onError: (error: ErrorMessage, variables) => {
+      console.error(`Fout bij verwijderen relatie (ID: ${variables.relationshipId}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}

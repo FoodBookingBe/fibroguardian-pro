@@ -1,48 +1,31 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Updated import
 import { redirect } from 'next/navigation';
 import { ReactNode } from 'react';
-import Sidebar from '@/components/layout/Sidebar'; // Assuming Sidebar and Topbar are still needed here for structure
-import Topbar from '@/components/layout/Topbar';   // or if DashboardLayout handles them, these might not be needed directly
+import { handleServerError } from '@/utils/error-handling'; // Import handleServerError
+// Sidebar and Topbar are part of the client-side DashboardLayout, not needed here.
+// import Sidebar from '@/components/layout/Sidebar'; 
+// import Topbar from '@/components/layout/Topbar';   
 
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode
 }) {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
+  const supabase = getSupabaseServerComponentClient(); // Use the new standardized client
   
   // Server-side auth verificatie
-  const { data, error } = await supabase.auth.getSession();
-  const user = data?.session?.user;
+  const { data: { user }, error } = await supabase.auth.getUser(); // Use getUser()
   
   if (error) {
-    console.error("Error getting session in dashboard layout:", error.message);
-    // Optionally redirect to an error page or login
-    redirect('/auth/login?error=session_error');
+    // Use handleServerError for consistent error handling
+    return handleServerError(error, '/auth/login'); 
   }
 
   if (!user) {
     // Als geen gebruiker, redirect hard naar login
     console.log("No user session found in dashboard layout, redirecting to login.");
-    redirect('/auth/login');
+    // redirect will throw an error, so no need to return its result
+    redirect('/auth/login'); 
   }
 
   // If we are here, user is authenticated.

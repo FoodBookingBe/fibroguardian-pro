@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null); // Added authError state
   const router = useRouter(); 
   const pathname = usePathname(); 
 
@@ -33,18 +34,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(sessionState);
     setUser(sessionState?.user ?? null);
     setLoading(false);
+    setAuthError(null); // Clear error on successful auth state change
   }, []);
 
   useEffect(() => {
     console.log('[AuthProvider] Setting up auth session...');
     setLoading(true);
+    setAuthError(null); // Clear previous errors
     const supabase = getSupabaseBrowserClient();
     
     // Add more detailed error handling and logging
     supabase.auth.getSession().then((response: { data: { session: Session | null }, error: AuthError | null }) => {
       if (response.error) {
         console.error("[AuthProvider] Error getting session:", response.error.message);
-        // Optionally handle error, e.g., clear session, set error state
+        setAuthError(response.error.message); // Set authError state
+        // Optionally clear session and user
+        setSession(null);
+        setUser(null);
+      } else {
+        setAuthError(null); // Clear error if session is retrieved successfully
       }
       
       const currentSession = response.data.session;

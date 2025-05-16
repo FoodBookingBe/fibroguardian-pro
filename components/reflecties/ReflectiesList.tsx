@@ -5,10 +5,13 @@ import { Reflectie } from '@/types';
 
 interface ReflectiesListProps {
   reflecties: Reflectie[];
+  onDelete?: (reflectieId: string) => void;
+  isDeletingId?: string | null | 'pending'; // To indicate which item (or any) is being deleted
 }
 
-export default function ReflectiesList({ reflecties }: ReflectiesListProps) {
+export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: ReflectiesListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
   // Helper om datum te formatteren
   const formatDate = (dateString: Date | string | undefined) => {
@@ -127,6 +130,34 @@ export default function ReflectiesList({ reflecties }: ReflectiesListProps) {
                 >
                   Bewerken
                 </Link>
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirmDeleteId === reflectie.id) {
+                        onDelete(reflectie.id);
+                        setConfirmDeleteId(null);
+                      } else {
+                        setConfirmDeleteId(reflectie.id);
+                        setTimeout(() => setConfirmDeleteId(null), 3000); // Auto-cancel confirm
+                      }
+                    }}
+                    disabled={isDeletingId === 'pending' || (typeof isDeletingId === 'string' && isDeletingId === reflectie.id)}
+                    className={`px-3 py-1 text-xs rounded-md transition-colors focus:outline-none focus:ring-1 ${
+                      confirmDeleteId === reflectie.id 
+                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-red-100 hover:text-red-700 focus:ring-gray-400'
+                    } ${(isDeletingId === 'pending' || (typeof isDeletingId === 'string' && isDeletingId === reflectie.id)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    aria-label={confirmDeleteId === reflectie.id ? `Bevestig verwijderen` : `Verwijder reflectie`}
+                  >
+                    {isDeletingId === reflectie.id ? (
+                      <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : confirmDeleteId === reflectie.id ? 'Bevestig' : 'Verwijder'}
+                  </button>
+                )}
               </div>
             </div>
           )}

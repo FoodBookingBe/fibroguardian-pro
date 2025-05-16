@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { getSupabaseBrowserClient } from '@/lib/supabase'; // Corrected import and function name
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 export default function Topbar() {
   const { user } = useAuth();
+  const router = useRouter(); // Initialize router
   const [profileData, setProfileData] = useState<{ voornaam?: string; achternaam?: string; avatar_url?: string }>({});
   const [menuOpen, setMenuOpen] = useState(false);
   
@@ -35,7 +37,7 @@ export default function Topbar() {
   const handleLogout = async () => {
     const supabaseClient = getSupabaseBrowserClient(); // Corrected usage
     await supabaseClient.auth.signOut();
-    window.location.href = '/';
+    router.push('/'); // Use router for navigation
   };
   
   return (
@@ -50,7 +52,7 @@ export default function Topbar() {
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-              aria-expanded={menuOpen ? "true" : "false"}
+              aria-expanded={menuOpen ? 'true' : 'false'} // Revert to explicit string literals
               aria-controls="user-menu"
             >
               <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden">

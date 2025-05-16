@@ -50,7 +50,7 @@ export default async function MijnSpecialistenPage() {
   }
   
   // Controleer of gebruiker een patiënt is
-  if (profile.type !== 'patient') {
+  if (!profile || profile.type !== 'patient') {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-yellow-50 p-4 rounded-md">
@@ -92,12 +92,24 @@ export default async function MijnSpecialistenPage() {
     if (!specialistsError && specialistsData) {
       // Combineer de gegevens
       specialists = specialistsData.map(specialist => {
-        const relation = relationData.find(rel => rel.specialist_id === specialist.id);
+        if (!specialist || !specialist.id) {
+          // Skip of log een waarschuwing
+          console.warn('Specialist zonder geldig ID gevonden:', specialist);
+          return {
+            id: 'unknown',
+            voornaam: 'Onbekend',
+            achternaam: 'Specialist',
+            email: 'geen-email@voorbeeld.com',
+            toegangsrechten: []
+          };
+        }
+        
+        const relation = relationData?.find?.(rel => rel.specialist_id === specialist.id);
         return {
           ...specialist,
-          toegangsrechten: relation?.toegangsrechten || []
+          toegangsrechten: Array.isArray(relation?.toegangsrechten) ? relation.toegangsrechten : []
         };
-      });
+      }).filter(Boolean) as Specialist[]; // Filter out any null/undefined entries if skipped
     }
   }
   

@@ -3,35 +3,42 @@ import { useState } from 'react';
 import { Task } from '@/types';
 import Link from 'next/link';
 import TaskCard from './TaskCard';
+import { useDeleteTask } from '@/hooks/useMutations';
+import { AlertMessage } from '@/components/common/AlertMessage'; 
+import { ErrorMessage } from '@/lib/error-handler';
+import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 
 interface TaskListProps {
   tasks: Task[];
+  // If TaskList is used by a parent that uses useTasks, 
+  // no need to reload window, parent's data will update.
 }
 
 export default function TaskList({ tasks }: TaskListProps) {
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
+  // const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null); // Handled by useDeleteTask.isPending
+  // const [deleteError, setDeleteError] = useState<string | null>(null); // Handled by useDeleteTask.error
   
+  const { 
+    mutate: deleteTask, 
+    isPending: isDeletingTask, 
+    error: deleteTaskHookError, // This will be ErrorMessage type
+    isError: isDeleteTaskError,
+    // isSuccess: isDeleteSuccess, // Can be used for success messages
+  } = useDeleteTask();
+
+  const { addNotification } = useNotification();
+
   const handleDeleteTask = async (taskId: string) => {
-    try {
-      setDeletingTaskId(taskId);
-      
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete task');
+    deleteTask(taskId, {
+      onSuccess: () => {
+        addNotification('success', 'Taak succesvol verwijderd.');
+        // No window.location.reload(); React Query invalidation in useDeleteTask should trigger parent re-render.
+      },
+      onError: (error) => { // error here is ErrorMessage
+        addNotification('error', error.userMessage || 'Fout bij verwijderen taak.');
+        console.error('Error deleting task (hook):', error.userMessage);
       }
-      
-      // Refresh the page to show the updated task list
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error deleting task:', error);
-      alert(`Er is een fout opgetreden bij het verwijderen van de taak: ${error.message}`);
-    } finally {
-      setDeletingTaskId(null);
-    }
+    });
   };
   
   if (tasks.length === 0) {
@@ -52,15 +59,27 @@ export default function TaskList({ tasks }: TaskListProps) {
     );
   }
   
+  const typedDeleteTaskError = deleteTaskHookError as ErrorMessage | null;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {tasks.map(task => (
-        <TaskCard 
-          key={task.id} 
-          task={task} 
-          onDelete={handleDeleteTask}
-        />
-      ))}
-    </div>
+    <>
+      {/* Inline error display for delete might be redundant if global notifications are used for errors too */}
+      {/* For now, keeping it as per previous structure, but consider if addNotification('error', ...) is sufficient */}
+      {isDeleteTaskError && typedDeleteTaskError && (
+        <AlertMessage type="error" title="Fout bij verwijderen" message={typedDeleteTaskError.userMessage || 'Kon taak niet verwijderen.'} className="mb-4" />
+      )}
+      {/* Success messages are now handled by global notifications */}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tasks.map(task => (
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            onDelete={handleDeleteTask}
+            isDeleting={isDeletingTask} // Pass deleting state to TaskCard if it needs to show individual loading
+          />
+        ))}
+      </div>
+    </>
   );
 }

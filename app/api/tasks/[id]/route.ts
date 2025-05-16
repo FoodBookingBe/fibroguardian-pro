@@ -1,272 +1,133 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { formatApiError } from '@/lib/api-error';
-import { handleSupabaseError } from '@/lib/error-handler';
-import { Task, SpecialistPatient } from '@/types'; // Import types
+// import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'; // Replaced by centralized helper
+// import { cookies } from 'next/headers'; // Handled by centralized helper
+import { NextResponse, NextRequest } from 'next/server';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Import centralized helper
+import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { Task } from '@/types'; // Assuming Task type
 
-export async function GET(
-  req: NextRequest,
+export async function DELETE(
+  request: NextRequest, // Use NextRequest for consistency
   { params }: { params: { id: string } }
 ) {
   const taskId = params.id;
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
+  const supabase = getSupabaseRouteHandlerClient();
   
   try {
-    // Auth check
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        formatApiError(401, 'Niet geautoriseerd'),
-        { status: 401 }
-      );
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
     }
     
-    // Taak ophalen
-    const { data, error } = await supabase
+    // Delete associated task_logs first to avoid foreign key constraint issues
+    const { error: logDeleteError } = await supabase
+      .from('task_logs')
+      .delete()
+      .eq('task_id', taskId)
+      .eq('user_id', user.id); // Ensure user context for log deletion as well
+
+    if (logDeleteError) {
+        // Log the error but don't necessarily block task deletion if logs don't exist or RLS prevents
+        console.warn(`Warning deleting logs for task ${taskId}: ${logDeleteError.message}`);
+    }
+
+    const { error: taskDeleteError } = await supabase
       .from('tasks')
-      .select('*')
+      .delete()
       .eq('id', taskId)
-      .single();
+      .eq('user_id', user.id); 
     
-    if (error) throw error;
+    if (taskDeleteError) throw taskDeleteError;
     
-    if (!data) {
-      return NextResponse.json(
-        formatApiError(404, 'Taak niet gevonden'),
-        { status: 404 }
-      );
-    }
-    
-    const task = data as Task; // Assert type
-
-    // Controleer of gebruiker eigenaar is of specialist
-    if (task.user_id !== session.user.id) {
-      // Controleer of ingelogde gebruiker specialist is voor deze gebruiker
-      const { data: specialistPatientData, error: spError } = await supabase
-        .from('specialist_patienten')
-        .select('*')
-        .eq('specialist_id', session.user.id)
-        .eq('patient_id', task.user_id)
-        .single();
-      
-      if (spError) throw spError; // Handle potential error from this query
-
-      const specialistPatient = specialistPatientData as SpecialistPatient | null;
-
-      if (!specialistPatient || !specialistPatient.toegangsrechten.includes('view_tasks')) {
-        return NextResponse.json(
-          formatApiError(403, 'Geen toegang tot deze taak'),
-          { status: 403 }
-        );
-      }
-    }
-    
-    return NextResponse.json(task);
+    return NextResponse.json({ message: 'Taak succesvol verwijderd' }); // Return 200 OK with success message
   } catch (error) {
-    const errorInfo = handleSupabaseError(error, 'taak-ophalen');
-    
-    return NextResponse.json(
-      formatApiError(500, errorInfo.userMessage),
-      { status: 500 }
-    );
+    const errorInfo = handleSupabaseError(error, 'taak-verwijderen');
+    return NextResponse.json(formatApiError(500, errorInfo.userMessage), { status: 500 });
   }
 }
 
 export async function PUT(
-  req: NextRequest,
+  request: NextRequest, // Use NextRequest
   { params }: { params: { id: string } }
 ) {
   const taskId = params.id;
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
-  
-  try {
-    // Auth check
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        formatApiError(401, 'Niet geautoriseerd'),
-        { status: 401 }
-      );
-    }
-    
-    // Haal taak op om te controleren of gebruiker eigenaar is
-    const { data: existingTaskData, error: fetchError } = await supabase
-      .from('tasks')
-      .select('user_id')
-      .eq('id', taskId)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    if (!existingTaskData) {
-      return NextResponse.json(
-        formatApiError(404, 'Taak niet gevonden'),
-        { status: 404 }
-      );
-    }
-    
-    const existingTask = existingTaskData as { user_id: string }; // Assert type
+  const supabase = getSupabaseRouteHandlerClient();
 
-    // Controleer of gebruiker eigenaar is of specialist
-    let hasPermission = existingTask.user_id === session.user.id;
-    
-    if (!hasPermission) {
-      // Controleer of ingelogde gebruiker specialist is voor deze gebruiker
-      const { data: specialistPatientData } = await supabase
-        .from('specialist_patienten')
-        .select('toegangsrechten')
-        .eq('specialist_id', session.user.id)
-        .eq('patient_id', existingTask.user_id)
-        .single();
-      
-      const specialistPatient = specialistPatientData as { toegangsrechten: string[] } | null; // Assert type
-      hasPermission = !!specialistPatient && specialistPatient.toegangsrechten.includes('update_tasks');
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
+
+    const taskData: Partial<Task> = await request.json();
+
+    // Basic validation
+    if (!taskData.titel && !taskData.beschrijving && taskData.duur === undefined) { // Check if any actual data is sent
+        return NextResponse.json(formatApiError(400, 'Geen data om bij te werken'), { status: 400 });
     }
     
-    if (!hasPermission) {
-      return NextResponse.json(
-        formatApiError(403, 'Geen toegang om deze taak te bewerken'),
-        { status: 403 }
-      );
-    }
-    
-    // Parse body
-    const taskUpdateData: Partial<Task> = await req.json(); // Use Partial for updates
-    
-    // Update taak
+    // Ensure user_id is not changed by client, enforce it to be the current user's ID
+    const updatePayload = { ...taskData, user_id: user.id };
+    // Remove id from payload if present, as it's used in eq()
+    if ('id' in updatePayload) delete (updatePayload as any).id;
+
+
     const { data, error } = await supabase
       .from('tasks')
-      .update(taskUpdateData)
+      .update(updatePayload)
       .eq('id', taskId)
+      .eq('user_id', user.id) // User can only update their own tasks
       .select()
       .single();
-    
+
     if (error) throw error;
-    
-    return NextResponse.json(data as Task); // Assert type
+
+    return NextResponse.json(data as Task);
   } catch (error) {
     const errorInfo = handleSupabaseError(error, 'taak-bijwerken');
-    
-    return NextResponse.json(
-      formatApiError(500, errorInfo.userMessage),
-      { status: 500 }
-    );
+    return NextResponse.json(formatApiError(500, errorInfo.userMessage), { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
+export async function GET(
+  request: NextRequest, // Use NextRequest
   { params }: { params: { id: string } }
 ) {
   const taskId = params.id;
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
-  
+  const supabase = getSupabaseRouteHandlerClient();
+
   try {
-    // Auth check
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        formatApiError(401, 'Niet geautoriseerd'),
-        { status: 401 }
-      );
-    }
-    
-    // Haal taak op om te controleren of gebruiker eigenaar is
-    const { data: existingTaskData, error: fetchError } = await supabase
-      .from('tasks')
-      .select('user_id')
-      .eq('id', taskId)
-      .single();
-    
-    if (fetchError) throw fetchError;
-    
-    if (!existingTaskData) {
-      return NextResponse.json(
-        formatApiError(404, 'Taak niet gevonden'),
-        { status: 404 }
-      );
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
     }
 
-    const existingTask = existingTaskData as { user_id: string }; // Assert type
-    
-    // Alleen eigenaar mag taak verwijderen
-    if (existingTask.user_id !== session.user.id) {
-      return NextResponse.json(
-        formatApiError(403, 'Geen toegang om deze taak te verwijderen'),
-        { status: 403 }
-      );
-    }
-    
-    // Verwijder taak
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('tasks')
-      .delete()
-      .eq('id', taskId);
-    
-    if (error) throw error;
-    
-    return NextResponse.json({ success: true });
+      .select<'*', Task>('*') // Ensure Task type is used
+      .eq('id', taskId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') { // Not found or RLS violation
+         return NextResponse.json(formatApiError(404, 'Taak niet gevonden of geen toegang.'), { status: 404 });
+      }
+      throw error; // Other errors
+    }
+
+    if (!data) { // Should be caught by single() error PGRST116 if not found
+      return NextResponse.json(formatApiError(404, 'Taak niet gevonden'), { status: 404 });
+    }
+
+    // RLS should handle if user can access this task.
+    // If additional checks are needed (e.g. specialist access), they can be added here.
+    // For now, assume RLS is primary guard. If data is returned, user has access.
+    // if (data.user_id !== user.id /* && check specialist logic if any */) {
+    //   return NextResponse.json(formatApiError(403, 'Geen toegang tot deze taak'), { status: 403 });
+    // }
+
+    return NextResponse.json(data);
   } catch (error) {
-    const errorInfo = handleSupabaseError(error, 'taak-verwijderen');
-    
-    return NextResponse.json(
-      formatApiError(500, errorInfo.userMessage),
-      { status: 500 }
-    );
+    const errorInfo = handleSupabaseError(error, 'taak-ophalen');
+    return NextResponse.json(formatApiError(500, errorInfo.userMessage), { status: 500 });
   }
 }

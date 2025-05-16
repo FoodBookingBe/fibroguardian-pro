@@ -1,99 +1,59 @@
 'use client';
-import { useState } from 'react';
-import { getSupabaseBrowserClient } from '@/lib/supabase'; // Corrected import
-import { useAuth } from '@/components/auth/AuthProvider'; // Corrected import path
+import { useState, FormEvent } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider'; 
+import { AlertMessage } from '@/components/common/AlertMessage';
+import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
+import { ErrorMessage } from '@/lib/error-handler';
 
 export default function AddPatientButton() {
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { 
+    mutate: addRelation, 
+    isPending: isLoading, // Renamed from isPending for consistency with old 'loading' state
+    error: hookError, 
+    isError, 
+    isSuccess
+  } = useAddSpecialistPatientRelation();
+  
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!user) return;
-    
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    
-    try {
-      const supabaseClient = getSupabaseBrowserClient(); // Corrected usage
-      // Zoek patiënt op basis van e-mail
-      const { data: userData, error: userError } = await supabaseClient
-        .from('profiles')
-        .select('id, type')
-        .eq('id', user.id)
-        .single();
-      
-      if (userError) throw userError;
-      
-      // Controleer of de huidige gebruiker een specialist is
-      if (!userData || userData.type !== 'specialist') {
-        throw new Error('U heeft geen toestemming om patiënten toe te voegen');
-      }
-      
-      // Zoek patiënt op basis van e-mail
-      const { data: users, error: emailError } = await supabaseClient
-        .from('auth.users')
-        .select('id')
-        .eq('email', email);
-      
-      if (emailError) throw emailError;
-      
-      if (!users || users.length === 0) {
-        throw new Error('Geen gebruiker gevonden met dit e-mailadres');
-      }
-      
-      const patientId = users[0].id;
-      
-      // Controleer of deze patiënt al is toegewezen aan deze specialist
-      const { data: existingRelation, error: relationError } = await supabaseClient
-        .from('specialist_patienten')
-        .select('id')
-        .eq('specialist_id', user.id)
-        .eq('patient_id', patientId);
-      
-      if (relationError) throw relationError;
-      
-      if (existingRelation && existingRelation.length > 0) {
-        throw new Error('Deze patiënt is al aan u toegewezen');
-      }
-      
-      // Voeg relatie toe
-      const { error: insertError } = await supabaseClient
-        .from('specialist_patienten')
-        .insert([{
-          specialist_id: user.id,
-          patient_id: patientId,
-          toegangsrechten: ['view_tasks', 'view_logs', 'create_tasks']
-        }]);
-      
-      if (insertError) throw insertError;
-      
-      setSuccess('Patiënt succesvol toegevoegd');
-      setTimeout(() => {
-        setShowModal(false);
-        setSuccess(null);
-        setEmail('');
-        // Refresh pagina na succes
-        window.location.reload();
-      }, 2000);
-    } catch (err: any) {
-      console.error('Error adding patient:', err);
-      setError(err.message || 'Er is een fout opgetreden');
-    } finally {
-      setLoading(false);
+    if (!user) {
+      // This case should ideally be handled by UI (e.g., button disabled if no user)
+      console.error("User not authenticated");
+      return;
     }
+    
+    addRelation({ patient_email: email }, {
+      onSuccess: () => {
+        // Success message will be shown via isSuccess and AlertMessage
+        // The API route doesn't return the full user details, so no need to update local state with it.
+        // Invalidation in the hook should handle refetching lists.
+        setTimeout(() => {
+          setShowModal(false);
+          setEmail('');
+          // Consider if window.location.reload() is truly necessary or if
+          // React Query cache invalidation is sufficient to update relevant lists.
+          // For now, keeping it as it might be there for a specific reason.
+          window.location.reload(); 
+        }, 2000);
+      },
+      // onError is handled by hookError and isError
+    });
   };
   
+  const typedHookError = hookError as ErrorMessage | null;
+
   return (
     <>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          setShowModal(true);
+          // Reset states when modal opens
+          setEmail('');
+        }}
         className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors"
       >
         Patiënt Toevoegen
@@ -105,16 +65,11 @@ export default function AddPatientButton() {
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Patiënt Toevoegen</h3>
               
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
-                  {error}
-                </div>
+              {isError && typedHookError && (
+                <AlertMessage type="error" message={typedHookError.userMessage || 'Kon patiënt niet toevoegen.'} />
               )}
-              
-              {success && (
-                <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
-                  {success}
-                </div>
+              {isSuccess && !isError && ( // Show success only if mutation succeeded without error
+                <AlertMessage type="success" message="Patiënt succesvol toegevoegd! Pagina wordt vernieuwd." />
               )}
               
               <form onSubmit={handleSubmit}>
@@ -129,6 +84,7 @@ export default function AddPatientButton() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
+                    disabled={isLoading}
                   />
                   <p className="mt-1 text-sm text-gray-500">
                     Voer het e-mailadres in waarmee de patiënt is geregistreerd.
@@ -140,19 +96,19 @@ export default function AddPatientButton() {
                     type="button"
                     onClick={() => setShowModal(false)}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={loading}
+                    disabled={isLoading}
                   >
                     Annuleren
                   </button>
                   
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isLoading}
                     className={`px-4 py-2 rounded-md text-white font-medium ${
-                      loading ? 'bg-purple-300' : 'bg-purple-600 hover:bg-purple-700'
+                      isLoading ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
                     } transition-colors`}
                   >
-                    {loading ? 'Bezig...' : 'Toevoegen'}
+                    {isLoading ? 'Bezig...' : 'Toevoegen'}
                   </button>
                 </div>
               </form>

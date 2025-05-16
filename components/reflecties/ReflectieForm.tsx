@@ -1,34 +1,43 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase'; // Corrected import
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useUpsertReflectie } from '@/hooks/useMutations';
+import { AlertMessage } from '@/components/common/AlertMessage';
+import { Reflectie, ReflectieFormData } from '@/types'; 
+import { ErrorMessage } from '@/lib/error-handler';
+import { ariaProps, useFocusManagement } from '@/utils/accessibility'; // Import accessibility utils
 
 interface ReflectieFormProps {
-  reflectieId?: string;
+  initialDatum?: string; // YYYY-MM-DD
+  // If editing a specific existing reflection, an ID might be passed
+  // For now, this form handles upsert based on date for the logged-in user
 }
 
 type Stemming = 'zeer goed' | 'goed' | 'neutraal' | 'matig' | 'slecht' | 'zeer slecht';
 
-export default function ReflectieForm({ reflectieId }: ReflectieFormProps) {
+export default function ReflectieForm({ initialDatum }: ReflectieFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   
   const vandaag = new Date().toISOString().split('T')[0];
   
   const [reflectieData, setReflectieData] = useState({
-    datum: vandaag,
+    datum: initialDatum || vandaag,
     stemming: 'neutraal' as Stemming,
     notitie: '',
   });
+
+  const { 
+    mutate: upsertReflectie, 
+    isPending: isUpserting, 
+    error: upsertHookError, // Renamed to avoid conflict with any local 'error' state if used
+    isError: isUpsertError,
+    isSuccess: isUpsertSuccess
+  } = useUpsertReflectie();
   
   const stemmingOpties: Stemming[] = [
-    'zeer goed',
-    'goed',
-    'neutraal',
-    'matig',
-    'slecht',
-    'zeer slecht'
+    'zeer goed', 'goed', 'neutraal', 'matig', 'slecht', 'zeer slecht'
   ];
 
   const stemmingKleur = (stemming: Stemming) => {
@@ -52,119 +61,80 @@ export default function ReflectieForm({ reflectieId }: ReflectieFormProps) {
     setReflectieData(prev => ({ ...prev, stemming }));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const supabaseClient = getSupabaseBrowserClient(); // Corrected usage
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      
-      if (!user) throw new Error('Niet ingelogd');
-      
-      // Validatie
-      if (!reflectieData.datum) {
-        throw new Error('Datum is verplicht');
-      }
-      
-      // Controleer of er al een reflectie is voor deze datum
-      const { data: bestaandeReflectie, error: checkError } = await supabaseClient
-        .from('reflecties')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('datum', reflectieData.datum)
-        .maybeSingle();
-      
-      if (checkError) throw checkError;
-      
-      let resultaat;
-      
-      if (bestaandeReflectie || reflectieId) {
-        // Update bestaande reflectie
-        const id = reflectieId || bestaandeReflectie?.id;
-        
-        resultaat = await supabaseClient
-          .from('reflecties')
-          .update({
-            stemming: reflectieData.stemming,
-            notitie: reflectieData.notitie,
-          })
-          .eq('id', id);
-      } else {
-        // Voeg nieuwe reflectie toe
-        resultaat = await supabaseClient
-          .from('reflecties')
-          .insert([{
-            user_id: user.id,
-            datum: reflectieData.datum,
-            stemming: reflectieData.stemming,
-            notitie: reflectieData.notitie,
-          }]);
-      }
-      
-      if (resultaat.error) throw resultaat.error;
-      
-      // Terug naar reflecties overzicht
-      router.push('/reflecties');
-    } catch (error: any) {
-      console.error('Fout bij opslaan reflectie:', error);
-      setError(error.message || 'Er is een fout opgetreden bij het opslaan van de reflectie');
-    } finally {
-      setLoading(false);
+    if (!user) {
+      console.error("User not authenticated for submitting reflection.");
+      // Consider setting a local error state if not relying on hook's error
+      return;
     }
+
+    if (!reflectieData.datum) {
+      console.error("Datum is verplicht voor reflectie.");
+      // Set local error or rely on form validation
+      return;
+    }
+
+    // Data for the API (which handles upsert logic based on user_id and datum)
+    const dataToUpsert: ReflectieFormData = { // Use ReflectieFormData type
+        datum: reflectieData.datum, 
+        stemming: reflectieData.stemming,
+        notitie: reflectieData.notitie,
+    };
+    
+    upsertReflectie(dataToUpsert, {
+      onSuccess: (savedReflectie) => {
+        console.log('Reflectie saved:', savedReflectie);
+        // Optionally show success message for a short duration before redirecting
+        // For now, directly redirecting as per original logic.
+        router.push('/reflecties');
+      },
+      onError: (error) => {
+        // Error is available via upsertHookError from the useUpsertReflectie hook
+        console.error('Fout bij opslaan reflectie (hook):', error.userMessage);
+      }
+    });
   };
   
+  const typedUpsertError = upsertHookError as ErrorMessage | null;
+  const submitButtonRef = useFocusManagement<HTMLButtonElement>(isUpsertError); // Focus submit button on error
+
   return (
     <section className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-6">
-        Dagelijkse Reflectie
-      </h2>
+      <h2 className="text-xl font-semibold mb-6">Dagelijkse Reflectie</h2>
       
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
-          {error}
-        </div>
+      {isUpsertError && typedUpsertError && (
+        <AlertMessage type="error" title="Opslaan Mislukt" message={typedUpsertError.userMessage || 'Opslaan van reflectie mislukt'} />
+      )}
+      {isUpsertSuccess && !isUpsertError && ( 
+         <AlertMessage type="success" title="Succes" message="Reflectie succesvol opgeslagen!" />
       )}
       
       <form onSubmit={handleSubmit}>
-        {/* Datum selector */}
         <div className="mb-5">
-          <label htmlFor="datum" className="block text-gray-700 font-medium mb-2">
-            Datum
-          </label>
+          <label htmlFor="datum" className="block text-gray-700 font-medium mb-2">Datum</label>
           <input
-            type="date"
-            id="datum"
-            name="datum"
-            value={reflectieData.datum}
-            onChange={handleChange}
-            max={vandaag}
+            type="date" id="datum" name="datum"
+            value={reflectieData.datum} onChange={handleChange}
+            max={vandaag} // Prevent future dates
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
-          <p className="mt-1 text-sm text-gray-500">
-            Selecteer de datum voor deze reflectie
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Selecteer de datum voor deze reflectie</p>
         </div>
         
-        {/* Stemming selector */}
         <div className="mb-5">
-          <label className="block text-gray-700 font-medium mb-2">
-            Hoe voelt u zich vandaag?
-          </label>
+          <label className="block text-gray-700 font-medium mb-2">Hoe voelt u zich vandaag?</label>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Stemming selectie">
             {stemmingOpties.map((stemming) => (
               <button
-                key={stemming}
-                type="button"
-                onClick={() => handleStemmingSelect(stemming)}
+                key={stemming} type="button" onClick={() => handleStemmingSelect(stemming)}
                 className={`px-4 py-2 rounded-md transition ${
                   reflectieData.stemming === stemming
                     ? stemmingKleur(stemming)
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
-                role="radio"
-                aria-checked={reflectieData.stemming === stemming ? "true" : "false"}
+                {...ariaProps.checkbox(reflectieData.stemming === stemming)} // Using checkbox role for radio-like buttons
                 aria-label={`Selecteer stemming: ${stemming}`}
               >
                 {stemming}
@@ -173,49 +143,33 @@ export default function ReflectieForm({ reflectieId }: ReflectieFormProps) {
           </div>
         </div>
         
-        {/* Notitie */}
         <div className="mb-5">
-          <label htmlFor="notitie" className="block text-gray-700 font-medium mb-2">
-            Reflectie
-          </label>
+          <label htmlFor="notitie" className="block text-gray-700 font-medium mb-2">Reflectie</label>
           <textarea
-            id="notitie"
-            name="notitie"
-            value={reflectieData.notitie}
-            onChange={handleChange}
-            rows={5}
+            id="notitie" name="notitie" value={reflectieData.notitie}
+            onChange={handleChange} rows={5}
             placeholder="Schrijf hier uw reflectie voor vandaag. Hoe voelt u zich? Wat ging er goed? Wat was moeilijk?"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           ></textarea>
-          <p className="mt-1 text-sm text-gray-500">
-            Dagelijkse reflecties helpen om inzicht te krijgen in uw patronen
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Dagelijkse reflecties helpen om inzicht te krijgen in uw patronen</p>
         </div>
         
-        {/* Submit knop */}
         <div className="flex justify-end space-x-3 mt-8">
           <button
-            type="button"
-            onClick={() => router.back()}
+            type="button" onClick={() => router.back()}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            disabled={loading}
+            disabled={isUpserting}
           >
             Annuleren
           </button>
           <button
-            type="submit"
-            disabled={loading}
+            type="submit" disabled={isUpserting}
+            ref={submitButtonRef} // Apply focus ref
             className={`px-4 py-2 rounded-md text-white font-medium ${
-              loading ? 'bg-purple-300' : 'bg-purple-600 hover:bg-purple-700'
+              isUpserting ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
             } transition-colors`}
           >
-            {loading ? (
-              <>
-                <span className="animate-pulse">Opslaan...</span>
-              </>
-            ) : (
-              'Opslaan'
-            )}
+            {isUpserting ? 'Opslaan...' : 'Opslaan'}
           </button>
         </div>
       </form>

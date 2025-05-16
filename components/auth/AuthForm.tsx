@@ -3,6 +3,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation'; // Added useRouter
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { validateEmail, validatePassword } from '@/utils/validation';
+import { AlertMessage } from '@/components/common/AlertMessage'; // Use named import
 
 export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) { // Accept initialIsLogin prop
   const router = useRouter();
@@ -28,6 +29,15 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       newErrors.password = passwordValidation.message;
+    } else {
+      // Extra password complexity checks as suggested by user
+      if (password.length < 8) {
+        newErrors.password = 'Wachtwoord moet minimaal 8 tekens bevatten.';
+      } else if (!/[A-Z]/.test(password)) {
+        newErrors.password = 'Wachtwoord moet minstens één hoofdletter bevatten.';
+      } else if (!/[0-9]/.test(password)) {
+        newErrors.password = 'Wachtwoord moet minstens één cijfer bevatten.';
+      }
     }
 
     // Valideer voornaam en achternaam alleen bij registratie
@@ -135,9 +145,10 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
       </h2>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-md ${message.startsWith('Fout:') ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'}`}>
-          {message}
-        </div>
+        <AlertMessage 
+          type={message.toLowerCase().startsWith('fout') ? 'error' : 'success'} 
+          message={message} 
+        />
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,11 +1,10 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Updated import
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable caching
 
 export default async function AuthTestPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = getSupabaseServerComponentClient(); // Use the new standardized client
   
   // Controleer of gebruiker is ingelogd
   const { data: { session } } = await supabase.auth.getSession();

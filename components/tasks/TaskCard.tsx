@@ -7,9 +7,10 @@ interface TaskCardProps {
   task: Task;
   onDelete?: (taskId: string) => void | Promise<void>; // Allow async delete
   onUpdateStatus?: (taskId: string, newStatus: string) => void | Promise<void>; // For future status updates
+  isDeleting?: boolean; // Add isDeleting prop
 }
 
-export default function TaskCard({ task, onDelete, onUpdateStatus }: TaskCardProps) {
+export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }: TaskCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   
   // Helper voor het formatteren van datum
@@ -142,11 +143,17 @@ export default function TaskCard({ task, onDelete, onUpdateStatus }: TaskCardPro
               onClick={handleDeleteClick}
               className={`transition-colors ${
                 confirmDelete ? 'text-red-600 hover:text-red-700' : 'text-gray-500 hover:text-red-600'
-              }`}
+              } ${isDeleting && task.id === (confirmDelete ? task.id : undefined) ? 'opacity-50 cursor-not-allowed' : ''}`} // Visual cue for deleting
               aria-label={confirmDelete ? `Bevestig verwijderen van taak ${task.titel}` : `Verwijder taak ${task.titel}`}
               aria-live={confirmDelete ? "assertive" : "off"} // Announce confirmation
+              disabled={isDeleting && task.id === (confirmDelete ? task.id : undefined)} // Disable button during delete
             >
-              {confirmDelete ? (
+              {(isDeleting && task.id === (confirmDelete ? task.id : undefined)) ? (
+                <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : confirmDelete ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M8.257 3.099A.75.75 0 007.5 3.75v1.5H4.5a.75.75 0 000 1.5h.09L5.37 15.09A2.25 2.25 0 007.618 17h4.764a2.25 2.25 0 002.248-1.911l.78-8.34h.09a.75.75 0 000-1.5H12.5v-1.5a.75.75 0 00-.75-.75h-1.5a.75.75 0 00-.743-.651zM9 3.75V5.25h2V3.75H9z" clipRule="evenodd" />
                 </svg>

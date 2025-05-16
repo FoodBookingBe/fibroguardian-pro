@@ -50,7 +50,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <AuthProvider>
             <NotificationProvider>
-              <NotificationSystem />
+              {/* NotificationList is rendered inside NotificationProvider */}
               <main id="main-content" className="flex-grow"> {/* Ensure main can grow */}
                 {children}
               </main>

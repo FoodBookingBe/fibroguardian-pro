@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react'; // Added Suspense
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import TaskLogs from '@/components/tasks/TaskLogs';
+import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton'; // Import skeleton
 import Link from 'next/link';
 
 export default function TaskLogsPage() {
@@ -70,7 +71,9 @@ export default function TaskLogsPage() {
         </div>
       </div>
       
-      <TaskLogs limit={50} />
+      <Suspense fallback={<TaskLogsLoadingSkeleton />}>
+        <TaskLogs limit={50} />
+      </Suspense>
     </div>
   );
 }

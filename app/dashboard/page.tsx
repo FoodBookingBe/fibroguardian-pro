@@ -1,7 +1,8 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
-import { createServerClient } from '@supabase/ssr'; // New import for App Router
-import { cookies } from 'next/headers';
+// import { createServerClient } from '@supabase/ssr'; // New import for App Router - Replaced by centralized client
+// import { cookies } from 'next/headers'; // Handled by getSupabaseServerComponentClient
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Import centralized client
 import DailyPlanner from '@/components/dashboard/DailyPlanner';
 import HealthMetrics from '@/components/dashboard/HealthMetrics';
 import AIInsights from '@/components/dashboard/AIInsights';
@@ -10,34 +11,18 @@ import SessionStatus from '@/components/debug/SessionStatus';
 import { Database } from '@/types/database'; // Assuming you have this type
 
 export default async function Dashboard() {
-  const cookieStore = cookies();
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        // If you need to set/remove cookies in Server Actions within this component/page:
-        // set(name: string, value: string, options: CookieOptions) {
-        //   cookieStore.set({ name, value, ...options });
-        // },
-        // remove(name: string, options: CookieOptions) {
-        //   cookieStore.delete({ name, ...options });
-        // },
-      },
-    }
-  );
+  // const cookieStore = cookies(); // Handled by getSupabaseServerComponentClient
+  const supabase = getSupabaseServerComponentClient(); // Use centralized server client
   
   // Authentication is now handled by app/dashboard/layout.tsx
-  // but we still need session data here for page content
-  const { data: { session } } = await supabase.auth.getSession();
+  // but we still need user data here for page content
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (userError || !user) {
     // This case should ideally be handled by the layout redirecting,
     // but as a safeguard or if layout logic changes:
     // redirect('/auth/login'); // Or handle appropriately
+    console.error('Dashboard Page: User not found or error fetching user.', userError);
     return null; // Or some fallback UI
   }
   
@@ -45,7 +30,7 @@ export default async function Dashboard() {
   const { data: tasksData, error: tasksError } = await supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id) // Use user.id
     .order('created_at', { ascending: false });
   
   if (tasksError) {
@@ -56,7 +41,7 @@ export default async function Dashboard() {
   const { data: logsData, error: logsError } = await supabase
     .from('task_logs')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id) // Use user.id
     .order('start_tijd', { ascending: false })
     .limit(30);
   
@@ -68,7 +53,7 @@ export default async function Dashboard() {
   const { data: insightsData, error: insightsError } = await supabase
     .from('inzichten')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id) // Use user.id
     .order('created_at', { ascending: false })
     .limit(3);
   
@@ -90,7 +75,7 @@ export default async function Dashboard() {
         {/* Dashboard content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <section id="daily-planner" className="lg:col-span-2">
-            <DailyPlanner tasks={tasksData || []} userId={session.user.id} />
+            <DailyPlanner tasks={tasksData || []} userId={user.id} /> 
           </section>
 
           <section id="health-metrics">

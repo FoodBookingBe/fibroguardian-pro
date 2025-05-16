@@ -2,48 +2,50 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { format, parseISO, isToday, isThisWeek, addDays } from 'date-fns';
+import { format, parseISO, isToday, addDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { useAuth } from '@/components/auth/AuthProvider';
+import MetricCard from '@/components/overzicht/MetricCard'; 
+import { Task, TaskLog as GlobalTaskLog, Reflectie } from '@/types'; 
 
-interface Task {
-  id: string;
-  titel: string;
-  beschrijving: string;
-  type: 'taak' | 'opdracht';
-  duur: number;
-  created_at: string;
-}
+// Helper functions for calculations
+const calculateAveragePain = (logs: ComponentTaskLog[]): string => {
+  if (!logs || logs.length === 0) return 'Geen data';
+  const validLogs = logs.filter(log => typeof log.pijn_score === 'number');
+  if (validLogs.length === 0) return 'Geen data';
+  const avg = Math.round(validLogs.reduce((sum, log) => sum + (log.pijn_score ?? 0), 0) / validLogs.length);
+  return `${avg}/20`;
+};
 
-interface TaskLog {
-  id: string;
-  task_id: string;
-  start_tijd: string;
-  eind_tijd: string;
-  energie_voor: number;
-  energie_na: number;
-  pijn_score: number;
-  vermoeidheid_score: number;
-  stemming: string;
-  notitie: string;
-  tasks: {
+const calculateAverageEnergy = (logs: ComponentTaskLog[]): string => {
+  if (!logs || logs.length === 0) return 'Geen data';
+  const validLogs = logs.filter(log => typeof log.energie_na === 'number' && typeof log.energie_voor === 'number');
+  if (validLogs.length === 0) return 'Geen data';
+  const avgChange = Math.round(validLogs.reduce((sum, log) => sum + ((log.energie_na ?? 0) - (log.energie_voor ?? 0)), 0) / validLogs.length);
+  return avgChange > 0 ? `+${avgChange}` : avgChange.toString();
+};
+
+const calculateAverageFatigue = (logs: ComponentTaskLog[]): string => {
+  if (!logs || logs.length === 0) return 'Geen data';
+  const validLogs = logs.filter(log => typeof log.vermoeidheid_score === 'number');
+  if (validLogs.length === 0) return 'Geen data';
+  const avg = Math.round(validLogs.reduce((sum, log) => sum + (log.vermoeidheid_score ?? 0), 0) / validLogs.length);
+  return `${avg}/20`;
+};
+
+// Define a more specific TaskLog type for this component if it includes joined data like 'tasks.titel'
+interface ComponentTaskLog extends GlobalTaskLog {
+  tasks?: { 
     titel: string;
   };
 }
 
-interface Reflectie {
-  id: string;
-  datum: string;
-  stemming: string;
-  notitie: string;
-}
-
 interface OverzichtClientProps {
   user: User;
-  userProfile: any;
+  userProfile: any; 
   tasks: Task[];
-  taskLogs: TaskLog[];
-  reflecties: Reflectie[];
+  taskLogs: ComponentTaskLog[]; 
+  reflecties: Reflectie[]; 
   startOfWeek: string;
   endOfWeek: string;
 }
@@ -57,7 +59,6 @@ export default function OverzichtClient({
   startOfWeek,
   endOfWeek
 }: OverzichtClientProps) {
-  // Use the authenticated user from context to ensure consistency
   const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
@@ -65,7 +66,6 @@ export default function OverzichtClient({
     setIsClient(true);
   }, []);
   
-  // Debug logging
   console.log('[OverzichtClient] Rendering with:', { 
     hasServerUser: !!serverUser, 
     hasContextUser: !!user,
@@ -77,8 +77,6 @@ export default function OverzichtClient({
     reflectiesCount: reflecties?.length
   });
   
-  // If auth is loading or not yet client-side, show a generic loading state
-  // This helps prevent hydration mismatch by ensuring server and initial client render are consistent
   if (authLoading || !isClient) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -89,8 +87,7 @@ export default function OverzichtClient({
     );
   }
   
-  // After client has mounted and auth is no longer loading
-  if (!user) { // Rely on the user from AuthProvider once client-side
+  if (!user) { 
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 p-4 rounded-md">
@@ -100,113 +97,93 @@ export default function OverzichtClient({
     );
   }
   
-  // At this point, user is authenticated and we are on the client
   const [activeTab, setActiveTab] = useState<'dag' | 'week'>('dag');
-  // const [aiInsights, setAiInsights] = useState<string[]>([]);
+  const [aiInsights, setAiInsights] = useState<string[]>([]);
   
-  // // Bereken gemiddelde scores voor de dag
-  // const todayLogs = taskLogs.filter(log => isToday(parseISO(log.eind_tijd)));
-  // const todayAvgPain = todayLogs.length > 0 
-  //   ? Math.round(todayLogs.reduce((sum, log) => sum + log.pijn_score, 0) / todayLogs.length) 
-  //   : null;
-  // const todayAvgEnergy = todayLogs.length > 0 
-  //   ? Math.round(todayLogs.reduce((sum, log) => sum + (log.energie_na - log.energie_voor), 0) / todayLogs.length) 
-  //   : null;
-  // const todayAvgFatigue = todayLogs.length > 0 
-  //   ? Math.round(todayLogs.reduce((sum, log) => sum + log.vermoeidheid_score, 0) / todayLogs.length) 
-  //   : null;
+  const todayLogs = (taskLogs || []).filter(log => log.eind_tijd && typeof log.eind_tijd === 'string' && isToday(parseISO(log.eind_tijd)));
   
-  // // Bereken gemiddelde scores voor de week
-  // const weekAvgPain = taskLogs.length > 0 
-  //   ? Math.round(taskLogs.reduce((sum, log) => sum + log.pijn_score, 0) / taskLogs.length) 
-  //   : null;
-  // const weekAvgEnergy = taskLogs.length > 0 
-  //   ? Math.round(taskLogs.reduce((sum, log) => sum + (log.energie_na - log.energie_voor), 0) / taskLogs.length) 
-  //   : null;
-  // const weekAvgFatigue = taskLogs.length > 0 
-  //   ? Math.round(taskLogs.reduce((sum, log) => sum + log.vermoeidheid_score, 0) / taskLogs.length) 
-  //   : null;
-  
-  // // Genereer AI inzichten door reflecties te vergelijken met taak feedback
-  // useEffect(() => {
-  //   const generateAiInsights = () => {
-  //     const insights: string[] = [];
+  useEffect(() => {
+    const generateAiInsights = () => {
+      const insights: string[] = [];
       
-  //     // Controleer of er reflecties zijn
-  //     if (reflecties.length === 0) {
-  //       insights.push("Er zijn nog geen reflecties voor deze week. Voeg dagelijkse reflecties toe om meer inzicht te krijgen in uw voortgang.");
-  //       setAiInsights(insights);
-  //       return;
-  //     }
+      if (!reflecties || reflecties.length === 0) {
+        insights.push("Er zijn nog geen reflecties voor deze week. Voeg dagelijkse reflecties toe om meer inzicht te krijgen in uw voortgang.");
+        setAiInsights(insights);
+        return;
+      }
       
-  //     // Controleer of er task logs zijn
-  //     if (taskLogs.length === 0) {
-  //       insights.push("Er zijn nog geen taken uitgevoerd deze week. Voer taken uit om meer inzicht te krijgen in uw voortgang.");
-  //       setAiInsights(insights);
-  //       return;
-  //     }
+      if (!taskLogs || taskLogs.length === 0) {
+        insights.push("Er zijn nog geen taken uitgevoerd deze week. Voer taken uit om meer inzicht te krijgen in uw voortgang.");
+        setAiInsights(insights);
+        return;
+      }
       
-  //     // Vergelijk reflecties met taak feedback
-  //     reflecties.forEach(reflectie => {
-  //       const reflectieDatum = parseISO(reflectie.datum);
-  //       const logsVanDag = taskLogs.filter(log => {
-  //         const logDatum = parseISO(log.eind_tijd);
-  //         return logDatum.getDate() === reflectieDatum.getDate() &&
-  //                logDatum.getMonth() === reflectieDatum.getMonth() &&
-  //                logDatum.getFullYear() === reflectieDatum.getFullYear();
-  //       });
+      reflecties.forEach(reflectie => {
+        const reflectieDatumString = typeof reflectie.datum === 'string' ? reflectie.datum : (reflectie.datum as unknown as Date)?.toISOString?.();
+        if (!reflectieDatumString) return;
+        const reflectieDatum = parseISO(reflectieDatumString);
+
+        const logsVanDag = taskLogs.filter(log => {
+          if (!log.eind_tijd || typeof log.eind_tijd !== 'string') return false;
+          const logDatum = parseISO(log.eind_tijd);
+          return logDatum && reflectieDatum &&
+                 logDatum.getDate() === reflectieDatum.getDate() &&
+                 logDatum.getMonth() === reflectieDatum.getMonth() &&
+                 logDatum.getFullYear() === reflectieDatum.getFullYear();
+        });
         
-  //       if (logsVanDag.length > 0) {
-  //         // Bereken gemiddelde scores voor de dag
-  //         const avgPain = Math.round(logsVanDag.reduce((sum, log) => sum + log.pijn_score, 0) / logsVanDag.length);
-  //         const avgEnergy = Math.round(logsVanDag.reduce((sum, log) => sum + (log.energie_na - log.energie_voor), 0) / logsVanDag.length);
-  //         const avgFatigue = Math.round(logsVanDag.reduce((sum, log) => sum + log.vermoeidheid_score, 0) / logsVanDag.length);
+        if (logsVanDag.length > 0) {
+          const validPainLogs = logsVanDag.filter(l => typeof l.pijn_score === 'number');
+          const avgPain = validPainLogs.length > 0 ? Math.round(validPainLogs.reduce((sum, log) => sum + (log.pijn_score ?? 0), 0) / validPainLogs.length) : 0;
           
-  //         // Controleer of reflectie overeenkomt met taak feedback
-  //         const isPositiveReflection = reflectie.stemming === 'goed' || reflectie.stemming === 'zeer goed';
-  //         const isNegativeReflection = reflectie.stemming === 'slecht' || reflectie.stemming === 'zeer slecht';
+          const validEnergyLogs = logsVanDag.filter(l => typeof l.energie_na === 'number' && typeof l.energie_voor === 'number');
+          const avgEnergyChange = validEnergyLogs.length > 0 ? Math.round(validEnergyLogs.reduce((sum, log) => sum + ((log.energie_na ?? 0) - (log.energie_voor ?? 0)), 0) / validEnergyLogs.length) : 0;
+
+          const validFatigueLogs = logsVanDag.filter(l => typeof l.vermoeidheid_score === 'number');
+          const avgFatigue = validFatigueLogs.length > 0 ? Math.round(validFatigueLogs.reduce((sum, log) => sum + (log.vermoeidheid_score ?? 0), 0) / validFatigueLogs.length) : 0;
           
-  //         const isPositiveTaskFeedback = avgPain < 10 && avgEnergy > 0 && avgFatigue < 10;
-  //         const isNegativeTaskFeedback = avgPain > 10 || avgEnergy < 0 || avgFatigue > 10;
+          const isPositiveReflection = reflectie.stemming === 'goed' || reflectie.stemming === 'zeer goed';
+          const isNegativeReflection = reflectie.stemming === 'slecht' || reflectie.stemming === 'zeer slecht';
           
-  //         const reflectieDatumFormatted = format(reflectieDatum, 'EEEE d MMMM', { locale: nl });
+          const isPositiveTaskFeedback = avgPain < 10 && avgEnergyChange > 0 && avgFatigue < 10;
+          const isNegativeTaskFeedback = avgPain > 10 || avgEnergyChange < 0 || avgFatigue > 10;
           
-  //         if (isPositiveReflection && isNegativeTaskFeedback) {
-  //           insights.push(`Op ${reflectieDatumFormatted} was uw reflectie positief, maar uw taakmetingen tonen hogere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk onderschat u de impact van activiteiten op uw lichaam.`);
-  //         } else if (isNegativeReflection && isPositiveTaskFeedback) {
-  //           insights.push(`Op ${reflectieDatumFormatted} was uw reflectie negatief, maar uw taakmetingen tonen lagere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk overschat u de impact van activiteiten op uw lichaam.`);
-  //         } else if (isPositiveReflection && isPositiveTaskFeedback) {
-  //           insights.push(`Op ${reflectieDatumFormatted} komen uw positieve reflectie en taakmetingen overeen. Uw activiteitenniveau lijkt goed afgestemd op uw capaciteiten.`);
-  //         } else if (isNegativeReflection && isNegativeTaskFeedback) {
-  //           insights.push(`Op ${reflectieDatumFormatted} komen uw negatieve reflectie en taakmetingen overeen. Overweeg om uw activiteitenniveau aan te passen of met uw specialist te overleggen.`);
-  //         }
-  //       }
-  //     });
+          const reflectieDatumFormatted = format(reflectieDatum, 'EEEE d MMMM', { locale: nl });
+          
+          if (isPositiveReflection && isNegativeTaskFeedback) {
+            insights.push(`Op ${reflectieDatumFormatted} was uw reflectie positief, maar uw taakmetingen tonen hogere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk onderschat u de impact van activiteiten op uw lichaam.`);
+          } else if (isNegativeReflection && isPositiveTaskFeedback) {
+            insights.push(`Op ${reflectieDatumFormatted} was uw reflectie negatief, maar uw taakmetingen tonen lagere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk overschat u de impact van activiteiten op uw lichaam.`);
+          } else if (isPositiveReflection && isPositiveTaskFeedback) {
+            insights.push(`Op ${reflectieDatumFormatted} komen uw positieve reflectie en taakmetingen overeen. Uw activiteitenniveau lijkt goed afgestemd op uw capaciteiten.`);
+          } else if (isNegativeReflection && isNegativeTaskFeedback) {
+            insights.push(`Op ${reflectieDatumFormatted} komen uw negatieve reflectie en taakmetingen overeen. Overweeg om uw activiteitenniveau aan te passen of met uw specialist te overleggen.`);
+          }
+        }
+      });
       
-  //     // Voeg algemene inzichten toe als er geen specifieke inzichten zijn
-  //     if (insights.length === 0) {
-  //       insights.push("Er zijn nog niet genoeg gegevens om specifieke inzichten te genereren. Blijf taken uitvoeren en dagelijkse reflecties toevoegen.");
-  //     }
+      if (insights.length === 0) {
+        insights.push("Er zijn nog niet genoeg gegevens om specifieke inzichten te genereren. Blijf taken uitvoeren en dagelijkse reflecties toevoegen.");
+      }
       
-  //     setAiInsights(insights);
-  //   };
+      setAiInsights(insights);
+    };
     
-  //   generateAiInsights();
-  // }, [reflecties, taskLogs]);
+    if(isClient) generateAiInsights();
+  }, [reflecties, taskLogs, isClient]);
   
-  // // Genereer weekdagen voor de weekweergave
-  // const weekDays = [];
-  // const startDate = parseISO(startOfWeek);
-  // for (let i = 0; i < 7; i++) {
-  //   const date = addDays(startDate, i);
-  //   weekDays.push(date);
-  // }
+  const weekDays: Date[] = [];
+  if (startOfWeek && typeof startOfWeek === 'string') {
+    const startDate = parseISO(startOfWeek);
+    for (let i = 0; i < 7; i++) {
+      weekDays.push(addDays(startDate, i));
+    }
+  }
   
   return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Overzicht</h1>
         
-        {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-6">
           <button
             onClick={() => setActiveTab('dag')}
@@ -230,26 +207,160 @@ export default function OverzichtClient({
           </button>
         </div>
         
-        {/* Dag weergave */}
         {activeTab === 'dag' && (
           <div>
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
               Vandaag - {format(new Date(), 'EEEE d MMMM', { locale: nl })}
             </h2>
             
-            {/* Samenvatting (Commented out for simplification) */}
-            {/* <div className="bg-white rounded-lg shadow-md p-6 mb-6"> ... </div> */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">Dagsamenvatting</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <MetricCard 
+                  title="Gemiddelde Pijn" 
+                  value={calculateAveragePain(todayLogs)} 
+                />
+                <MetricCard 
+                  title="Gemiddelde Energieverandering" 
+                  value={calculateAverageEnergy(todayLogs)} 
+                />
+                <MetricCard 
+                  title="Gemiddelde Vermoeidheid" 
+                  value={calculateAverageFatigue(todayLogs)} 
+                />
+              </div>
+            </div>
             
-            {/* Taken van vandaag (Commented out for simplification) */}
-            {/* <div className="bg-white rounded-lg shadow-md p-6 mb-6"> ... </div> */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">Taken van vandaag</h3>
+              {todayLogs.length === 0 ? (
+                <p className="text-gray-500">Geen taken uitgevoerd vandaag.</p>
+              ) : (
+                <div className="space-y-4">
+                  {todayLogs.map(log => (
+                    <div key={log.id} className="border-l-4 border-purple-500 pl-4 py-2">
+                      <h4 className="font-medium text-gray-800">{log.tasks?.titel || 'Onbekende taak'}</h4>
+                      <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-600">
+                        <span>{log.start_tijd && typeof log.start_tijd === 'string' ? format(parseISO(log.start_tijd), 'HH:mm') : ''} - {log.eind_tijd && typeof log.eind_tijd === 'string' ? format(parseISO(log.eind_tijd), 'HH:mm') : ''}</span>
+                        <span>•</span><span>Pijn: {log.pijn_score ?? 'N/A'}/20</span>
+                        <span>•</span><span>Energie: {log.energie_voor ?? 'N/A'} → {log.energie_na ?? 'N/A'}</span>
+                        <span>•</span><span>Vermoeidheid: {log.vermoeidheid_score ?? 'N/A'}/20</span>
+                      </div>
+                      {log.notitie && <p className="mt-2 text-sm text-gray-600">{log.notitie}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             
-            {/* Reflecties van vandaag (Commented out for simplification) */}
-            {/* <div className="bg-white rounded-lg shadow-md p-6 mb-6"> ... </div> */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">Reflecties van vandaag</h3>
+              {(!reflecties || reflecties.filter(r => r.datum && typeof r.datum === 'string' && isToday(parseISO(r.datum))).length === 0) ? (
+                <p className="text-gray-500">Geen reflecties toegevoegd vandaag.</p>
+              ) : (
+                <div className="space-y-4">
+                  {reflecties.filter(r => r.datum && typeof r.datum === 'string' && isToday(parseISO(r.datum))).map(reflectie => (
+                      <div key={reflectie.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-800">Stemming: {reflectie.stemming}</span>
+                        </div>
+                        <p className="mt-2 text-gray-600">{reflectie.notitie}</p>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
         
-        {/* Week weergave (Commented out for simplification) */}
-        {/* {activeTab === 'week' && ( ... )} */}
+        {activeTab === 'week' && (
+          <div>
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">
+              Week van {startOfWeek && typeof startOfWeek === 'string' ? format(parseISO(startOfWeek), 'd MMMM', { locale: nl }) : ''} tot {endOfWeek && typeof endOfWeek === 'string' ? format(parseISO(endOfWeek), 'd MMMM', { locale: nl }) : ''}
+            </h2>
+            
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">Weeksamenvatting</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <MetricCard 
+                  title="Gemiddelde Pijn" 
+                  value={calculateAveragePain(taskLogs || [])} 
+                />
+                <MetricCard 
+                  title="Gemiddelde Energieverandering" 
+                  value={calculateAverageEnergy(taskLogs || [])} 
+                />
+                <MetricCard 
+                  title="Gemiddelde Vermoeidheid" 
+                  value={calculateAverageFatigue(taskLogs || [])} 
+                />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">Weekoverzicht</h3>
+              <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                {weekDays.map(day => {
+                  const dayLogs = (taskLogs || []).filter(log => {
+                    if(!log.eind_tijd || typeof log.eind_tijd !== 'string') return false;
+                    const logDate = parseISO(log.eind_tijd);
+                    return logDate.getDate() === day.getDate() &&
+                           logDate.getMonth() === day.getMonth() &&
+                           logDate.getFullYear() === day.getFullYear();
+                  });
+                  const dayReflecties = (reflecties || []).filter(r => {
+                    if(!r.datum || typeof r.datum !== 'string') return false;
+                    const reflectieDate = parseISO(r.datum);
+                    return reflectieDate.getDate() === day.getDate() &&
+                           reflectieDate.getMonth() === day.getMonth() &&
+                           reflectieDate.getFullYear() === day.getFullYear();
+                  });
+                  return (
+                    <div key={day.toISOString()} className={`border rounded-md p-3 ${isToday(day) ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}>
+                      <h4 className="font-medium text-gray-800 mb-2">
+                        {format(day, 'EEEE', { locale: nl })}
+                        <span className="ml-1 text-sm text-gray-500">{format(day, 'd/M')}</span>
+                      </h4>
+                      {dayLogs.length === 0 ? (
+                        <p className="text-xs text-gray-500">Geen taken</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {dayLogs.map(log => (
+                            <div key={log.id} className="text-xs p-1 bg-purple-100 rounded">
+                              <p className="font-medium">{log.tasks?.titel || 'Onbekende taak'}</p>
+                              <p className="text-gray-600">{log.start_tijd && typeof log.start_tijd === 'string' ? format(parseISO(log.start_tijd), 'HH:mm') : ''} - {log.eind_tijd && typeof log.eind_tijd === 'string' ? format(parseISO(log.eind_tijd), 'HH:mm') : ''}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {dayReflecties.length > 0 && dayReflecties[0].stemming && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <p className="text-xs font-medium text-blue-600">Reflectie: {dayReflecties[0].stemming}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-3">AI Inzichten</h3>
+              {(!aiInsights || aiInsights.length === 0) ? ( 
+                <p className="text-gray-500">Geen inzichten beschikbaar.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {aiInsights.map((insight, index) => (
+                    <li key={index} className="flex items-start">
+                      <svg className="w-5 h-5 text-purple-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <span className="text-gray-700">{insight}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
       </div>
   );
 }

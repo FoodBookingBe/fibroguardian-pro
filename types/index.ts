@@ -58,12 +58,21 @@ export interface Planning {
 export interface Reflectie {
   id: string;
   user_id: string;
-  datum: Date;
+  datum: Date; // Stored as Date in the main type
   stemming?: string;
   notitie?: string;
   ai_validatie?: string;
   created_at: Date;
 }
+
+// Specific type for form data where date is a string
+export interface ReflectieFormData {
+  datum: string; // ISO string format (YYYY-MM-DD)
+  stemming?: string; // Optional as per Omit in hook
+  notitie?: string;  // Optional as per Omit in hook
+  // user_id is added by API, id/created_at/ai_validatie are not part of form input
+}
+
 
 export interface SpecialistPatient {
   id: string;

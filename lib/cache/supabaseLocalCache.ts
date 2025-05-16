@@ -4,8 +4,10 @@
  */
 
 import localforage from 'localforage';
-import { createClient, SupabaseClient, PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js'; // Added PostgrestSingleResponse
+// Removed createClient from here, will use getSupabaseBrowserClient
+import { SupabaseClient, PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js'; 
 import { Database } from '@/types/database'; // Assuming Database types are correctly defined
+import { getSupabaseBrowserClient } from '../supabase'; // Import the centralized browser client
 
 // Setup localforage instance
 const cacheStore = localforage.createInstance({ // Renamed to avoid conflict with 'cache' variable
@@ -55,14 +57,9 @@ const generateCacheKey = (table: string, customKey?: string, queryParams?: any):
 };
 
 export const createCachedSupabaseClient = (): CachedSupabaseClient => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase URL or Anon Key is not defined. Check .env files.");
-  }
-  
-  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+  // Get the browser client from the centralized lib/supabase.ts
+  // This already handles URL/key checks and singleton instantiation for the browser.
+  const supabase = getSupabaseBrowserClient(); 
   
   const fromCacheFirst = async <T = any>(
     table: string,

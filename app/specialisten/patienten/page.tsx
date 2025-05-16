@@ -1,24 +1,26 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PatientList from '@/components/specialisten/PatientList';
 import AddPatientButton from '@/components/specialisten/AddPatientButton';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+// import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
+// import { cookies } from 'next/headers'; // Handled by centralized client
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; // New import
 
 export default async function PatientenPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = getSupabaseServerComponentClient(); // Use centralized server client
   
   // Check authentication
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser(); // Use getUser
   
-  if (!session) {
-    return null; // DashboardLayout handles redirect
+  if (userError || !user) {
+    console.error('PatientenPage: User not found or error fetching user.', userError);
+    return null; // DashboardLayout should handle redirect if not authenticated
   }
   
   // Haal patiënten op voor deze specialist
   const { data: specialistPatients } = await supabase
     .from('specialist_patienten')
     .select('patient_id')
-    .eq('specialist_id', session.user.id);
+    .eq('specialist_id', user.id); // Use user.id
   
   let patients = [];
   

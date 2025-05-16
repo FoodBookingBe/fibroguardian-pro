@@ -1,113 +1,70 @@
-'use client';
-import React, { createContext, useContext, useReducer, ReactNode, Dispatch, useCallback } from 'react'; // Added Dispatch and useCallback
+// context/NotificationContext.tsx
+import { createContext, useContext, useState, ReactNode } from 'react';
 
-type NotificationType = 'success' | 'error' | 'warning' | 'info';
+// Definieer typen voor notificaties
+export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
-export interface Notification { // Exporting for potential use elsewhere
+export interface Notification {
   id: string;
-  message: string;
   type: NotificationType;
-  duration?: number; // In milliseconds
-  details?: string; // Optional more details
+  message: string;
+  duration?: number; // in milliseconden
 }
 
-interface NotificationState {
-  notifications: Notification[];
-}
-
-// Define a more specific type for the payload of ADD_NOTIFICATION
-type AddNotificationPayload = Omit<Notification, 'id'>;
-
-type NotificationAction = 
-  | { type: 'ADD_NOTIFICATION'; payload: AddNotificationPayload }
-  | { type: 'REMOVE_NOTIFICATION'; payload: string }; // Payload is the id of the notification to remove
-
+// Context type
 interface NotificationContextType {
-  state: NotificationState;
-  addNotification: (notification: AddNotificationPayload) => void;
+  notifications: Notification[];
+  addNotification: (type: NotificationType, message: string, duration?: number) => void;
   removeNotification: (id: string) => void;
 }
 
+// Context aanmaken
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-function notificationReducer(state: NotificationState, action: NotificationAction): NotificationState {
-  switch (action.type) {
-    case 'ADD_NOTIFICATION':
-      // Prevent duplicate messages if desired, or allow them
-      // For now, allowing duplicates as IDs will be unique
-      return {
-        ...state,
-        notifications: [
-          ...state.notifications,
-          {
-            id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // More unique ID
-            ...action.payload,
-          },
-        ],
-      };
-    case 'REMOVE_NOTIFICATION':
-      return {
-        ...state,
-        notifications: state.notifications.filter(
-          notification => notification.id !== action.payload
-        ),
-      };
-    default:
-      // For exhaustive check, though not strictly necessary with TypeScript
-      // const _exhaustiveCheck: never = action; 
-      return state;
-  }
-}
-
+// Provider component
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(notificationReducer, {
-    notifications: [],
-  });
-
-  const addNotification = useCallback((notification: AddNotificationPayload) => {
-    const newId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    dispatch({ 
-      type: 'ADD_NOTIFICATION', 
-      // Manually construct the full notification object with ID here
-      // to ensure the setTimeout uses the correct ID generated at this point.
-      payload: { ...notification, id: newId } as Notification 
-    });
-
-    if (notification.duration) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  const addNotification = (type: NotificationType, message: string, duration = 5000) => {
+    const id = Date.now().toString() + Math.random().toString(36).substring(2, 7); // Ensure more unique ID
+    setNotifications(prev => [...prev, { id, type, message, duration }]);
+    
+    if (duration > 0) {
       setTimeout(() => {
-        dispatch({ 
-          type: 'REMOVE_NOTIFICATION', 
-          payload: newId // Use the ID generated when adding
-        });
-      }, notification.duration);
+        removeNotification(id);
+      }, duration);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]); // dispatch is stable, but include if ESLint insists
-
-  const removeNotification = useCallback((id: string) => {
-    dispatch({ 
-      type: 'REMOVE_NOTIFICATION', 
-      payload: id 
-    });
-  }, [dispatch]); // dispatch is stable
-
+  };
+  
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+  
   return (
-    <NotificationContext.Provider
-      value={{
-        state,
-        addNotification,
-        removeNotification,
-      }}
-    >
+    <NotificationContext.Provider value={{ notifications, addNotification, removeNotification }}>
       {children}
+      {/* NotificationList wordt hier gerenderd om globaal beschikbaar te zijn */}
+      {/* De import zal werken zodra NotificationList.tsx is aangemaakt */}
+      <NotificationList 
+        notifications={notifications} 
+        onDismiss={removeNotification} 
+      />
     </NotificationContext.Provider>
   );
 }
 
+// Hook voor gebruik in componenten
 export function useNotification() {
   const context = useContext(NotificationContext);
-  if (context === undefined) {
-    throw new Error('useNotification must be used within a NotificationProvider');
+  if (!context) {
+    throw new Error('useNotification moet binnen een NotificationProvider gebruikt worden');
   }
   return context;
 }
+
+// Notification List component (te implementeren in stap 1.2)
+// Deze import zal pas werken na creatie van het bestand.
+// Voor nu, om circular dependency issues te vermijden bij het direct aanmaken,
+// kan deze import tijdelijk gecommentarieerd worden of de NotificationList direct hier gedefinieerd worden.
+// Volgens het plan wordt het apart aangemaakt, dus we gaan ervan uit dat dit later werkt.
+import { NotificationList } from '@/components/ui/NotificationList';
