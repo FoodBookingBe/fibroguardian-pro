@@ -22,15 +22,36 @@ export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
   }
 
   if (!supabaseInstance) {
-    // Voeg deze debug logging toe
-    console.log("Creating new Supabase client instance (default cookie handling)");
-    supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!);
-    // Reverted to default cookie handling by removing the custom 'cookies' object.
-    // The @supabase/ssr library's createBrowserClient is generally expected to handle
-    // cookie operations correctly by default in a Next.js environment.
-    // The "Failed to parse cookie string: SyntaxError: Unexpected token 'b', "base64-eyJ"..."
-    // error suggests that the custom cookie 'get' method, or how cookies were being set,
-    // might have been interfering with the expected format.
+    try {
+      // Enhanced debug logging
+      console.log("[Supabase] Creating new Supabase client instance with URL:", supabaseUrl);
+      
+      // Check if environment variables are properly loaded
+      if (!supabaseUrl || !supabaseAnonKey) {
+        console.error("[Supabase] Missing environment variables:", { 
+          hasUrl: !!supabaseUrl, 
+          hasAnonKey: !!supabaseAnonKey 
+        });
+      }
+      
+      supabaseInstance = createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!);
+      console.log("[Supabase] Client instance created successfully");
+      
+      // Test the client with a simple auth check
+      supabaseInstance.auth.getSession().then(({ data, error }) => {
+        if (error) {
+          console.error("[Supabase] Error testing client:", error.message);
+        } else {
+          console.log("[Supabase] Client test successful, session:", { 
+            hasSession: !!data.session,
+            hasUser: !!data.session?.user
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[Supabase] Error creating client:", err);
+      throw err; // Re-throw to make errors visible
+    }
   }
   return supabaseInstance!;
 };

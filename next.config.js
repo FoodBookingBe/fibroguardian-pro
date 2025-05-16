@@ -26,7 +26,7 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = withPWA({
   reactStrictMode: true,
-  swcMinify: true,
+  swcMinify: false, // Disabled for testing
   cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes (Next.js expects bytes)
   
   images: {

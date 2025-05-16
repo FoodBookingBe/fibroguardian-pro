@@ -9,18 +9,32 @@ export default async function OverzichtPage() {
   const supabase = createServerComponentClient({ cookies });
   
   // Haal gebruikerssessie op - middleware zorgt al voor authenticatie
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  // Use getUser() instead of getSession() for server components
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  // Log session information for debugging
+  console.log('[Server] OverzichtPage user check:', {
+    hasUser: !!user,
+    error: userError?.message
+  });
+  
+  if (!user) {
     // Dit zou niet moeten gebeuren door middleware, maar voor de zekerheid
-    console.log('No session found despite middleware check');
-    return null;
+    console.log('[Server] No user found despite middleware check');
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 p-4 rounded-md">
+          <p className="text-red-700">U bent niet ingelogd. <a href="/auth/login" className="underline">Log in</a> om deze pagina te bekijken.</p>
+        </div>
+      </div>
+    );
   }
   
   // Haal gebruikersprofiel op
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single();
   
   if (profileError || !profile) {
@@ -49,7 +63,7 @@ export default async function OverzichtPage() {
   const { data: tasks, error: tasksError } = await supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
   
   if (tasksError) {
@@ -60,7 +74,7 @@ export default async function OverzichtPage() {
   const { data: taskLogs, error: taskLogsError } = await supabase
     .from('task_logs')
     .select('*, tasks(titel)')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .gte('start_tijd', startOfWeek.toISOString())
     .lte('eind_tijd', endOfWeek.toISOString())
     .order('start_tijd', { ascending: false });
@@ -73,7 +87,7 @@ export default async function OverzichtPage() {
   const { data: reflecties, error: reflectiesError } = await supabase
     .from('reflecties')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .gte('datum', startOfWeek.toISOString().split('T')[0])
     .lte('datum', endOfWeek.toISOString().split('T')[0])
     .order('datum', { ascending: false });
@@ -85,7 +99,7 @@ export default async function OverzichtPage() {
   // Gebruik de client component om de UI te renderen
   return (
     <OverzichtClient 
-      user={session.user} 
+      user={user} 
       userProfile={profile} 
       tasks={tasks || []} 
       taskLogs={taskLogs || []} 

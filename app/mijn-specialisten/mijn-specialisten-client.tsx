@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import AddSpecialistButton from '@/components/specialisten/AddSpecialistButton';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface Specialist {
   id: string;
@@ -19,46 +20,87 @@ interface MijnSpecialistenClientProps {
   userProfile: any;
 }
 
-export default function MijnSpecialistenClient({ user, specialists, userProfile }: MijnSpecialistenClientProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [localSpecialists, setLocalSpecialists] = useState<Specialist[]>(specialists);
+export default function MijnSpecialistenClient({ user: serverUser, specialists, userProfile }: MijnSpecialistenClientProps) {
+  // Use the authenticated user from context to ensure consistency
+  const { user, loading: authLoading } = useAuth();
+  const [isClient, setIsClient] = useState(false);
 
-  const handleRemoveSpecialist = async (specialistId: string) => {
-    if (!user || !window.confirm('Weet u zeker dat u deze specialist wilt verwijderen?')) return;
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  // Debug logging
+  console.log('[MijnSpecialistenClient] Rendering with:', { 
+    hasServerUser: !!serverUser, 
+    hasContextUser: !!user,
+    authLoading,
+    isClient,
+    userProfile,
+    specialistsCount: specialists?.length
+  });
+  
+  // If auth is loading or not yet client-side, show a generic loading state
+  if (authLoading || !isClient) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" aria-label="Laden..."></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // After client has mounted and auth is no longer loading
+  if (!user) { // Rely on the user from AuthProvider once client-side
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 p-4 rounded-md">
+          <p className="text-red-700">Authenticatie is vereist. U wordt mogelijk doorgestuurd naar de login pagina.</p>
+        </div>
+      </div>
+    );
+  }
 
-    try {
-      const supabase = getSupabaseBrowserClient();
+  // At this point, user is authenticated and we are on the client
+  // const [error, setError] = useState<string | null>(null);
+  // const [localSpecialists, setLocalSpecialists] = useState<Specialist[]>(specialists);
+
+  // const handleRemoveSpecialist = async (specialistId: string) => {
+  //   if (!user || !window.confirm('Weet u zeker dat u deze specialist wilt verwijderen?')) return;
+
+  //   try {
+  //     const supabase = getSupabaseBrowserClient();
       
-      const { error } = await supabase
-        .from('specialist_patienten')
-        .delete()
-        .eq('specialist_id', specialistId)
-        .eq('patient_id', user.id);
+  //     const { error } = await supabase
+  //       .from('specialist_patienten')
+  //       .delete()
+  //       .eq('specialist_id', specialistId)
+  //       .eq('patient_id', user.id);
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      // Update de lijst met specialisten
-      setLocalSpecialists(localSpecialists.filter(s => s.id !== specialistId));
-    } catch (err: any) {
-      console.error('Error removing specialist:', err);
-      setError(`Er is een fout opgetreden: ${err.message}`);
-    }
-  };
+  //     // Update de lijst met specialisten
+  //     setLocalSpecialists(localSpecialists.filter(s => s.id !== specialistId));
+  //   } catch (err: any) {
+  //     console.error('Error removing specialist:', err);
+  //     setError(`Er is een fout opgetreden: ${err.message}`);
+  //   }
+  // };
 
   return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Mijn Specialisten</h1>
-          <AddSpecialistButton />
+          {/* <AddSpecialistButton /> */}
         </div>
 
-        {error && (
+        {/* {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
             {error}
           </div>
-        )}
+        )} */}
 
-        {localSpecialists.length === 0 ? (
+        {/* {localSpecialists.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <p className="text-gray-600 mb-4">U heeft nog geen specialisten toegevoegd.</p>
             <p className="text-gray-500">
@@ -117,7 +159,8 @@ export default function MijnSpecialistenClient({ user, specialists, userProfile 
               </div>
             ))}
           </div>
-        )}
+        )} */}
+        <div>Content wordt geladen...</div>
       </div>
   );
 }

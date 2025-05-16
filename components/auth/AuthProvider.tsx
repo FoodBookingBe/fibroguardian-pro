@@ -36,14 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    console.log('[AuthProvider] Setting up auth session...');
     setLoading(true);
     const supabase = getSupabaseBrowserClient();
+    
+    // Add more detailed error handling and logging
     supabase.auth.getSession().then((response: { data: { session: Session | null }, error: AuthError | null }) => {
       if (response.error) {
-        console.error("Error getting session in AuthProvider:", response.error.message);
+        console.error("[AuthProvider] Error getting session:", response.error.message);
         // Optionally handle error, e.g., clear session, set error state
       }
+      
       const currentSession = response.data.session;
+      console.log('[AuthProvider] Initial session retrieved:', {
+        hasSession: !!currentSession,
+        userId: currentSession?.user?.id,
+        userEmail: currentSession?.user?.email,
+      });
+      
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
@@ -58,6 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : 'No expiry',
         cookies: typeof document !== 'undefined' ? document.cookie.split(';').filter(c => c.trim().startsWith('sb-')) : 'No document/cookies (server?)',
       });
+    }).catch(err => {
+      console.error('[AuthProvider] Unexpected error in getSession:', err);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessionState) => {

@@ -27,23 +27,23 @@ export default function RootLayout({
   children: ReactNode
 }) {
   return (
-    <html lang="nl-NL">
+    <html lang="nl-NL"> {/* Ensure consistent casing */}
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="theme-color" content="#7c3aed" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="FibroGuardian Pro" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="FibroGuardian Pro" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        {/* <link rel="manifest" href="/manifest.json" /> */}
+        {/* <meta name="application-name" content="FibroGuardian Pro" /> */}
+        {/* <meta name="apple-mobile-web-app-capable" content="yes" /> */}
+        {/* <meta name="apple-mobile-web-app-status-bar-style" content="default" /> */}
+        {/* <meta name="apple-mobile-web-app-title" content="FibroGuardian Pro" /> */}
+        {/* <meta name="format-detection" content="telephone=no" /> */}
+        {/* <meta name="mobile-web-app-capable" content="yes" /> */}
+        {/* <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />  */}
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="shortcut icon" href="/icons/favicon.ico" />
-        <link rel="icon" href="/icons/icon-192x192.png" sizes="192x192" type="image/png"/>
-        <link rel="icon" href="/icons/icon-512x512.png" sizes="512x512" type="image/png"/>
+        {/* <link rel="icon" href="/icons/icon-192x192.png" sizes="192x192" type="image/png"/> */}
+        {/* <link rel="icon" href="/icons/icon-512x512.png" sizes="512x512" type="image/png"/> */}
       </head>
       <body>
         <SkipLink />
