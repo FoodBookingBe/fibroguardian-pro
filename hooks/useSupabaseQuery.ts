@@ -3,7 +3,16 @@ import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { handleSupabaseError, ErrorMessage } from '@/lib/error-handler';
 import { Task, Profile, TaskLog, Reflectie, Inzicht, SpecialistPatient } from '@/types';
 import { QueryHookResult, SupabaseQueryHookOptions, SupabaseQueryFunction } from '@/types/query'; 
-import { STALE_TIME } from '@/lib/QueryClientConfig'; // Import STALE_TIME constants
+import { STALE_TIME } from '@/lib/QueryClientConfig'; 
+
+// Define SpecialistWithRelation type here or import from types/index.ts if moved
+export interface SpecialistWithRelation extends Profile {
+  relationId: string; 
+}
+// Define PatientWithRelation type here or import from types/index.ts if moved
+export interface PatientWithRelation extends Profile {
+  relationId: string;
+}
 
 // Generic useSupabaseQuery hook
 export function useSupabaseQuery<
@@ -19,17 +28,12 @@ export function useSupabaseQuery<
   return useQuery<TQueryFnData, TError, TData, TQueryKey>({
     queryKey,
     queryFn,
-    // Default staleTime from QueryClientConfig will apply if not overridden here or in specific hook options
-    // staleTime: 5 * 60 * 1000, // This was a generic default, specific hooks will set their own
     ...options,
   });
 }
 
 /**
  * Hook to fetch a user's profile data.
- * @param userId - The ID of the user to fetch the profile for. Can be null or undefined if no user is logged in.
- * @param options - Optional React Query options.
- * @returns QueryHookResult with profile data (Profile | null) and query state.
  */
 export function useProfile(
   userId: string | null | undefined,
@@ -110,7 +114,7 @@ export function useTask(
     },
     {
       enabled: !!taskId,
-      staleTime: STALE_TIME.TASKS, // Individual task might share same stale time as list or have its own
+      staleTime: STALE_TIME.TASKS,
       ...options,
     }
   );
@@ -224,28 +228,46 @@ export function useReflecties(
   );
 }
 
+// Hook to get patients for a specialist, including relationId
 export function useMyPatients(
   specialistId: string | undefined,
-  options?: SupabaseQueryHookOptions<Profile[], ErrorMessage, Profile[]>
-): QueryHookResult<Profile[], ErrorMessage> {
-  return useSupabaseQuery<Profile[], ErrorMessage, Profile[]>(
+  options?: SupabaseQueryHookOptions<PatientWithRelation[], ErrorMessage, PatientWithRelation[]>
+): QueryHookResult<PatientWithRelation[], ErrorMessage> {
+  return useSupabaseQuery<PatientWithRelation[], ErrorMessage, PatientWithRelation[]>(
     ['myPatients', specialistId],
     async () => {
       if (!specialistId) return [];
       const supabase = getSupabaseBrowserClient();
+      
       const { data: relations, error: relationError } = await supabase
         .from('specialist_patienten')
-        .select('patient_id')
+        .select('id, patient_id') // Select relation ID and patient_id
         .eq('specialist_id', specialistId);
+
       if (relationError) throw handleSupabaseError(relationError, `myPatients-relations-fetch-${specialistId}`);
       if (!relations || relations.length === 0) return [];
+      
       const patientIds = relations.map(r => r.patient_id);
+      if (patientIds.length === 0) return [];
+
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select<string, Profile>('*')
         .in('id', patientIds);
+        
       if (profileError) throw handleSupabaseError(profileError, `myPatients-profiles-fetch-${specialistId}`);
-      return (profiles || []) as Profile[];
+      
+      const relationMap = relations.reduce((map, relation) => {
+        map[relation.patient_id] = relation.id;
+        return map;
+      }, {} as Record<string, string>);
+
+      const patientsWithRelation = (profiles || []).map(profile => ({
+        ...profile,
+        relationId: relationMap[profile.id]
+      }));
+      
+      return patientsWithRelation;
     },
     {
       enabled: !!specialistId,
@@ -255,28 +277,46 @@ export function useMyPatients(
   );
 }
 
+// Hook to get specialists for a patient, including relationId
 export function useMySpecialists(
   patientId: string | undefined,
-  options?: SupabaseQueryHookOptions<Profile[], ErrorMessage, Profile[]>
-): QueryHookResult<Profile[], ErrorMessage> {
-  return useSupabaseQuery<Profile[], ErrorMessage, Profile[]>(
+  options?: SupabaseQueryHookOptions<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>
+): QueryHookResult<SpecialistWithRelation[], ErrorMessage> {
+  return useSupabaseQuery<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>(
     ['mySpecialists', patientId],
     async () => {
       if (!patientId) return [];
       const supabase = getSupabaseBrowserClient();
+      
       const { data: relations, error: relationError } = await supabase
         .from('specialist_patienten')
-        .select('specialist_id')
+        .select('id, specialist_id') // Select relation ID and specialist_id
         .eq('patient_id', patientId);
+
       if (relationError) throw handleSupabaseError(relationError, `mySpecialists-relations-fetch-${patientId}`);
       if (!relations || relations.length === 0) return [];
+      
       const specialistIds = relations.map(r => r.specialist_id);
+      if (specialistIds.length === 0) return [];
+
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select<string, Profile>('*')
         .in('id', specialistIds);
+        
       if (profileError) throw handleSupabaseError(profileError, `mySpecialists-profiles-fetch-${patientId}`);
-      return (profiles || []) as Profile[];
+      
+      const relationMap = relations.reduce((map, relation) => {
+        map[relation.specialist_id] = relation.id;
+        return map;
+      }, {} as Record<string, string>);
+
+      const specialistsWithRelation = (profiles || []).map(profile => ({
+        ...profile,
+        relationId: relationMap[profile.id]
+      }));
+      
+      return specialistsWithRelation;
     },
     {
       enabled: !!patientId,

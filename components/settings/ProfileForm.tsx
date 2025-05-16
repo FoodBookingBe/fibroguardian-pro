@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useProfile } from '@/hooks/useSupabaseQuery';
 import { useUpdateProfile } from '@/hooks/useMutations';
-import { AlertMessage } from '@/components/common/AlertMessage';
+import { AlertMessage } from '@/components/common/AlertMessage'; // Keep for inline form validation errors if any
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { Profile } from '@/types';
+import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 import { getSupabaseBrowserClient } from '@/lib/supabase'; // For avatar upload
 import { ErrorMessage } from '@/lib/error-handler';
 
@@ -39,8 +40,9 @@ export default function ProfileForm() {
   const [formData, setFormData] = useState(profileToFormState(profileData));
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profileData?.avatar_url || null);
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
-  const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null);
+  // const [avatarError, setAvatarError] = useState<string | null>(null); // Replaced by notifications
+  // const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null); // Replaced by notifications
+  const { addNotification } = useNotification(); // Initialize notification hook
 
   // Update form state when profileData is fetched or changes
   useEffect(() => {
@@ -73,8 +75,8 @@ export default function ProfileForm() {
     const filePath = `avatars/${fileName}`;
 
     setUploadingAvatar(true);
-    setAvatarError(null);
-    setAvatarSuccess(null);
+    // setAvatarError(null); // Removed, using global notifications
+    // setAvatarSuccess(null); // Removed, using global notifications
 
     const supabaseClient = getSupabaseBrowserClient(); // Direct client for storage
 
@@ -98,19 +100,18 @@ export default function ProfileForm() {
       setAvatarUrl(urlData.publicUrl);
 
       // Update profile in DB with new avatar URL via mutation hook
-      updateProfile({ id: user.id, data: { avatar_url: urlData.publicUrl } }, {
+    updateProfile({ id: user.id, data: { avatar_url: urlData.publicUrl } }, {
         onSuccess: () => {
-          setAvatarSuccess('Profielfoto succesvol bijgewerkt.');
-          setTimeout(() => setAvatarSuccess(null), 3000);
+          addNotification('success', 'Profielfoto succesvol bijgewerkt.');
         },
         onError: (err) => {
-          setAvatarError(err.userMessage || 'Fout bij opslaan avatar URL.');
+          addNotification('error', err.userMessage || 'Fout bij opslaan avatar URL.');
         }
       });
 
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      setAvatarError(error.message || 'Fout bij uploaden van profielfoto.');
+      addNotification('error', error.message || 'Fout bij uploaden van profielfoto.');
     } finally {
       setUploadingAvatar(false);
       e.target.value = ''; // Reset file input
@@ -129,10 +130,12 @@ export default function ProfileForm() {
     
     updateProfile({ id: user.id, data: profileUpdateData }, {
       onSuccess: () => {
-        // isUpdateProfileSuccess will be true from the hook
-        // router.push('/dashboard'); // Or show success message
+        addNotification('success', 'Profiel succesvol bijgewerkt!');
+        // router.push('/dashboard'); // Optional redirect
       },
-      // onError is handled by updateProfileHookError
+      onError: (err) => { // Error is already available via updateProfileHookError for AlertMessage
+        addNotification('error', err.userMessage || 'Fout bij opslaan profiel.');
+      }
     });
   };
 
@@ -160,14 +163,12 @@ export default function ProfileForm() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-6">Mijn Profiel</h2>
       
-      {isUpdateProfileError && typedUpdateProfileError && (
+      {/* Inline AlertMessage can still be used for form-specific validation errors not handled by global notifications */}
+      {isUpdateProfileError && typedUpdateProfileError && !isUpdateProfileSuccess && ( // Show only if not also success (e.g. optimistic update failed)
         <AlertMessage type="error" title="Opslaan Mislukt" message={typedUpdateProfileError.userMessage} className="mb-4" />
       )}
-      {isUpdateProfileSuccess && (
-        <AlertMessage type="success" title="Succes" message="Profiel succesvol bijgewerkt!" className="mb-4" />
-      )}
-      {avatarError && <AlertMessage type="error" title="Avatar Fout" message={avatarError} className="mb-4" />}
-      {avatarSuccess && <AlertMessage type="success" title="Avatar Succes" message={avatarSuccess} className="mb-4" />}
+      {/* Success messages are now handled by global notifications */}
+      {/* Avatar specific errors/success are now handled by global notifications */}
       
       <form onSubmit={handleSubmit}>
         <div className="mb-6 flex flex-col items-center">
