@@ -68,7 +68,7 @@ export default function AddSpecialistButton() {
       // 3. Call the mutation hook
       addRelation({ specialist_id_to_add: specialistIdToAdd }, {
         onSuccess: () => {
-          addNotification('success', 'Specialist succesvol toegevoegd!');
+          addNotification({ type: 'success', message: 'Specialist succesvol toegevoegd!' });
           setShowModal(false);
           setEmail('');
           // Consider if reload is truly needed or if cache invalidation is enough
@@ -77,14 +77,14 @@ export default function AddSpecialistButton() {
         },
         onError: (error: ErrorMessage) => {
           // Error message from API/hook is shown via notification
-          addNotification('error', error.userMessage || 'Fout bij toevoegen specialist.');
+          addNotification({ type: 'error', message: error.userMessage || 'Fout bij toevoegen specialist.' });
         }
       });
 
     } catch (err: any) {
       console.error('Error in AddSpecialistButton handleSubmit:', err);
       setFormError(err.message || 'Er is een onverwachte fout opgetreden.');
-      addNotification('error', err.message || 'Er is een onverwachte fout opgetreden.');
+      addNotification({ type: 'error', message: err.message || 'Er is een onverwachte fout opgetreden.' });
     }
   };
   

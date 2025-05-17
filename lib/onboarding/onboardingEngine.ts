@@ -1,5 +1,5 @@
 import { analytics } from '@/lib/analytics/eventTracking';
-import { trackOnboardingStep, getLatestCompletedOnboardingStep, OnboardingStepName } from '@/lib/analytics/userJourney';
+import { trackOnboardingStep, OnboardingStepName } from '@/lib/analytics/userJourney'; // getLatestCompletedOnboardingStep was unused
 import { EmailTemplate, getEmailContent, WelcomeEmailData } from '@/utils/email-templates';
 // import { sendEmail } from '@/lib/email/sendEmail'; // Placeholder - team implementeert e-mail verzendlogica
 import type { User } from '@supabase/supabase-js'; // Supabase User type
@@ -34,7 +34,7 @@ export interface OnboardingEngineConfig {
 
 export class OnboardingEngine {
   private config: Required<OnboardingEngineConfig>; // Alle properties zijn nu required
-  private supabase = getSupabaseBrowserClient();
+  // private supabase = getSupabaseBrowserClient(); // Unused
 
   constructor(config?: Partial<OnboardingEngineConfig>) {
     // Default configuratie

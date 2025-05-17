@@ -6,7 +6,7 @@ import { trackOnboardingStep, OnboardingStepName } from '@/lib/analytics/userJou
 import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook
 // import { useFocusTrap } from '@/lib/accessibility/focus-trap'; // Placeholder hook
 import { useAuth } from '@/components/auth/AuthProvider';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // X was unused
 
 // Placeholder voor useFocusTrap hook
 const useFocusTrap = (ref: React.RefObject<HTMLElement>, active: boolean) => {

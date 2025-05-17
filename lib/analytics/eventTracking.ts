@@ -74,7 +74,7 @@ class AnalyticsService {
         }
       });
        // Luister naar auth changes om userId bij te werken
-      this.supabase.auth.onAuthStateChange((event, session) => {
+      this.supabase.auth.onAuthStateChange((_event, session) => { // event parameter was unused
         this.userId = session?.user?.id || null;
         if (this.debugMode) {
             console.log('[Analytics] Auth state changed, new userId:', this.userId);
@@ -211,17 +211,17 @@ class AnalyticsService {
     }
   }
   
-  private queueEventForLater(event: AnalyticsEvent) {
-    if (typeof window === 'undefined' || !localStorage) return;
-    try {
-      const queueStr = localStorage.getItem('fibro_analytics_queue');
-      const queue = queueStr ? JSON.parse(queueStr) : [];
-      queue.push(event);
-      localStorage.setItem('fibro_analytics_queue', JSON.stringify(queue.slice(-50))); // Max 50 events
-    } catch (e) {
-      if (this.debugMode) console.error('[Analytics] Error queueing event:', e);
-    }
-  }
+  // private queueEventForLater(event: AnalyticsEvent) { // This method was unused
+  //   if (typeof window === 'undefined' || !localStorage) return;
+  //   try {
+  //     const queueStr = localStorage.getItem('fibro_analytics_queue');
+  //     const queue = queueStr ? JSON.parse(queueStr) : [];
+  //     queue.push(event);
+  //     localStorage.setItem('fibro_analytics_queue', JSON.stringify(queue.slice(-50))); // Max 50 events
+  //   } catch (e) {
+  //     if (this.debugMode) console.error('[Analytics] Error queueing event:', e);
+  //   }
+  // }
   
   public flushQueue() {
     if (typeof window === 'undefined' || !localStorage) return;

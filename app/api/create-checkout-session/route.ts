@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Gebruik de route handler client
-import { patientPlans, specialistPlans, SubscriptionPlan, SubscriptionTier } from '@/types/subscription'; // Importeer types
+import { patientPlans, specialistPlans, SubscriptionPlan } from '@/types/subscription'; // Importeer types, SubscriptionTier was unused
 
 // Instantieer Stripe met de secret key
 // Zorg dat STRIPE_SECRET_KEY is ingesteld in je environment variabelen

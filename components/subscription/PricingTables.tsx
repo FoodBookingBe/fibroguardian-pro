@@ -9,7 +9,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
 import { patientPlans, specialistPlans, SubscriptionPlan, subscriptionFeatures } from '@/types/subscription';
 import { createCheckoutSession } from '@/lib/stripe';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react'; // X is not used
 import { useNotification } from '@/context/NotificationContext';
 
 // Basis Button component als ds/atoms/Button niet bestaat
@@ -33,7 +33,7 @@ const Card = ({ children, className: cardClassName = '', ...props }: any) => (
   </div>
 );
 // Basis Toggle component
-const Toggle = ({ checked, onChange, size = 'md' }: { checked: boolean, onChange: () => void, size?: string }) => (
+const Toggle = ({ checked, onChange }: { checked: boolean, onChange: () => void, size?: string }) => ( // size prop was unused
     <button
         type="button"
         role="switch"
@@ -58,7 +58,7 @@ export function PricingTables() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const userTypeParam = searchParams.get('userType');
-  const upgradeParam = searchParams.get('upgrade');
+  // const upgradeParam = searchParams.get('upgrade'); // Unused variable
   
   const { user, profile, loading: loadingAuth } = useAuth();
   const { subscription, isLoadingSubscription } = useFeatureAccess(); // isLoadingSubscription van hier

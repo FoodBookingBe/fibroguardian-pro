@@ -1,10 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react'; // useEffect was unused
 import { useRouter } from 'next/navigation';
 // import { Button } from '@/components/ds/atoms/Button'; // Placeholder
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; // Correct pad
-import { patientPlans, specialistPlans, subscriptionFeatures, SubscriptionPlan } from '@/types/subscription';
+import { patientPlans, specialistPlans, subscriptionFeatures } from '@/types/subscription'; // SubscriptionPlan was unused
 import { ArrowRight, X } from 'lucide-react'; // Gebruik lucide-react voor iconen
 
 interface UpgradePromptProps {

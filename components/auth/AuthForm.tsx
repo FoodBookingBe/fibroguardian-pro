@@ -3,7 +3,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { validateEmail, validatePassword } from '@/utils/validation';
-import { AlertMessage } from '@/components/common/AlertMessage';
+// import { AlertMessage } from '@/components/common/AlertMessage'; // Replaced by global notifications
 import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 
 export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) {
@@ -14,7 +14,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
   const [achternaam, setAchternaam] = useState<string>('');
   const [userType, setUserType] = useState<string>('patient'); // Default to patient
   const [loading, setLoading] = useState<boolean>(false);
-  const [isLogin, setIsLogin] = useState<boolean>(initialIsLogin ?? true);
+  const [isLogin] = useState<boolean>(initialIsLogin ?? true); // setIsLogin is not used, navigation handles mode switch
   // const [message, setMessage] = useState<string>(''); // Replaced by global notifications for success/error
   const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; userType?: string; }>({});
   const { addNotification } = useNotification();
@@ -86,22 +86,22 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
         });
 
         if (signInError) {
-          addNotification('error', `Fout bij inloggen: ${signInError.message}`);
+          addNotification({ type: 'error', message: `Fout bij inloggen: ${signInError.message}` });
         } else if (signInData?.user) {
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData.session) {
-            addNotification('success', 'Succesvol ingelogd! U wordt doorverwezen...');
+            addNotification({ type: 'success', message: 'Succesvol ingelogd! U wordt doorverwezen...' });
             // AuthProvider handles redirect
           } else {
-            addNotification('warning', 'Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.');
+            addNotification({ type: 'warning', message: 'Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.' });
           }
         } else {
-          addNotification('error', 'Onbekende fout bij inloggen. Probeer het opnieuw.');
+          addNotification({ type: 'error', message: 'Onbekende fout bij inloggen. Probeer het opnieuw.' });
         }
       } else {
         // Registratie
         const supabase = getSupabaseBrowserClient();
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({ // signUpData was unused
           email,
           password,
           options: {
@@ -115,14 +115,14 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
         });
         if (signUpError) { 
           console.error('AuthForm: SignUp failed with error object:', signUpError);
-          addNotification('error', `Fout bij registratie: ${signUpError.message}`);
+          addNotification({ type: 'error', message: `Fout bij registratie: ${signUpError.message}` });
         } else {
-          addNotification('success', 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.');
+          addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.' });
         }
       }
     } catch (error: any) { 
       console.error('AuthForm: Unexpected error in handleSubmit:', error);
-      addNotification('error', `Onverwachte fout: ${error.message}`);
+      addNotification({ type: 'error', message: `Onverwachte fout: ${error.message}` });
     } finally {
       setLoading(false);
     }
@@ -226,7 +226,7 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             id="password"
             name="password"
             type="password"
-            autoComplete={isLogin ? "current-password" : "new-password section-password"}
+            autoComplete={isLogin ? "current-password" : "new-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={`form-input ${errors.password ? 'border-red-500' : 'border-gray-300'}`}

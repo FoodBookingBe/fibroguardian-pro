@@ -46,17 +46,17 @@ export function SpecialistsListContainer() {
 
   const handleDeleteRelation = (relationId: string) => {
     if (!patientId) {
-      addNotification('error', 'Gebruiker niet gevonden, kan relatie niet verwijderen.');
+      addNotification({ type: 'error', message: 'Gebruiker niet gevonden, kan relatie niet verwijderen.' });
       return;
     }
     
     deleteRelationMutation.mutate({ relationshipId: relationId, currentUserId: patientId }, {
       onSuccess: () => {
-        addNotification('success', 'Specialist succesvol verwijderd uit uw lijst.');
+        addNotification({ type: 'success', message: 'Specialist succesvol verwijderd uit uw lijst.' });
         // Invalidation is handled by the hook, which should refetch useMySpecialists
       },
       onError: (err: ErrorMessage) => {
-        addNotification('error', err.userMessage || 'Fout bij verwijderen specialist.');
+        addNotification({ type: 'error', message: err.userMessage || 'Fout bij verwijderen specialist.' });
       }
     });
   };

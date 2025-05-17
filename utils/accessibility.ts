@@ -1,5 +1,5 @@
 // utils/accessibility.ts
-import { useRef, useEffect, ReactNode, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react'; // Expliciet React importeren, ReactNode and useCallback were unused
 
 // Helper voor correcte ARIA attributen
 export const ariaProps = {
@@ -72,36 +72,29 @@ export const ariaProps = {
 };
 
 // Icon button helper
-interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: ReactNode;
-  label: string; 
-}
+// interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+//   icon: ReactNode;
+//   label: string; 
+// }
 
-export function IconButton({ 
-  icon, 
-  label, 
-  className,
-  ...rest 
-}: IconButtonProps): JSX.Element {
-  return (
-    <button
-      type="button" 
-      aria-label={label}
-      className={className}
-      {...rest}
-    >
-      {icon}
-      <span className="sr-only">{label}</span> 
-    </button>
-  );
-}
+// export function IconButton({ 
+//   icon, 
+//   label,
+//   className,
+//   ...rest
+// }: IconButtonProps): JSX.Element {
+//   return (
+//     <button type="button" aria-label={label} className={className} {...rest}>
+//       {icon}
+//       <span className="sr-only">{label}</span>
+//     </button>
+//   );
+// }
 
 // Screen reader only tekst
-export function SROnly({ children }: { children: ReactNode }): JSX.Element {
-  return (
-    <span className="sr-only">{children}</span>
-  );
-}
+// export function SROnly({ children }: { children: ReactNode }): JSX.Element {
+//   return <span className="sr-only">{children}</span>;
+// }
 
 // Focus management hook
 export function useFocusManagement<T extends HTMLElement>(shouldFocus: boolean) {
@@ -188,17 +181,14 @@ export function useFocusTrap(
 }
 
 // Example FocusTrap component (optional, hook can be used directly)
-interface FocusTrapComponentProps {
-  isActive: boolean;
-  children: React.ReactNode;
-  onEscape?: () => void;
-}
-export function FocusTrapComponent({ isActive, children, onEscape }: FocusTrapComponentProps): JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(containerRef, isActive, onEscape);
+// interface FocusTrapComponentProps {
+//   isActive: boolean;
+//   children: React.ReactNode;
+//   onEscape?: () => void;
+// }
+// export function FocusTrapComponent({ isActive, children, onEscape }: FocusTrapComponentProps): JSX.Element {
+//   const containerRef = useRef<HTMLDivElement>(null);
+//   useFocusTrap(containerRef, isActive, onEscape);
 
-  // The div itself might need to be focusable if it's the only thing when children are empty,
-  // but generally, focus should go to interactive elements within.
-  // Adding tabIndex={-1} makes the div programmatically focusable but not via keyboard tabbing.
-  return <div ref={containerRef} tabIndex={-1}>{children}</div>;
-}
+//   return <div ref={containerRef} tabIndex={-1}>{children}</div>;
+// }

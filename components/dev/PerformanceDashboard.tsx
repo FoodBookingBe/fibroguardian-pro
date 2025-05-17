@@ -27,7 +27,7 @@ ChartJS.register(
 interface PerformanceMetrics {
   FCP: number;
   LCP: number;
-  FID: number;
+  INP: number; // Changed from FID to INP
   CLS: number;
   TTI: number;
   TBT: number;
@@ -42,7 +42,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
   if (typeof window === 'undefined' || typeof performance === 'undefined') return null;
   
   const metrics: PerformanceMetrics = {
-    FCP: 0, LCP: 0, FID: 0, CLS: 0, TTI: 0, TBT: 0,
+    FCP: 0, LCP: 0, INP: 0, CLS: 0, TTI: 0, TBT: 0, // Changed FID to INP
     resourceLoading: [], jsExecution: [], renderBlocking: [], longTasks: [],
   };
   
@@ -140,11 +140,12 @@ export default function PerformanceDashboard() {
     }
 
     if (typeof window !== 'undefined') {
-      import('web-vitals').then(({ onCLS, onFID, onLCP, onTBT }) => { // Added onTBT
-        onCLS((result) => setMetrics(prev => ({ ...prev!, CLS: result.value })), { reportAllChanges: true });
-        onFID((result) => setMetrics(prev => ({ ...prev!, FID: result.value })));
-        onLCP((result) => setMetrics(prev => ({ ...prev!, LCP: result.value })));
-        onTBT((result) => setMetrics(prev => ({ ...prev!, TBT: result.value }))); // Get TBT from web-vitals
+      import('web-vitals').then(({ onCLS, onINP, onLCP, onFCP, Metric }) => { // Updated to onINP, added Metric type
+        onCLS((metric: Metric) => setMetrics(prev => ({ ...prev!, CLS: metric.value })), { reportAllChanges: true });
+        onINP((metric: Metric) => setMetrics(prev => ({ ...prev!, INP: metric.value }))); // Changed from onFID to onINP
+        onLCP((metric: Metric) => setMetrics(prev => ({ ...prev!, LCP: metric.value })));
+        // onFCP((metric: Metric) => setMetrics(prev => ({ ...prev!, FCP: metric.value }))); // FCP is also available via web-vitals if needed, but already captured
+        // TBT is calculated from long tasks observer, direct onTBT is not standard in web-vitals
       });
     }
   }, []);
@@ -210,7 +211,7 @@ export default function PerformanceDashboard() {
         <section id="overview-metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <MetricCard title="First Contentful Paint (FCP)" value={metrics.FCP} unit="ms" goodThreshold={1800} poorThreshold={3000} />
           <MetricCard title="Largest Contentful Paint (LCP)" value={metrics.LCP} unit="ms" goodThreshold={2500} poorThreshold={4000} />
-          <MetricCard title="First Input Delay (FID)" value={metrics.FID} unit="ms" goodThreshold={100} poorThreshold={300} />
+          <MetricCard title="Interaction to Next Paint (INP)" value={metrics.INP} unit="ms" goodThreshold={200} poorThreshold={500} />
           <MetricCard title="Cumulative Layout Shift (CLS)" value={metrics.CLS} unit="" goodThreshold={0.1} poorThreshold={0.25} precision={3} />
           <MetricCard title="Time to Interactive (TTI)" value={metrics.TTI} unit="ms" goodThreshold={3800} poorThreshold={7300} />
           <MetricCard title="Total Blocking Time (TBT)" value={metrics.TBT} unit="ms" goodThreshold={200} poorThreshold={600} />

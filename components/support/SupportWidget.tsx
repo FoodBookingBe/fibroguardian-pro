@@ -135,10 +135,9 @@ export function SupportWidget() {
       </button>
       
       <div 
-        className={`fixed bottom-5 right-5 z-50 w-[calc(100%-2.5rem)] max-w-sm bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed bottom-5 right-5 z-50 w-[calc(100%-2.5rem)] max-w-sm bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col transition-all duration-300 ease-in-out max-h-[calc(100vh-3.75rem)] ${
           isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
         }`}
-        style={{ maxHeight: 'calc(100vh - 2.5rem - 1.25rem)' }} // Max hoogte minus margins
         role="dialog"
         aria-modal="true"
         aria-labelledby="support-widget-title"

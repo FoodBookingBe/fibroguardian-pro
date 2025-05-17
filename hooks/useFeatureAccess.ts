@@ -2,7 +2,7 @@ import { useAuth } from '@/components/auth/AuthProvider'; // Aangepast pad
 // import { useSubscription } from '@/hooks/useSubscription'; // Placeholder, zie hieronder
 import { subscriptionFeatures, SubscriptionFeature, SubscriptionTier, patientPlans, specialistPlans } from '@/types/subscription';
 import { useCallback, useState, useEffect } from 'react';
-import { useNotification } from '@/context/NotificationContext'; // Voor feedback
+// import { useNotification } from '@/context/NotificationContext'; // Voor feedback - Unused
 
 // Placeholder voor useSubscription hook data (zelfde als in SubscriptionManagement)
 interface MockSubscription {
@@ -21,7 +21,7 @@ interface MockSubscription {
 const useSubscription = (userId: string | undefined) => {
   const [subscription, setSubscription] = useState<MockSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start als loading
-  const [error, setError] = useState<Error | null>(null);
+  // const [error, setError] = useState<Error | null>(null); // Error state was unused in this hook
 
   useEffect(() => {
     if (!userId) {
@@ -58,7 +58,7 @@ const useSubscription = (userId: string | undefined) => {
     }, 500);
   }, [userId]);
 
-  return { subscription, isLoading, error };
+  return { subscription, isLoading }; // Error was unused
 };
 
 

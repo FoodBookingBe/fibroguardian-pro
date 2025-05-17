@@ -17,6 +17,7 @@ Dit document dient als een matrix voor het systematisch testen van FibroGuardian
 | **Opera**        | Laatste stabiel | ☐             | ☐             | ☐            | ☐            | ☐            | ☐            |        |        | (Lagere prioriteit) |
 
 **Legenda Status:**
+
 - ☐: Nog te testen
 - ✅: Geslaagd
 - ⚠️: Geslaagd met opmerkingen/kleine issues
@@ -68,6 +69,7 @@ Dit document dient als een matrix voor het systematisch testen van FibroGuardian
 
 Lijst van 5-10 kritieke user flows die op een subset van de bovenstaande matrix worden getest om brede compatibiliteit te verzekeren.
 Voorbeeld flows:
+
 1. Registratie + Onboarding (eerste taak)
 2. Login + Dashboard view + Taak loggen
 3. Abonnement selecteren + Start Checkout

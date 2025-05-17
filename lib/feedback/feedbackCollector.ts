@@ -1,6 +1,6 @@
 'use client'; // Deze hook is bedoeld voor client-side gebruik
 import { trackEvent } from '@/lib/analytics/eventTracking';
-import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook
+// import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook - Unused as local placeholder is used
 import { useEffect, useState, useCallback } from 'react'; // Import useCallback
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';

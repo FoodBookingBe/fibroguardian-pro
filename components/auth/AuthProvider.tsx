@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Session, User, AuthError } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js'; // AuthError was unused
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Profile } from '@/types'; // Import Profile type
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true); // For auth session
   const [loadingProfile, setLoadingProfile] = useState(false); // For profile data
-  const [authError, setAuthError] = useState<string | null>(null);
+  // const [authError, setAuthError] = useState<string | null>(null); // authError state was not used
   const router = useRouter(); 
   const pathname = usePathname(); 
 
@@ -45,24 +45,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
     }
     setLoadingAuth(false);
-    setAuthError(null);
+    // setAuthError(null);
   }, []);
 
   // Effect for fetching initial session and listening to auth changes
   useEffect(() => {
     setLoadingAuth(true);
-    setAuthError(null);
+    // setAuthError(null);
     const supabase = getSupabaseBrowserClient();
     
     supabase.auth.getSession().then(({ data: { session: currentSession }, error }) => {
       if (error) {
         console.error("[AuthProvider] Error getting session:", error.message);
-        setAuthError(error.message);
+        // setAuthError(error.message);
         setSession(null);
         setUser(null);
         setProfile(null); // Clear profile on error
       } else {
-        setAuthError(null);
+        // setAuthError(null);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
       }
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then(({ data, error }) => {
           if (error) {
             console.error('[AuthProvider] Error fetching profile:', error.message);
-            setAuthError(error.message); // Can use authError or a separate profileError state
+            // setAuthError(error.message); // Can use authError or a separate profileError state
             setProfile(null);
           } else {
             setProfile(data as Profile | null);

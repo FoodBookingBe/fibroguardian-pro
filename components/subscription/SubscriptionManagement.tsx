@@ -8,7 +8,7 @@ import Link from 'next/link'; // Import Link
 // import { Grid } from '@/components/ds/layout/Grid'; // Placeholder
 import { useAuth } from '@/components/auth/AuthProvider'; // Gebruik bestaande AuthProvider
 // import { useSubscription } from '@/hooks/useSubscription'; // Placeholder hook
-import { formatCurrency } from '@/utils/format'; // Placeholder util
+// import { formatCurrency } from '@/utils/format'; // Placeholder util - Removed as formatCurrency is defined locally or globally
 import { useNotification } from '@/context/NotificationContext'; // Voor feedback
 
 // Placeholder voor useSubscription hook data

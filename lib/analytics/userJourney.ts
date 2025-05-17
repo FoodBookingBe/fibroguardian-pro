@@ -1,5 +1,5 @@
-import React, { useEffect, useState, ComponentType, FC } from 'react'; // Import React en types
-import { analytics, trackEvent } from './eventTracking'; // Gebruik de bestaande analytics instance
+// import React, { useEffect, useState, ComponentType, FC } from 'react'; // Import React en types - All unused
+import { trackEvent } from './eventTracking'; // Gebruik de bestaande analytics instance, analytics was unused
 
 // Types voor verschillende journey stappen
 export type OnboardingStepName = // Hernoemd voor duidelijkheid

@@ -1,4 +1,4 @@
-import React, { ComponentType, useState } from 'react'; // Import React
+import React, { ComponentType } from 'react'; // Import React, useState was unused
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; // Correct pad
 import { UpgradePrompt } from './UpgradePrompt'; // Importeer de UpgradePrompt component
 

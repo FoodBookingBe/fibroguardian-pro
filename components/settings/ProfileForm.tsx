@@ -102,16 +102,16 @@ export default function ProfileForm() {
       // Update profile in DB with new avatar URL via mutation hook
     updateProfile({ id: user.id, data: { avatar_url: urlData.publicUrl } }, {
         onSuccess: () => {
-          addNotification('success', 'Profielfoto succesvol bijgewerkt.');
+          addNotification({ type: 'success', message: 'Profielfoto succesvol bijgewerkt.' });
         },
         onError: (err) => {
-          addNotification('error', err.userMessage || 'Fout bij opslaan avatar URL.');
+          addNotification({ type: 'error', message: err.userMessage || 'Fout bij opslaan avatar URL.' });
         }
       });
 
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      addNotification('error', error.message || 'Fout bij uploaden van profielfoto.');
+      addNotification({ type: 'error', message: error.message || 'Fout bij uploaden van profielfoto.' });
     } finally {
       setUploadingAvatar(false);
       e.target.value = ''; // Reset file input
@@ -130,11 +130,11 @@ export default function ProfileForm() {
     
     updateProfile({ id: user.id, data: profileUpdateData }, {
       onSuccess: () => {
-        addNotification('success', 'Profiel succesvol bijgewerkt!');
+        addNotification({ type: 'success', message: 'Profiel succesvol bijgewerkt!' });
         // router.push('/dashboard'); // Optional redirect
       },
       onError: (err) => { // Error is already available via updateProfileHookError for AlertMessage
-        addNotification('error', err.userMessage || 'Fout bij opslaan profiel.');
+        addNotification({ type: 'error', message: err.userMessage || 'Fout bij opslaan profiel.' });
       }
     });
   };
@@ -233,9 +233,9 @@ export default function ProfileForm() {
         {/* Account type is generally not editable by user after creation */}
         {profileData?.type && (
             <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Account type</label>
-                <input type="text" value={profileData.type.charAt(0).toUpperCase() + profileData.type.slice(1)} readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 focus:outline-none" />
+                <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">Account type</label>
+                <input id="accountType" type="text" value={profileData.type.charAt(0).toUpperCase() + profileData.type.slice(1)} readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 focus:outline-none" aria-label="Account type (niet wijzigbaar)" />
             </div>
         )}
         

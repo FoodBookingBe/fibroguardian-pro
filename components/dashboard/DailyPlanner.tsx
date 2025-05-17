@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react'; // Keep useState for confirmDelete if needed locally in TaskCard
+import React from 'react'; // Keep useState for confirmDelete if needed locally in TaskCard
 import Link from 'next/link';
 import { Task } from '@/types';
 import TaskCard from '@/components/tasks/TaskCard';
@@ -15,9 +15,9 @@ interface DailyPlannerProps {
   // isLoading?: boolean; // If container wants to pass loading state for individual items
 }
 
-function DailyPlanner({ 
-  tasks, 
-  userId, // userId might not be directly used if tasks are already filtered for the user
+function DailyPlanner({
+  tasks,
+  // userId, // userId might not be directly used if tasks are already filtered for the user
   activeFilter,
   onFilterChange,
 }: DailyPlannerProps) {
@@ -33,12 +33,12 @@ function DailyPlanner({
   const handleDeleteTask = (taskId: string) => {
     deleteTask(taskId, {
       onSuccess: () => {
-        addNotification('success', 'Taak succesvol verwijderd.');
+        addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
         // Query invalidation is handled by the useDeleteTask hook,
         // which should cause DailyPlannerContainer to re-fetch/re-filter tasks.
       },
       onError: (error: ErrorMessage) => { // Explicitly type error
-        addNotification('error', error.userMessage || 'Fout bij verwijderen van taak.');
+        addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen van taak.' });
       }
     });
   };
