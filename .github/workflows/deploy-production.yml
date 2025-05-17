@@ -1,0 +1,149 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch: # Maakt handmatig triggeren mogelijk
+    inputs:
+      confirm:
+        description: 'Type "confirm" to deploy to production'
+        required: true
+        default: ''
+      version:
+        description: 'Version tag (e.g. v1.2.3)'
+        required: true
+        # default: '' # Geen default, moet ingevuld worden
+
+jobs:
+  check_inputs:
+    name: Validate Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ github.event.inputs.version }}
+    steps:
+      - name: Check confirmation input
+        if: ${{ github.event.inputs.confirm != 'confirm' }}
+        run: |
+          echo "::error::Deployment not confirmed. You must type 'confirm' to proceed."
+          exit 1
+      - name: Check version format
+        if: ${{ !startsWith(github.event.inputs.version, 'v') }}
+        run: |
+          echo "::error::Version tag must start with 'v' (e.g. v1.2.3)."
+          exit 1
+      - name: Validate basic version structure
+        # Simplified check: starts with 'v' and contains at least one dot.
+        if: ${{ !startsWith(github.event.inputs.version, 'v') || !contains(github.event.inputs.version, '.') }}
+        run: |
+          echo "::error::Version tag '${{ github.event.inputs.version }}' must start with 'v' and contain at least one dot (e.g., v1.0.0)."
+          exit 1
+        # For more complex regex validation, a separate script step would be better.
+
+  test_and_build:
+    name: Test & Build
+    needs: check_inputs
+    runs-on: ubuntu-latest
+    outputs:
+      build_artifact_name: nextjs-build-${{ needs.check_inputs.outputs.version_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main # Zorg dat je altijd vanaf main (of je release branch) deployt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linters
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run tests and check coverage
+        run: |
+          npm run test -- --coverage
+          # De coverage check hieronder is een voorbeeld. Pas aan naar je test runner output.
+          # Dit vereist dat je test runner een coverage summary JSON output genereert.
+          # Voor Jest, zorg dat `coverageReporters: ["json-summary", "text", "lcov"]` in jest.config.js staat.
+          # COVERAGE_LINES=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          # COVERAGE_FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')
+          # echo "Line Coverage: $COVERAGE_LINES%"
+          # echo "Function Coverage: $COVERAGE_FUNCTIONS%"
+          # if (( $(echo "$COVERAGE_LINES < 80" | bc -l) )); then
+          #   echo "::error::Line test coverage ($COVERAGE_LINES%) is below the 80% threshold."
+          #   # exit 1 # Maak dit een harde fail als gewenst
+          # fi
+          # if (( $(echo "$COVERAGE_FUNCTIONS < 80" | bc -l) )); then
+          #   echo "::error::Function test coverage ($COVERAGE_FUNCTIONS%) is below the 80% threshold."
+          #   # exit 1 # Maak dit een harde fail als gewenst
+          # fi
+        # De jq en bc commando's zijn mogelijk niet standaard beschikbaar op alle runners.
+        # Overweeg een Node.js script of een GitHub Action voor coverage check.
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL_PROD }} # Gebruik productie secrets
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY_PROD }}
+          # Voeg andere productie build-time env vars hier toe
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.check_inputs.outputs.version_tag }}-build # Unieke naam per versie
+          path: .next/
+
+  deploy_to_production:
+    name: Deploy to Production
+    needs: [check_inputs, test_and_build]
+    runs-on: ubuntu-latest
+    environment: 
+      name: production # Definieer 'production' environment in GitHub repo settings
+      url: https://fibroguardian.be # URL van je productieomgeving
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.check_inputs.outputs.version_tag }}-build
+          path: .next/
+          
+      - name: Deploy to Production (Vercel Example)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }} # Specifiek project ID voor productie
+        run: |
+          npm install -g vercel
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel build --prod --token=$VERCEL_TOKEN 
+          vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+          # De output van vercel deploy --prod bevat de uiteindelijke URL, die je kunt loggen of gebruiken.
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Dit is automatisch beschikbaar
+        with:
+          tag_name: ${{ needs.check_inputs.outputs.version_tag }}
+          release_name: Release ${{ needs.check_inputs.outputs.version_tag }}
+          body: |
+            Release of version ${{ needs.check_inputs.outputs.version_tag }}.
+            Changes in this release:
+            - TODO: Link to changelog or summarize changes here.
+          draft: false
+          prerelease: false # Zet op true als het een pre-release is
+
+      - name: Post-deployment Health Check
+        if: success() # Alleen uitvoeren als deployment succesvol was
+        run: |
+          echo "Waiting for deployment to be live..."
+          sleep 60 # Wacht 60 seconden (pas aan indien nodig)
+          echo "Performing health check on https://fibroguardian.be"
+          curl --silent --show-error --fail https://fibroguardian.be || (echo "::error::Production health check failed for homepage!" && exit 1)
+          curl --silent --show-error --fail https://fibroguardian.be/auth/login || (echo "::error::Production health check failed for login page!" && exit 1)
+          echo "Production health checks passed."
