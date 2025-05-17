@@ -1,12 +1,13 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+// import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old way
+// import { cookies } from 'next/headers'; // Handled by getSupabaseServerComponentClient
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // New way
 import MijnSpecialistenClient from './mijn-specialisten-client';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable caching
 
 export default async function MijnSpecialistenPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = getSupabaseServerComponentClient(); // Use the new helper
   
   // Haal gebruikerssessie op - middleware zorgt al voor authenticatie
   // Use getUser() instead of getSession() for server components
@@ -68,51 +69,35 @@ export default async function MijnSpecialistenPage() {
   
   if (relationError) {
     console.error('Error fetching specialist relations:', relationError);
-    // Ga door met lege lijst
+  // Ga door met lege lijst
   }
   
-  interface Specialist {
-    id: string;
-    voornaam: string;
-    achternaam: string;
-    email: string;
-    toegangsrechten: string[];
-  }
-  
-  let specialists: Specialist[] = [];
+  let specialistsProps: import('@/types').Profile[] = []; 
   
   if (relationData && relationData.length > 0) {
-    // Haal de gegevens van de specialisten op
     const specialistIds = relationData.map(rel => rel.specialist_id);
-    const { data: specialistsData, error: specialistsError } = await supabase
-      .from('profiles')
-      .select('id, voornaam, achternaam, email')
-      .in('id', specialistIds);
-    
-    if (!specialistsError && specialistsData) {
-      // Combineer de gegevens
-      specialists = specialistsData.map(specialist => {
-        if (!specialist || !specialist.id) {
-          // Skip of log een waarschuwing
-          console.warn('Specialist zonder geldig ID gevonden:', specialist);
-          return {
-            id: 'unknown',
-            voornaam: 'Onbekend',
-            achternaam: 'Specialist',
-            email: 'geen-email@voorbeeld.com',
-            toegangsrechten: []
-          };
-        }
-        
-        const relation = relationData?.find?.(rel => rel.specialist_id === specialist.id);
-        return {
-          ...specialist,
-          toegangsrechten: Array.isArray(relation?.toegangsrechten) ? relation.toegangsrechten : []
-        };
-      }).filter(Boolean) as Specialist[]; // Filter out any null/undefined entries if skipped
+    if (specialistIds.length > 0) {
+      const { data: fetchedProfiles, error: specialistsError } = await supabase
+        .from('profiles')
+        .select('id, voornaam, achternaam, email, type, avatar_url, postcode, gemeente, geboortedatum, created_at, updated_at') // Ensure all Profile fields
+        .in('id', specialistIds)
+        .eq('type', 'specialist');
+      
+      if (!specialistsError && fetchedProfiles) {
+        specialistsProps = fetchedProfiles.map(p => ({
+          ...p,
+          geboortedatum: p.geboortedatum ? new Date(p.geboortedatum) : undefined,
+          // The `toegangsrechten` is specific to the relation, not the profile itself.
+          // MijnSpecialistenClient will need to handle this if it needs that data.
+          // For now, ensure `specialistsProps` is strictly Profile[].
+        }));
+      } else if (specialistsError) {
+        console.error('Error fetching specialist profiles:', specialistsError);
+      }
     }
   }
   
   // Gebruik de client component om de UI te renderen
-  return <MijnSpecialistenClient user={user} specialists={specialists} userProfile={profile} />;
+  // Note: `MijnSpecialistenClient` imports `Profile as Specialist`, so `specialistsProps` (which is Profile[]) is compatible.
+  return <MijnSpecialistenClient user={user} specialists={specialistsProps} userProfile={profile} />;
 }

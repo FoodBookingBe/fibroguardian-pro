@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { Task } from '@/types';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { TasksPageContainer } from '@/containers/tasks/TasksPageContainer'; // Updated import
-import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Import server client helper
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Import server client helper
 
 export default async function TakenPage() {
   const supabase = getSupabaseServerComponentClient(); // Use helper

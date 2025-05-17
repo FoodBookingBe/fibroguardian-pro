@@ -18,8 +18,8 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
   const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; userType?: string; }>({});
   const { addNotification } = useNotification();
 
-  const { mutate: signIn, isPending: isSigningIn, error: signInErrorHook } = useSignInEmailPassword();
-  const { mutate: signUp, isPending: isSigningUp, error: signUpErrorHook } = useSignUpWithEmailPassword();
+  const { mutate: signIn, isPending: isSigningIn } = useSignInEmailPassword(); // Removed signInErrorHook
+  const { mutate: signUp, isPending: isSigningUp } = useSignUpWithEmailPassword(); // Removed signUpErrorHook
 
   const loading = isSigningIn || isSigningUp;
  
@@ -116,6 +116,9 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     }
     // setLoading(false); // Handled by isPending from hooks
   };
+
+  return (
+    <section className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
       <h2 className="text-2xl font-semibold mb-6 text-center text-purple-800">
         {isLogin ? 'Inloggen' : 'Registreren'} bij FibroGuardian Pro
       </h2>

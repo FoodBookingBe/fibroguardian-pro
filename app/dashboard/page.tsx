@@ -2,13 +2,13 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
 // import { createServerClient } from '@supabase/ssr'; 
 // import { cookies } from 'next/headers'; 
-import { getSupabaseServerComponentClient } from '@/lib/supabase'; 
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; 
 import { DailyPlannerContainer } from '@/containers/dashboard/DailyPlannerContainer'; // Updated import
 import HealthMetrics from '@/components/dashboard/HealthMetrics';
 import { AIInsightsContainer } from '@/containers/dashboard/AIInsightsContainer'; // Updated import
 import QuickActions from '@/components/dashboard/QuickActions';
 import SessionStatus from '@/components/debug/SessionStatus';
-import { Database } from '@/types/database'; // Assuming you have this type
+// import { Database } from '@/types/database'; // Unused import
 
 export default async function Dashboard() {
   // const cookieStore = cookies(); // Handled by getSupabaseServerComponentClient
@@ -26,16 +26,17 @@ export default async function Dashboard() {
     return null; // Or some fallback UI
   }
   
-  // Fetch tasks for the daily planner
-  const { data: tasksData, error: tasksError } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('user_id', user.id) // Use user.id
-    .order('created_at', { ascending: false });
+  // tasksData is fetched by DailyPlannerContainer itself, so no need to fetch here.
+  // // Fetch tasks for the daily planner
+  // const { data: tasksData, error: tasksError } = await supabase
+  //   .from('tasks')
+  //   .select('*')
+  //   .eq('user_id', user.id) // Use user.id
+  //   .order('created_at', { ascending: false });
   
-  if (tasksError) {
-    console.error('Error fetching tasks:', tasksError);
-  }
+  // if (tasksError) {
+  //   console.error('Error fetching tasks:', tasksError);
+  // }
   
   // Fetch task logs for health metrics
   const { data: logsData, error: logsError } = await supabase

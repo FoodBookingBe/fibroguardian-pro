@@ -70,7 +70,7 @@ const nextConfig = withPWA(withBundleAnalyzer({
   },
   
   async headers() {
-    const { securityHeaders } = await import('./lib/security-headers'); // Import dynamisch
+    const { securityHeaders } = await import('./lib/security-headers.js'); // Import dynamisch
     return [
       {
         source: '/(.*)', // Pas toe op alle routes

@@ -7,7 +7,7 @@ import { useUpdateProfile } from '@/hooks/useMutations';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { Profile } from '@/types';
 import { useNotification } from '@/context/NotificationContext';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { ErrorMessage } from '@/lib/error-handler';
 import ProfileFormPresentational, { ProfileFormData } from '@/components/settings/ProfileFormPresentational';
 import { AlertMessage } from '@/components/common/AlertMessage';

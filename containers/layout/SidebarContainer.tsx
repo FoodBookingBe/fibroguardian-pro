@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, ReactElement } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useProfile } from '@/hooks/useSupabaseQuery'; // To get profile type
 import SidebarPresentational, { MenuItemP } from '@/components/layout/SidebarPresentational';
@@ -10,8 +10,7 @@ import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading 
 export default function SidebarContainer() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, session } // Removed unused 'session' variable
-    = useAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useProfile(user?.id, {

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
 import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
 import { ErrorMessage } from '@/lib/error-handler';
-import { getSupabaseBrowserClient } from '@/lib/supabase'; // Added import
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Added import
 
 // Taak toevoegen/bijwerken
 // TData is the type of data returned by the mutationFn on success (e.g., the updated/created task)
@@ -78,7 +78,7 @@ export function useDeleteTask(
       
       return responseData; // API returns { message: string }
     },
-    onSuccess: (data, taskId, context) => {
+    onSuccess: (_data, taskId, _context) => { // data and context marked as unused
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.removeQueries({ queryKey: ['task', taskId] });
       // Potentially invalidate user-specific task list if applicable
@@ -313,7 +313,7 @@ export function useDeleteReflectie(
       }
       return responseData;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => { // data marked as unused
       if (variables.userId) {
         queryClient.invalidateQueries({ queryKey: ['reflecties', variables.userId] });
       } else {
@@ -387,7 +387,7 @@ export function useDeleteSpecialistPatientRelation(
       }
       return responseData;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => { // data marked as unused
       // Invalidate lists of patients and specialists for the affected users
       // This might require knowing both specialistId and patientId from the deleted relation,
       // or having the currentUserId to invalidate their specific list.
@@ -416,7 +416,7 @@ interface SignInVariables {
 // For simplicity, we'll type the success data (TData) as the user object, session handling is often implicit.
 // Or more explicitly: interface SignInSuccessData { user: SupabaseUser; session: Session | null }
 // Sticking to User for now, as session is managed by Supabase client.
-import { User as SupabaseUser, AuthError, Session } from '@supabase/supabase-js'; // Import Supabase types
+import { User as SupabaseUser } from '@supabase/supabase-js'; // Removed unused AuthError, Session
 
 export function useSignInEmailPassword(
   options?: Omit<UseMutationOptions<SupabaseUser, ErrorMessage, SignInVariables>, 'mutationFn'>
@@ -444,7 +444,7 @@ export function useSignInEmailPassword(
       }
       return data.user;
     },
-    onSuccess: (user) => {
+    onSuccess: (_user) => { // user marked as unused
       queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
       queryClient.invalidateQueries({ queryKey: ['user'] }); // General user query if used
       // addNotification({ type: 'success', message: 'Succesvol ingelogd!' });
@@ -506,7 +506,7 @@ export function useSignUpWithEmailPassword(
       // data.session will also be null in that case.
       return { user: data.user }; 
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => { // data marked as unused
       // if (data.user) {
         // addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail.' });
       // } else {

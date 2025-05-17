@@ -1,10 +1,35 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'; // Updated import
+import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res }); // Use createMiddlewareClient
+  let res = NextResponse.next({
+    request: {
+      headers: new Headers(req.headers), // Ensure new headers instance for modification
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          // If the cookie is set, update the request and response cookies
+          // The Supabase client will handle refreshing session and updating cookies.
+          // We need to ensure the response object has these cookies set.
+          res.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          // If the cookie is removed, update the response cookies
+          res.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
+
   const { data: { session } } = await supabase.auth.getSession();
 
   // If no session, redirect to login except for public paths
@@ -54,7 +79,7 @@ export async function middleware(req: NextRequest) {
   }
   
   // CSP and other security headers (can be kept or adjusted)
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  // const nonce = Buffer.from(crypto.randomUUID()).toString('base64'); // Nonce not currently used in CSP
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;

@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { Inzicht, TaskLog } from '@/types';
 import AIInsightVisualization from '@/components/ai/AIInsightVisualization';
 import Link from 'next/link';
@@ -15,42 +15,44 @@ export default function InzichtenPage() {
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'dag' | 'week' | 'maand'>('all');
   
-  useEffect(() => {
-    const fetchInsights = async () => {
-      try {
-        const supabaseClient = getSupabaseBrowserClient();
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        
-        if (!user) {
-          router.push('/auth/login');
-          return;
-        }
-        
-        let query = supabaseClient
-          .from('inzichten')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (filter !== 'all') {
-          query = query.eq('periode', filter);
-        }
-        
-        const { data, error: fetchError } = await query;
-        
-        if (fetchError) throw fetchError;
-        
-        setInsights(data || []);
-      } catch (error: any) {
-        console.error('Fout bij ophalen inzichten:', error);
-        setError(error.message || 'Er is een fout opgetreden bij het ophalen van de inzichten');
-      } finally {
-        setLoading(false);
+  const fetchInsights = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const supabaseClient = getSupabaseBrowserClient();
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      
+      if (!user) {
+        router.push('/auth/login');
+        return;
       }
-    };
-    
-    fetchInsights();
+      
+      let query = supabaseClient
+        .from('inzichten')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (filter !== 'all') {
+        query = query.eq('periode', filter);
+      }
+      
+      const { data, error: fetchError } = await query;
+      
+      if (fetchError) throw fetchError;
+      
+      setInsights(data || []);
+    } catch (error: any) {
+      console.error('Fout bij ophalen inzichten:', error);
+      setError(error.message || 'Er is een fout opgetreden bij het ophalen van de inzichten');
+    } finally {
+      setLoading(false);
+    }
   }, [router, filter]);
+
+  useEffect(() => {
+    fetchInsights();
+  }, [fetchInsights]);
   
   // Fetch logs for a specific insight when expanded
   useEffect(() => {
@@ -224,7 +226,13 @@ export default function InzichtenPage() {
       {error && (
         <div className="mb-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-            {error}
+            <p>{error}</p>
+            <button
+              onClick={fetchInsights}
+              className="mt-2 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+            >
+              Probeer opnieuw
+            </button>
           </div>
         </div>
       )}
@@ -237,7 +245,7 @@ export default function InzichtenPage() {
                 type="button"
                 onClick={() => toggleExpand(insight.id)}
                 className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset"
-                aria-expanded={expandedInsightId === insight.id ? 'true' : 'false'}
+                aria-expanded={expandedInsightId === insight.id}
                 aria-controls={`insight-details-${insight.id}`}
               >
                 <div className="flex items-start">

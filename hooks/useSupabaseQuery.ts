@@ -1,7 +1,7 @@
-import { useQuery, QueryKey, UseQueryResult } from '@tanstack/react-query'; 
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { useQuery, QueryKey } from '@tanstack/react-query'; // Removed UseQueryResult
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { handleSupabaseError, ErrorMessage } from '@/lib/error-handler';
-import { Task, Profile, TaskLog, Reflectie, Inzicht, SpecialistPatient } from '@/types';
+import { Task, Profile, TaskLog, Reflectie, Inzicht } from '@/types'; // Removed SpecialistPatient
 import { QueryHookResult, SupabaseQueryHookOptions, SupabaseQueryFunction } from '@/types/query'; 
 import { STALE_TIME } from '@/lib/QueryClientConfig'; 
 

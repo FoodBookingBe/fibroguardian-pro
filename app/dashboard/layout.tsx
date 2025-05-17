@@ -1,4 +1,4 @@
-import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Updated import
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Updated import
 import { redirect } from 'next/navigation';
 import { ReactNode } from 'react';
 import { handleServerError } from '@/utils/error-handling'; // Import handleServerError

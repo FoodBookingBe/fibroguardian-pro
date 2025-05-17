@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import AddSpecialistButtonContainer from '@/containers/specialisten/AddSpecialistButtonContainer'; // Updated import
 import { useAuth } from '@/components/auth/AuthProvider';
 import SpecialistLoadingSkeleton from '@/components/specialisten/SpecialistLoadingSkeleton';
 import EmptySpecialistState from '@/components/specialisten/EmptySpecialistState';
 import SpecialistsList from '@/components/specialisten/SpecialistsList';
-import { Specialist } from '@/types'; // Assuming Specialist type is defined in types/index.ts or similar
+import { Profile as Specialist } from '@/types'; // Use Profile and alias as Specialist for minimal changes
 
 interface MijnSpecialistenClientProps {
   user: User;
-  specialists: Specialist[];
+  specialists: Specialist[]; // This will now refer to Profile aliased as Specialist
   userProfile: any;
 }
 
@@ -20,6 +20,11 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
   // Use the authenticated user from context to ensure consistency
   const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Initialize localSpecialists with the specialists prop.
+  // The type Specialist is an alias for Profile here due to the import.
+  const [localSpecialists, setLocalSpecialists] = useState<Specialist[]>(specialists);
+  const [isLoading, setIsLoading] = useState(false); // Added for remove operation
 
   useEffect(() => {
     setIsClient(true);
@@ -58,9 +63,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
   }
 
   // At this point, user is authenticated and we are on the client
-  const [error, setError] = useState<string | null>(null);
-  const [localSpecialists, setLocalSpecialists] = useState<Specialist[]>(specialists);
-  const [isLoading, setIsLoading] = useState(false); // Added for remove operation
+  // Hooks for error, localSpecialists, isLoading were moved up
 
   const handleRemoveSpecialist = async (specialistId: string) => {
     if (!user || !window.confirm('Weet u zeker dat u deze specialist wilt verwijderen?')) return;

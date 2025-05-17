@@ -1,3 +1,12 @@
+// This file is deprecated and its contents have been moved to
+// lib/supabase-client.ts and lib/supabase-server.ts.
+// It can be deleted after confirming no part of the application still imports from it.
+// If the build breaks after this change, it means some file is still importing from here.
+// Update those imports to use either lib/supabase-client.ts or lib/supabase-server.ts accordingly.
+
+/*
+Original content was:
+
 import { createBrowserClient, createServerClient as createSSRServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClientComponentClient as createOldClientComponentClient } from '@supabase/auth-helpers-nextjs'; // Keep for existing server components if needed
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -110,3 +119,5 @@ export const getSupabaseRouteHandlerClient = () => {
 //   // If issues persist, this specific client might need to be replaced with getSupabaseServerComponentClient (ssr).
 //   return createOldClientComponentClient<Database>();
 // };
+
+*/

@@ -5,7 +5,7 @@ import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
 import { ErrorMessage } from '@/lib/error-handler';
 import AddSpecialistButtonPresentational from '@/components/specialisten/AddSpecialistButtonPresentational';
 import { useNotification } from '@/context/NotificationContext';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function AddSpecialistButtonContainer() {

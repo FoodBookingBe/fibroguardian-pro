@@ -1,5 +1,6 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+// import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old way
+// import { cookies } from 'next/headers'; // Handled by getSupabaseServerComponentClient
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // New way
 import OverzichtClient from './overzicht-client';
 import { User } from '@supabase/supabase-js'; // Import User type
 import { Profile, Task, TaskLog, Reflectie } from '@/types'; // Import custom types
@@ -19,7 +20,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable caching
 
 export default async function OverzichtPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = getSupabaseServerComponentClient(); // Use the new helper
   
   // Haal gebruikerssessie op - middleware zorgt al voor authenticatie
   // Use getUser() instead of getSession() for server components

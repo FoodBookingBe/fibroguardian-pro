@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 // import RapportList from '@/components/rapporten/RapportList'; // Assuming a component to list reports
-import RapportGenerator from '@/components/rapporten/RapportGenerator'; // Assuming a component to generate reports
+import RapportGeneratorContainer from '@/containers/rapporten/RapportGeneratorContainer'; // Use the container
 import DashboardLayout from '@/components/layout/DashboardLayout'; // Import DashboardLayout
 
 export default async function RapportenPage() {
@@ -48,7 +48,7 @@ export default async function RapportenPage() {
           Nieuw Rapport
         </Link>
       </header>
-      <RapportGenerator />
+      <RapportGeneratorContainer />
       {/* <RapportList rapporten={rapporten || []} /> */}
       {/* <p>Hier komt de functionaliteit voor het beheren en genereren van rapporten.</p>
       <p>Veronderstelt componenten zoals `RapportGenerator` en `RapportList`.</p> */}

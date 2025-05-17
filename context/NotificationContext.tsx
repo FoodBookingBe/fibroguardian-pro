@@ -1,3 +1,4 @@
+"use client";
 // context/NotificationContext.tsx
 import { createContext, useContext, useState, ReactNode } from 'react';
 

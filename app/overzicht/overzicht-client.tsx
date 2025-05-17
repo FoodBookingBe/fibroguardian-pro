@@ -61,47 +61,13 @@ export default function OverzichtClient({
 }: OverzichtClientProps) {
   const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
+  const [activeTab, setActiveTab] = useState<'dag' | 'week'>('dag');
+  const [aiInsights, setAiInsights] = useState<string[]>([]);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
-  console.log('[OverzichtClient] Rendering with:', { 
-    hasServerUser: !!serverUser, 
-    hasContextUser: !!user,
-    authLoading,
-    isClient,
-    userProfile,
-    tasksCount: tasks?.length,
-    taskLogsCount: taskLogs?.length,
-    reflectiesCount: reflecties?.length
-  });
-  
-  if (authLoading || !isClient) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" aria-label="Laden..."></div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!user) { 
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 p-4 rounded-md">
-          <p className="text-red-700">Authenticatie is vereist. U wordt mogelijk doorgestuurd naar de login pagina.</p>
-        </div>
-      </div>
-    );
-  }
-  
-  const [activeTab, setActiveTab] = useState<'dag' | 'week'>('dag');
-  const [aiInsights, setAiInsights] = useState<string[]>([]);
-  
-  const todayLogs = (taskLogs || []).filter(log => log.eind_tijd && typeof log.eind_tijd === 'string' && isToday(parseISO(log.eind_tijd)));
-  
+
   useEffect(() => {
     const generateAiInsights = () => {
       const insights: string[] = [];
@@ -169,8 +135,48 @@ export default function OverzichtClient({
       setAiInsights(insights);
     };
     
-    if(isClient) generateAiInsights();
+    if(isClient) {
+      generateAiInsights();
+    }
   }, [reflecties, taskLogs, isClient]);
+  
+  console.log('[OverzichtClient] Rendering with:', { 
+    hasServerUser: !!serverUser, 
+    hasContextUser: !!user,
+    authLoading,
+    isClient,
+    userProfile,
+    tasksCount: tasks?.length,
+    taskLogsCount: taskLogs?.length,
+    reflectiesCount: reflecties?.length
+  });
+  
+  if (authLoading || !isClient) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" aria-label="Laden..."></div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) { 
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 p-4 rounded-md">
+          <p className="text-red-700">Authenticatie is vereist. U wordt mogelijk doorgestuurd naar de login pagina.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // const [activeTab, setActiveTab] = useState<'dag' | 'week'>('dag'); // Moved up
+  // const [aiInsights, setAiInsights] = useState<string[]>([]); // Moved up
+  
+  const todayLogs = (taskLogs || []).filter(log => log.eind_tijd && typeof log.eind_tijd === 'string' && isToday(parseISO(log.eind_tijd)));
+  
+  // useEffect for generateAiInsights moved up before conditional returns
   
   const weekDays: Date[] = [];
   if (startOfWeek && typeof startOfWeek === 'string') {

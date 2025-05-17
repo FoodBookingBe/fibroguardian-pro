@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useRouter, usePathname } from 'next/navigation';
 import { Profile } from '@/types';
 import { useProfile } from '@/hooks/useSupabaseQuery'; // Import useProfile
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const overallLoading = loadingAuth || (!!user && loadingProfile);
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading: overallLoading, loadingAuth, loadingProfile }}>
+    <AuthContext.Provider value={{ user, session, profile: profile ?? null, loading: overallLoading, loadingAuth, loadingProfile }}>
       {children}
     </AuthContext.Provider>
   );

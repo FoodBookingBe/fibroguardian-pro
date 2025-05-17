@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useProfile } from '@/hooks/useSupabaseQuery';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import TopbarPresentational, { TopbarProfileData } from '@/components/layout/TopbarPresentational';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
