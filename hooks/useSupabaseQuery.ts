@@ -227,59 +227,10 @@ export function useReflecties(
     }
   );
 }
-
-// Hook to get patients for a specialist, including relationId
-export function useMyPatients(
-  specialistId: string | undefined,
-  options?: SupabaseQueryHookOptions<PatientWithRelation[], ErrorMessage, PatientWithRelation[]>
-): QueryHookResult<PatientWithRelation[], ErrorMessage> {
-  return useSupabaseQuery<PatientWithRelation[], ErrorMessage, PatientWithRelation[]>(
-    ['myPatients', specialistId],
-    async () => {
-      if (!specialistId) return [];
-      const supabase = getSupabaseBrowserClient();
-      
-      const { data: relations, error: relationError } = await supabase
-        .from('specialist_patienten')
-        .select('id, patient_id') // Select relation ID and patient_id
-        .eq('specialist_id', specialistId);
-
-      if (relationError) throw handleSupabaseError(relationError, `myPatients-relations-fetch-${specialistId}`);
-      if (!relations || relations.length === 0) return [];
-      
-      const patientIds = relations.map(r => r.patient_id);
-      if (patientIds.length === 0) return [];
-
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select<string, Profile>('*')
-        .in('id', patientIds);
-        
-      if (profileError) throw handleSupabaseError(profileError, `myPatients-profiles-fetch-${specialistId}`);
-      
-      const relationMap = relations.reduce((map, relation) => {
-        map[relation.patient_id] = relation.id;
-        return map;
-      }, {} as Record<string, string>);
-
-      const patientsWithRelation = (profiles || []).map(profile => ({
-        ...profile,
-        relationId: relationMap[profile.id]
-      }));
-      
-      return patientsWithRelation;
-    },
-    {
-      enabled: !!specialistId,
-      staleTime: STALE_TIME.SPECIALIST_PATIENT_RELATIONS,
-      ...options,
-    }
-  );
-}
-
+ 
 // Hook to get specialists for a patient, including relationId
 export function useMySpecialists(
-  patientId: string | undefined,
+  patientId: string | undefined, // Added missing patientId parameter
   options?: SupabaseQueryHookOptions<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>
 ): QueryHookResult<SpecialistWithRelation[], ErrorMessage> {
   return useSupabaseQuery<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>(

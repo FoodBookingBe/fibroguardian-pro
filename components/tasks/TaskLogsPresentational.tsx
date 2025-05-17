@@ -1,128 +1,84 @@
 'use client';
-import { useState, useEffect } from 'react'; // useEffect might not be needed
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { useTaskLogs, useRecentLogs, RecentLogWithTaskTitle } from '@/hooks/useSupabaseQuery';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // Use new SkeletonLoader
+import { RecentLogWithTaskTitle } from '@/hooks/useSupabaseQuery'; // Assuming this type includes necessary task details
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { ErrorMessage } from '@/lib/error-handler';
-import { Task } from '@/types'; // Task might still be needed for log.task type if not fully covered by RecentLogWithTaskTitle
 
-interface TaskLogsProps {
-  userId?: string; // Optional: if provided, show logs for a specific user (for useRecentLogs)
-  taskId?: string; // Optional: if provided, show logs for a specific task (for useTaskLogs)
-  limit?: number; 
-  showTaskDetails?: boolean; // This might become implicit based on data from hook
+interface TaskLogsPresentationalProps {
+  logsToDisplay: RecentLogWithTaskTitle[];
+  isLoading: boolean;
+  isError: boolean;
+  error: ErrorMessage | null;
+  expandedLogId: string | null;
+  onToggleExpand: (id: string) => void;
+  formatDate: (dateString: Date | string | undefined) => string;
+  calculateDuration: (startTime?: Date | string, endTime?: Date | string) => string;
+  limit: number;
+  taskId?: string; // For "Bekijk alle logs" link context
   className?: string;
+  title?: string; // Allow custom title
 }
 
-export default function TaskLogs({ 
-  userId: propUserId, 
-  taskId, 
-  limit = 10, 
-  // showTaskDetails = true, // Data from hooks will determine if task details are present
-  className = ''
-}: TaskLogsProps) {
-  const { user: authUser } = useAuth();
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+export default function TaskLogsPresentational({
+  logsToDisplay,
+  isLoading,
+  isError,
+  error,
+  expandedLogId,
+  onToggleExpand,
+  formatDate,
+  calculateDuration,
+  limit,
+  taskId,
+  className = '',
+  title = "Activiteiten Logs"
+}: TaskLogsPresentationalProps) {
 
-  // Determine which hook to use based on provided props
-  const effectiveUserId = propUserId || authUser?.id;
-
-  const queryOptions = {
-    // React Query options can be passed here if needed, e.g., initialData
-  };
-
-  // Fetch logs for a specific task if taskId is provided
-  const { 
-    data: taskSpecificLogs, 
-    isLoading: isLoadingTaskLogs, 
-    error: taskLogsError, 
-    isError: isTaskLogsError 
-  } = useTaskLogs(taskId, { enabled: !!taskId, ...queryOptions });
-
-  // Fetch recent logs for a user if no taskId is provided but a userId is available
-  const { 
-    data: recentUserLogs, 
-    isLoading: isLoadingRecentLogs, 
-    error: recentLogsError, 
-    isError: isRecentLogsError 
-  } = useRecentLogs(effectiveUserId, limit, { enabled: !taskId && !!effectiveUserId, ...queryOptions });
-
-  // Determine which data, loading, and error states to use
-  const isLoading = taskId ? isLoadingTaskLogs : isLoadingRecentLogs;
-  const isError = taskId ? isTaskLogsError : isRecentLogsError;
-  const error = taskId ? taskLogsError : recentLogsError;
-  const logsToDisplay: RecentLogWithTaskTitle[] = (taskId ? taskSpecificLogs : recentUserLogs) || [];
-  
-  // Format date for display
-  const formatDate = (dateString: Date | string | undefined) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('nl-BE', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-  };
-  
-  const calculateDuration = (startTime?: Date | string, endTime?: Date | string) => {
-    if (!startTime || !endTime) return 'Onbekend';
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const durationMs = end.getTime() - start.getTime();
-    const hours = Math.floor(durationMs / (1000 * 60 * 60));
-    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-  
-  const toggleExpand = (id: string) => {
-    setExpandedLogId(prevId => (prevId === id ? null : id));
-  };
-  
-  if (isLoading && logsToDisplay.length === 0) { // Show skeleton if loading and no data yet
+  if (isLoading && logsToDisplay.length === 0) {
     return (
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-        <h2 className="text-lg font-semibold mb-4">Activiteiten Logs</h2>
+        <h2 className="text-lg font-semibold mb-4">{title}</h2>
         <SkeletonLoader type="logs" count={limit > 5 ? 5 : limit} />
       </div>
     );
   }
-  
-  const typedError = error as ErrorMessage | null;
-  if (isError && typedError) {
+
+  if (isError && error) {
     return (
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-        <h2 className="text-lg font-semibold mb-4">Activiteiten Logs</h2>
-        <AlertMessage type="error" title="Fout bij laden logs" message={typedError.userMessage || 'Kon de logs niet ophalen.'} />
+        <h2 className="text-lg font-semibold mb-4">{title}</h2>
+        <AlertMessage type="error" title="Fout bij laden logs" message={error.userMessage || 'Kon de logs niet ophalen.'} />
       </div>
     );
   }
-  
+
   if (logsToDisplay.length === 0) {
     return (
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-        <h2 className="text-lg font-semibold mb-4">Activiteiten Logs</h2>
+        <h2 className="text-lg font-semibold mb-4">{title}</h2>
         <div className="p-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
           <p className="text-gray-500">Geen activiteiten logs gevonden</p>
-          {!taskId && (
-            <Link href="/taken" className="mt-2 inline-block text-purple-600 hover:text-purple-800">
-              Ga naar taken
+          {!taskId && ( // Only show general link if not specific to a task
+            <Link href="/taken/logs" className="mt-2 inline-block text-purple-600 hover:text-purple-800">
+              Bekijk alle logs
             </Link>
           )}
         </div>
       </div>
     );
   }
-  
+
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-      <h2 className="text-lg font-semibold mb-4">Activiteiten Logs</h2>
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <div className="space-y-3">
         {logsToDisplay.map(log => (
           <div key={log.id} className="border rounded-lg overflow-hidden transition-all duration-200">
             <button
               type="button"
-              onClick={() => toggleExpand(log.id)}
+              onClick={() => onToggleExpand(log.id)}
               className="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset"
               aria-expanded={expandedLogId === log.id ? 'true' : 'false'}
               aria-controls={`log-details-${log.id}`}
@@ -153,11 +109,9 @@ export default function TaskLogs({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                   <div>
                     <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Taak Details</h4>
-                    {log.tasks && ( // tasks object now comes from the hook
+                    {log.tasks && (
                       <div className="space-y-1">
                         <p className="text-sm"><span className="font-medium">Type:</span> {log.tasks.type === 'taak' ? 'Taak' : 'Opdracht'}</p>
-                        {/* Assuming 'duur' is not part of tasks(titel, type) select. If needed, adjust hook. */}
-                        {/* <p className="text-sm"><span className="font-medium">Geplande duur:</span> {log.tasks.duur} minuten</p> */}
                         <p className="text-sm"><span className="font-medium">Werkelijke duur:</span> {log.eind_tijd ? calculateDuration(log.start_tijd, log.eind_tijd) : 'Nog bezig'}</p>
                       </div>
                     )}

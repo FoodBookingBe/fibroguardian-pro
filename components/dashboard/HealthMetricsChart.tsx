@@ -1,16 +1,27 @@
 'use client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TaskLog } from '@/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react'; // Added useMemo
 
+// Define the keys for metrics explicitly for better type safety, matching HealthMetrics component
+type PlottableMetricKey = 'pijn_score' | 'vermoeidheid_score' | 'energie_na' | 'hartslag';
+
+interface ChartDataItem {
+  originalDate: Date;
+  name: string;
+  pijn_score?: number;
+  vermoeidheid_score?: number;
+  energie_na?: number;
+  hartslag?: number;
+}
 interface HealthMetricsChartProps {
   logs: TaskLog[];
-  metricKey?: keyof Pick<TaskLog, 'pijn_score' | 'vermoeidheid_score' | 'energie_na' | 'hartslag'>; // Optional specific metric
+  metricKey?: PlottableMetricKey; // Optional specific metric
 }
 
 export default function HealthMetricsChart({ logs, metricKey }: HealthMetricsChartProps) {
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [activeMetric, setActiveMetric] = useState<string>(metricKey || 'pijn_score');
+  // const [chartData, setChartData] = useState<any[]>([]); // Replaced by useMemo
+  const [activeMetric, setActiveMetric] = useState<PlottableMetricKey>(metricKey || 'pijn_score');
 
   useEffect(() => {
     if (metricKey) {
@@ -18,26 +29,24 @@ export default function HealthMetricsChart({ logs, metricKey }: HealthMetricsCha
     }
   }, [metricKey]);
 
-  useEffect(() => {
-    if (logs && logs.length > 0) {
-      const processedData = logs.map(log => {
-        const date = new Date(log.start_tijd);
-        return {
-          originalDate: date,
-          pijn_score: log.pijn_score,
-          vermoeidheid_score: log.vermoeidheid_score,
-          energie_na: log.energie_na, // Assuming 'energie_na' is a relevant metric to chart
-          hartslag: log.hartslag,
-          name: date.toLocaleDateString('nl-BE', { day: '2-digit', month: 'short' })
-        };
-      }).sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
-      setChartData(processedData);
-    } else {
-      setChartData([]);
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (!logs || logs.length === 0) {
+      return [];
     }
+    return logs.map(log => {
+      const date = new Date(log.start_tijd);
+      return {
+        originalDate: date,
+        pijn_score: log.pijn_score,
+        vermoeidheid_score: log.vermoeidheid_score,
+        energie_na: log.energie_na,
+        hartslag: log.hartslag,
+        name: date.toLocaleDateString('nl-BE', { day: '2-digit', month: 'short' })
+      };
+    }).sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
   }, [logs]);
 
-  const metricsInfo: Record<string, { label: string, color: string, domain?: [number, number | 'auto'] }> = {
+  const metricsInfo: Record<PlottableMetricKey, { label: string, color: string, domain?: [number, number | 'auto'] }> = {
     'pijn_score': { label: 'Pijn', color: '#ef4444', domain: [0, 20] },
     'vermoeidheid_score': { label: 'Vermoeidheid', color: '#f97316', domain: [0, 20] },
     'energie_na': { label: 'Energie (na)', color: '#10b981', domain: [0, 20] },

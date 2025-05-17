@@ -1,32 +1,18 @@
 'use client';
-import { useEffect } from 'react';
-import { useNotification, Notification } from '@/context/NotificationContext'; // Import Notification type
-// import { useAuth } from '@/components/auth/AuthProvider'; // useAuth not directly used in this version
+// import { useEffect } from 'react'; // No longer needed for auto-dismissal here
+import { useNotification, Notification } from '@/context/NotificationContext';
 
 const NotificationSystem = () => {
-  const { state, removeNotification } = useNotification();
-  // const { user } = useAuth(); // Not used in this version, can be removed if not needed for future logic
+  const { notifications, removeNotification } = useNotification(); // Destructure notifications directly
 
-  // Auto-dismiss notifications after their duration (this logic is also in NotificationProvider, consider centralizing)
-  useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
-    state.notifications.forEach(notification => {
-      if (notification.duration) {
-        const timer = setTimeout(() => {
-          removeNotification(notification.id);
-        }, notification.duration);
-        timers.push(timer);
-      }
-    });
-    // Cleanup timers when component unmounts or notifications change
-    return () => timers.forEach(clearTimeout);
-  }, [state.notifications, removeNotification]);
+  // Auto-dismissal logic is handled by NotificationProvider.
+  // This component is now purely for rendering the notifications from context.
 
-  if (state.notifications.length === 0) {
+  if (notifications.length === 0) {
     return null;
   }
 
-  const getIcon = (type: Notification['type']) => { // Use imported Notification['type']
+  const getIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
         return <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>;
@@ -52,14 +38,14 @@ const NotificationSystem = () => {
 
   return (
     <div className="fixed top-4 right-4 z-[100] w-full max-w-xs sm:max-w-sm space-y-3 pointer-events-none"> {/* Increased z-index */}
-      {state.notifications.map(notification => (
+      {notifications.map((notification: Notification) => ( // Explicitly type notification
         <div
           key={notification.id}
-          className={`rounded-md shadow-lg border p-4 pointer-events-auto transition-all duration-300 ease-out transform 
-                      ${getBgColor(notification.type)} 
+          className={`rounded-md shadow-lg border p-4 pointer-events-auto transition-all duration-300 ease-out transform
+                      ${getBgColor(notification.type)}
                       animate-fadeInRight`} // Added animation class (needs to be defined in CSS)
           role="alert"
-          aria-live={notification.type === 'error' || notification.type === 'warning' ? 'assertive' : 'polite'}
+          aria-live={(notification.type === 'error' || notification.type === 'warning') ? 'assertive' : 'polite'} // Ensure expression is clean
         >
           <div className="flex items-start">
             <div className="flex-shrink-0 mt-0.5"> {/* Adjusted margin */}
@@ -69,11 +55,7 @@ const NotificationSystem = () => {
               <p className="text-sm font-medium">
                 {notification.message}
               </p>
-              {notification.details && (
-                <p className="mt-1 text-xs opacity-80">
-                  {notification.details}
-                </p>
-              )}
+              {/* notification.details was removed as it's not in Notification type */}
             </div>
             <div className="ml-4 flex-shrink-0 flex">
               <button

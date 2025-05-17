@@ -1,9 +1,10 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js'; // AuthError was unused
+import { Session, User } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation';
-import { Profile } from '@/types'; // Import Profile type
+import { Profile } from '@/types';
+import { useProfile } from '@/hooks/useSupabaseQuery'; // Import useProfile
 
 interface AuthContextType {
   user: User | null;
@@ -30,20 +31,17 @@ export const useAuth = () => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  // const [profile, setProfile] = useState<Profile | null>(null); // Will come from useProfile
   const [loadingAuth, setLoadingAuth] = useState(true); // For auth session
-  const [loadingProfile, setLoadingProfile] = useState(false); // For profile data
-  // const [authError, setAuthError] = useState<string | null>(null); // authError state was not used
-  const router = useRouter(); 
+  // const [loadingProfile, setLoadingProfile] = useState(false); // Will come from useProfile
+  const router = useRouter();
   const pathname = usePathname(); 
 
   const handleAuthStateChange = useCallback((_event: string, sessionState: Session | null) => {
     setSession(sessionState);
     const currentUser = sessionState?.user ?? null;
     setUser(currentUser);
-    if (!currentUser) { // If user logs out, clear profile
-      setProfile(null);
-    }
+    // Profile will be cleared/refetched by useProfile hook when user changes
     setLoadingAuth(false);
     // setAuthError(null);
   }, []);
@@ -60,9 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // setAuthError(error.message);
         setSession(null);
         setUser(null);
-        setProfile(null); // Clear profile on error
+        // Profile will be null if user is null via useProfile
       } else {
-        // setAuthError(null);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
       }
@@ -77,35 +74,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [handleAuthStateChange]);
 
-  // Effect for fetching user profile when user object changes
-  useEffect(() => {
-    if (user && !profile) { // Fetch profile if user exists and profile is not yet loaded
-      setLoadingProfile(true);
-      const supabase = getSupabaseBrowserClient();
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('[AuthProvider] Error fetching profile:', error.message);
-            // setAuthError(error.message); // Can use authError or a separate profileError state
-            setProfile(null);
-          } else {
-            setProfile(data as Profile | null);
-          }
-          setLoadingProfile(false);
-        });
-        // .catch(err => { // This .catch is likely redundant as .then handles the error from Supabase client
-        //   console.error('[AuthProvider] Unexpected error fetching profile:', err);
-        //   setLoadingProfile(false);
-        // });
-    } else if (!user) {
-      setProfile(null); // Clear profile if user logs out
-    }
-  }, [user]); // Re-run when user changes
-
+  // Fetch profile using useProfile hook
+  const {
+    data: profile,
+    isLoading: loadingProfile,
+    // error: profileError, // Errors can be handled globally or locally if needed
+  } = useProfile(user?.id, {
+    enabled: !!user, // Only fetch if user is available
+  });
+ 
   // Effect for route protection
   useEffect(() => {
     if (loadingAuth) return; // Wait for auth state to be determined

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
-import AddSpecialistButton from '@/components/specialisten/AddSpecialistButton';
+import AddSpecialistButtonContainer from '@/containers/specialisten/AddSpecialistButtonContainer'; // Updated import
 import { useAuth } from '@/components/auth/AuthProvider';
 import SpecialistLoadingSkeleton from '@/components/specialisten/SpecialistLoadingSkeleton';
 import EmptySpecialistState from '@/components/specialisten/EmptySpecialistState';
@@ -90,7 +90,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Mijn Specialisten</h1>
-          <AddSpecialistButton />
+          <AddSpecialistButtonContainer /> {/* Updated component */}
         </div>
 
         {error && (

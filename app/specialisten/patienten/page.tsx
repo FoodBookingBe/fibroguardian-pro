@@ -1,6 +1,6 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PatientList from '@/components/specialisten/PatientList';
-import AddPatientButton from '@/components/specialisten/AddPatientButton';
+import AddPatientButtonContainer from '@/containers/specialisten/AddPatientButtonContainer'; // Updated import
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
 // import { cookies } from 'next/headers'; // Handled by centralized client
 import { getSupabaseServerComponentClient } from '@/lib/supabase'; // New import
@@ -41,7 +41,7 @@ export default async function PatientenPage() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Mijn Patiënten</h1>
-          <AddPatientButton />
+          <AddPatientButtonContainer /> {/* Updated component */}
         </div>
         
         <PatientList patients={patients} />

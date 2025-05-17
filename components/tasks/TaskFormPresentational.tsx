@@ -1,175 +1,65 @@
 'use client';
-import { useState, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { AlertMessage } from '@/components/common/AlertMessage'; // Use named import
-import { Task } from '@/types';
-import { useUpsertTask } from '@/hooks/useMutations';
-import { useTask } from '@/hooks/useSupabaseQuery';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import React, { FormEvent } from 'react';
+import { AlertMessage } from '@/components/common/AlertMessage';
+import { Task } from '@/types'; // Assuming Task type is defined
 import { ErrorMessage } from '@/lib/error-handler';
 
-interface TaskFormProps {
-  taskId?: string;
-  initialData?: Partial<Task>;
-  isEditing?: boolean;
-  initialType?: 'taak' | 'opdracht';
+// This defines the shape of the data the form inputs will manage
+export interface TaskFormData {
+  type: 'taak' | 'opdracht';
+  titel: string;
+  beschrijving: string;
+  duur: string; // Kept as string for input compatibility
+  hartslag_doel: string; // Kept as string for input compatibility
+  herhaal_patroon: 'eenmalig' | 'dagelijks' | 'wekelijks' | 'maandelijks' | 'aangepast';
+  dagen_van_week: string[];
+  metingen: string[];
+  notities: string;
+  labels: string[];
 }
 
-// Helper to convert Task fields to form-compatible strings
-const taskToFormData = (task: Partial<Task> | null | undefined, defaultType: 'taak' | 'opdracht') => {
-  return {
-    type: task?.type || defaultType,
-    titel: task?.titel || '',
-    beschrijving: task?.beschrijving || '',
-    duur: task?.duur?.toString() || '15', // Default to string '15'
-    hartslag_doel: task?.hartslag_doel?.toString() || '', // Default to empty string
-    herhaal_patroon: task?.herhaal_patroon || 'eenmalig',
-    dagen_van_week: task?.dagen_van_week || [],
-    metingen: task?.metingen || ['energie', 'pijn', 'vermoeidheid'],
-    notities: task?.notities || '',
-    labels: task?.labels || [],
-  };
-};
+interface TaskFormPresentationalProps {
+  formState: TaskFormData;
+  isEditing: boolean;
+  isUpserting: boolean;
+  upsertError: ErrorMessage | null;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onDayToggle: (day: string) => void;
+  onMeasurementToggle: (measurement: string) => void;
+  onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: FormEvent) => void;
+  onCancel: () => void;
+}
 
-export default function TaskForm({ taskId, initialData, isEditing = false, initialType = 'taak' }: TaskFormProps) {
-  const router = useRouter();
-  const { user } = useAuth();
-
-  // Form field values, kept as strings for input compatibility where needed
-  const [formState, setFormState] = useState(taskToFormData(initialData, initialType));
-
-  // Fetch existing task data if editing and taskId is provided
-  const { 
-    data: fetchedTaskData, 
-    isLoading: isLoadingTask, 
-    error: fetchTaskError, // This will be ErrorMessage type
-    isError: isFetchTaskError,
-  } = useTask(taskId, { 
-    enabled: !!taskId && isEditing && !initialData, // Only fetch if editing, taskId given, and no initialData prop
-  });
-
-  // Populate form with initialData prop or fetched data from useTask
-  useEffect(() => {
-    if (isEditing) {
-      const dataToUse = initialData || fetchedTaskData;
-      if (dataToUse) {
-        setFormState(taskToFormData(dataToUse, initialType));
-      }
-    }
-  }, [initialData, fetchedTaskData, isEditing, initialType]);
-
-  // Mutation hook for upserting task
-  const { mutate: upsertTask, isPending: isUpserting, error: upsertHookError, isError: isUpsertError } = useUpsertTask();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleDayToggle = (day: string) => {
-    const currentDays = formState.dagen_van_week || [];
-    const days = [...currentDays];
-    const index = days.indexOf(day);
-    if (index > -1) {
-      days.splice(index, 1);
-    } else {
-      days.push(day);
-    }
-    setFormState(prev => ({ ...prev, dagen_van_week: days }));
-  };
-
-  const handleMeasurementToggle = (measurement: string) => {
-    const currentMetingen = formState.metingen || [];
-    const measurements = [...currentMetingen];
-    const index = measurements.indexOf(measurement);
-    if (index > -1) {
-      measurements.splice(index, 1);
-    } else {
-      measurements.push(measurement);
-    }
-    setFormState(prev => ({ ...prev, metingen: measurements }));
-  };
-
-  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const labels = e.target.value.split(',').map(label => label.trim()).filter(label => label !== '');
-    setFormState(prev => ({ ...prev, labels }));
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      console.error("User not authenticated. Cannot submit form.");
-      // Optionally set a local error state to display in AlertMessage
-      return;
-    }
-
-    const taskToSubmit: Partial<Task> = {
-      ...formState,
-      user_id: user.id,
-      duur: formState.duur ? parseInt(formState.duur, 10) : undefined, // Use undefined
-      hartslag_doel: formState.hartslag_doel ? parseInt(formState.hartslag_doel, 10) : undefined, // Use undefined
-      // Ensure arrays are passed correctly
-      dagen_van_week: formState.dagen_van_week || [],
-      metingen: formState.metingen || [],
-      labels: formState.labels || [],
-    };
-
-    if (isEditing && taskId) {
-      taskToSubmit.id = taskId;
-    } else {
-      delete taskToSubmit.id; // Ensure no id is sent for new tasks
-    }
-    
-    upsertTask(taskToSubmit, {
-      onSuccess: (savedTask) => {
-        console.log('Task saved:', savedTask);
-        // TODO: Re-add planning logic if necessary, perhaps as a separate mutation or server-side effect
-        router.push('/taken');
-      },
-      // onError is handled by upsertHookError and isUpsertError from the hook
-    });
-  };
-
-  if (isLoadingTask) {
-    return (
-      <section id="task-form" className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-6">Taak Laden...</h2>
-        <SkeletonLoader type="form" count={5} />
-      </section>
-    );
-  }
-
-  // Error from fetching the task to edit
-  const typedFetchTaskError = fetchTaskError as ErrorMessage | null;
-  if (isFetchTaskError && typedFetchTaskError) {
-     return (
-      <section id="task-form" className="bg-white rounded-lg shadow-md p-6">
-        <AlertMessage type="error" title="Fout bij laden" message={typedFetchTaskError.userMessage || "Kon taakdetails niet laden."} />
-      </section>
-     );
-  }
-  
-  // Error from submitting the form
-  const typedUpsertError = upsertHookError as ErrorMessage | null;
-
+export default function TaskFormPresentational({
+  formState,
+  isEditing,
+  isUpserting,
+  upsertError,
+  onFormChange,
+  onDayToggle,
+  onMeasurementToggle,
+  onLabelChange,
+  onSubmit,
+  onCancel,
+}: TaskFormPresentationalProps) {
   return (
     <section id="task-form" className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-6">
         {isEditing ? 'Bewerk' : 'Nieuwe'} {formState.type === 'opdracht' ? 'Opdracht' : 'Taak'}
       </h2>
 
-      {isUpsertError && typedUpsertError && (
-        <AlertMessage type="error" message={typedUpsertError.userMessage || 'Opslaan van taak mislukt'} />
+      {upsertError && (
+        <AlertMessage type="error" message={upsertError.userMessage || 'Opslaan van taak mislukt'} />
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={onSubmit}>
         <div className="mb-5">
           <label className="block text-gray-700 font-medium mb-2">Type</label>
           <div className="flex space-x-4">
             <button
               type="button"
-              onClick={() => setFormState(prev => ({ ...prev, type: 'taak' }))}
+              onClick={() => onFormChange({ target: { name: 'type', value: 'taak' } } as any)} // Simulate event
               className={`px-4 py-2 rounded-md transition ${
                 formState.type === 'taak'
                   ? 'bg-purple-600 text-white'
@@ -180,7 +70,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
             </button>
             <button
               type="button"
-              onClick={() => setFormState(prev => ({ ...prev, type: 'opdracht' }))}
+              onClick={() => onFormChange({ target: { name: 'type', value: 'opdracht' } } as any)} // Simulate event
               className={`px-4 py-2 rounded-md transition ${
                 formState.type === 'opdracht'
                   ? 'bg-purple-600 text-white'
@@ -196,7 +86,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="titel" className="block text-gray-700 font-medium mb-2">Titel</label>
           <input
             id="titel" name="titel" type="text" value={formState.titel}
-            onChange={handleChange}
+            onChange={onFormChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             required
           />
@@ -206,7 +96,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="beschrijving" className="block text-gray-700 font-medium mb-2">Beschrijving / Instructies</label>
           <textarea
             id="beschrijving" name="beschrijving" value={formState.beschrijving}
-            onChange={handleChange} rows={3}
+            onChange={onFormChange} rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           ></textarea>
         </div>
@@ -215,7 +105,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="duur" className="block text-gray-700 font-medium mb-2">Duur (minuten)</label>
           <input
             id="duur" name="duur" type="number" min="1" max="480" value={formState.duur}
-            onChange={handleChange}
+            onChange={onFormChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
@@ -225,7 +115,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
             <label htmlFor="hartslag_doel" className="block text-gray-700 font-medium mb-2">Hartslag Doel (BPM)</label>
             <input
               id="hartslag_doel" name="hartslag_doel" type="number" min="40" max="200" value={formState.hartslag_doel}
-              onChange={handleChange}
+              onChange={onFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
@@ -235,7 +125,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="herhaal_patroon" className="block text-gray-700 font-medium mb-2">Herhaalpatroon</label>
           <select
             id="herhaal_patroon" name="herhaal_patroon" value={formState.herhaal_patroon}
-            onChange={handleChange}
+            onChange={onFormChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="eenmalig">Eenmalig</option>
@@ -256,7 +146,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
                 { key: '6', label: 'Za' }
               ].map(day => (
                 <button
-                  key={day.key} type="button" onClick={() => handleDayToggle(day.key)}
+                  key={day.key} type="button" onClick={() => onDayToggle(day.key)}
                   className={`px-3 py-1 rounded-md ${
                     (formState.dagen_van_week || []).includes(day.key)
                       ? 'bg-purple-600 text-white'
@@ -282,7 +172,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
                 <input
                   id={`meting-${measurement.key}`} type="checkbox"
                   checked={(formState.metingen || []).includes(measurement.key)}
-                  onChange={() => handleMeasurementToggle(measurement.key)}
+                  onChange={() => onMeasurementToggle(measurement.key)}
                   className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                 />
                 <label htmlFor={`meting-${measurement.key}`} className="ml-2 block text-sm text-gray-700">
@@ -297,7 +187,7 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="labels" className="block text-gray-700 font-medium mb-2">Labels (komma-gescheiden)</label>
           <input
             id="labels" name="labels" type="text" value={(formState.labels || []).join(', ')}
-            onChange={handleLabelChange}
+            onChange={onLabelChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             placeholder="Bijv. belangrijk, werk, thuis"
           />
@@ -307,14 +197,14 @@ export default function TaskForm({ taskId, initialData, isEditing = false, initi
           <label htmlFor="notities" className="block text-gray-700 font-medium mb-2">Notities</label>
           <textarea
             id="notities" name="notities" value={formState.notities || ''}
-            onChange={handleChange} rows={2}
+            onChange={onFormChange} rows={2}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           ></textarea>
         </div>
 
         <div className="flex justify-end space-x-3 mt-6">
           <button
-            type="button" onClick={() => router.back()}
+            type="button" onClick={onCancel}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             disabled={isUpserting}
           >

@@ -49,6 +49,7 @@
     "web-vitals": "^5.0.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.2",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.1.2",
     "@types/node": "^20.9.2",

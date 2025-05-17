@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react'; // Import useMemo
 import Link from 'next/link';
 
 interface Patient {
@@ -22,24 +22,25 @@ export default function PatientList({ patients, onAddPatient }: PatientListProps
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'naam' | 'datum'>('naam');
   
-  // Filter en sorteer patienten
-  const filteredPatients = patients
-    .filter(patient => {
-      const fullName = `${patient.voornaam || ''} ${patient.achternaam || ''}`.toLowerCase();
-      return fullName.includes(searchTerm.toLowerCase()) || 
-             (patient.postcode && patient.postcode.includes(searchTerm));
-    })
-    .sort((a, b) => {
-      if (sortBy === 'naam') {
-        const nameA = `${a.voornaam || ''} ${a.achternaam || ''}`.toLowerCase();
-        const nameB = `${b.voornaam || ''} ${b.achternaam || ''}`.toLowerCase();
-        return nameA.localeCompare(nameB);
-      } else { // Sort by date
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
-        return dateB.getTime() - dateA.getTime();
-      }
-    });
+  const filteredPatients = useMemo(() => {
+    return patients
+      .filter(patient => {
+        const fullName = `${patient.voornaam || ''} ${patient.achternaam || ''}`.toLowerCase();
+        return fullName.includes(searchTerm.toLowerCase()) ||
+               (patient.postcode && patient.postcode.includes(searchTerm));
+      })
+      .sort((a, b) => {
+        if (sortBy === 'naam') {
+          const nameA = `${a.voornaam || ''} ${a.achternaam || ''}`.toLowerCase();
+          const nameB = `${b.voornaam || ''} ${b.achternaam || ''}`.toLowerCase();
+          return nameA.localeCompare(nameB);
+        } else { // Sort by date (created_at)
+          const dateA = new Date(a.created_at);
+          const dateB = new Date(b.created_at);
+          return dateB.getTime() - dateA.getTime(); // Most recent first
+        }
+      });
+  }, [patients, searchTerm, sortBy]);
   
   if (patients.length === 0 && !onAddPatient) {
     return (

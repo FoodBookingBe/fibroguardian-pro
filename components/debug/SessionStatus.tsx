@@ -1,30 +1,27 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { getSupabaseBrowserClient } from '@/lib/supabase'; // Corrected import path
+import { useAuth } from '@/components/auth/AuthProvider'; // Import useAuth
 
 export default function SessionStatus() {
-  const [status, setStatus] = useState<string>('Checking...');
-  
-  useEffect(() => {
-    async function checkSession() {
-      const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        setStatus(`Error: ${error.message}`);
-      } else if (data.session) {
-        setStatus(`Active session: ${data.session.user.email}`);
-      } else {
-        setStatus('No active session found');
-      }
+  const { user, session, loading, profile } = useAuth();
+
+  let statusMessage = 'Laden...';
+
+  if (!loading) {
+    if (session && user) {
+      statusMessage = `Actieve sessie: ${user.email} (Type: ${profile?.type || 'onbekend'})`;
+    } else if (session && !user) {
+      statusMessage = 'Sessie gevonden, maar geen user object. Controleer Supabase logs.';
     }
-    
-    checkSession();
-  }, []);
+     else {
+      statusMessage = 'Geen actieve sessie gevonden.';
+    }
+  }
   
   return (
     <div className="p-2 bg-gray-100 text-sm text-gray-700 rounded mb-4">
-      <strong>Session Debug:</strong> {status}
+      <strong>Session Debug:</strong> {statusMessage}
+      {loading && <span className="italic ml-1">(Auth context laden...)</span>}
+      {/* {profile && <pre className="mt-1 text-xs bg-gray-200 p-1 rounded overflow-x-auto">Profile: {JSON.stringify(profile, null, 2)}</pre>} */}
     </div>
   );
 }

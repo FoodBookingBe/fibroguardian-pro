@@ -1,47 +1,53 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react'; // Changed useEffect to useMemo
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TaskLog } from '@/types';
+
+// Define the keys for metrics explicitly for better type safety
+type MetricKey = 'pijn' | 'vermoeidheid' | 'energie_voor' | 'energie_na' | 'hartslag';
+
+interface ChartDataItem {
+  originalDate: Date;
+  name: string;
+  pijn?: number;
+  vermoeidheid?: number;
+  energie_voor?: number;
+  energie_na?: number;
+  hartslag?: number;
+  // No index signature needed if we use MetricKey for activeMetric
+}
 
 interface HealthMetricsProps {
   logs: TaskLog[];
 }
 
 export default function HealthMetrics({ logs }: HealthMetricsProps) {
-  const [activeMetric, setActiveMetric] = useState<string>('pijn');
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [activeMetric, setActiveMetric] = useState<MetricKey>('pijn'); // Use MetricKey type
+  // const [chartData, setChartData] = useState<any[]>([]); // Replaced by useMemo
 
-  useEffect(() => {
-    // Bereid data voor voor de grafiek
-    if (logs && logs.length > 0) {
-      const processedData = logs.map(log => {
-        const date = new Date(log.start_tijd);
-        return {
-          // Store original date for accurate sorting
-          originalDate: date,
-          pijn: log.pijn_score,
-          vermoeidheid: log.vermoeidheid_score,
-          energie_voor: log.energie_voor,
-          energie_na: log.energie_na,
-          hartslag: log.hartslag,
-          // Formatted name for display on X-axis
-          name: date.toLocaleDateString('nl-BE', { 
-            day: '2-digit', 
-            month: '2-digit',
-            // hour: '2-digit', // Keep X-axis cleaner
-            // minute: '2-digit'
-          })
-        };
-      })
-      .sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime()); // Sort by original date
-      
-      setChartData(processedData);
-    } else {
-      setChartData([]);
+  const chartData: ChartDataItem[] = useMemo(() => {
+    if (!logs || logs.length === 0) {
+      return [];
     }
+    return logs.map(log => {
+      const date = new Date(log.start_tijd);
+      return {
+        originalDate: date,
+        pijn: log.pijn_score,
+        vermoeidheid: log.vermoeidheid_score,
+        energie_voor: log.energie_voor,
+        energie_na: log.energie_na,
+        hartslag: log.hartslag,
+        name: date.toLocaleDateString('nl-BE', {
+          day: '2-digit',
+          month: '2-digit',
+        })
+      };
+    })
+    .sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
   }, [logs]);
 
-  const metrics = [
+  const metrics: Array<{ key: MetricKey; label: string; color: string }> = [
     { key: 'pijn', label: 'Pijn', color: '#ef4444' },
     { key: 'vermoeidheid', label: 'Vermoeidheid', color: '#f97316' },
     { key: 'energie_voor', label: 'Energie (voor)', color: '#84cc16' },
@@ -68,14 +74,14 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
             <button
               key={metric.key}
               type="button"
-              onClick={() => setActiveMetric(metric.key)}
+              onClick={() => setActiveMetric(metric.key)} // metric.key is now MetricKey
               className={`px-3 py-1 text-sm rounded-md transition-colors ${
                 activeMetric === metric.key
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
               role="radio"
-              aria-checked={activeMetric === metric.key ? "true" : "false"}
+              aria-checked={activeMetric === metric.key ? 'true' : 'false'} // Ensure this is exactly "true" or "false"
               aria-label={`Bekijk ${metric.label} data`}
             >
               {metric.label}
@@ -92,7 +98,7 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
               Grafiek van {currentMetric?.label || activeMetric} gegevens over tijd. 
               {chartData.map((item, index) => (
                 <span key={index}>
-                  {item.name}: {item[activeMetric]} 
+                  {item.name}: {item[activeMetric as MetricKey]}
                   {activeMetric === 'hartslag' ? ' BPM' : ' op schaal van 20'}.
                 </span>
               ))}
@@ -116,9 +122,9 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
                   domain={activeMetric === 'hartslag' ? [40, 'auto'] : [0, 20]} 
                   allowDataOverflow={true}
                   tick={{ fontSize: 10 }}
-                  aria-label={currentMetric?.label || activeMetric} 
+                  aria-label={currentMetric?.label || activeMetric.toString()}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [`${value} ${activeMetric === 'hartslag' ? 'BPM' : '/ 20'}`, currentMetric?.label || activeMetric]} 
                   labelFormatter={(label: string) => `Datum: ${label}`}
                 />
@@ -127,9 +133,9 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
                   type="monotone" 
                   dataKey={activeMetric} 
                   stroke={currentMetric?.color || '#8884d8'} 
-                  activeDot={{ r: 6 }} 
+                  activeDot={{ r: 6 }}
                   strokeWidth={2}
-                  name={currentMetric?.label || activeMetric}
+                  name={currentMetric?.label || activeMetric.toString()}
                   dot={false}
                 />
               </LineChart>

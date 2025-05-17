@@ -94,19 +94,19 @@ export const getSupabaseRouteHandlerClient = () => {
 
 
 // --- Legacy/Alternative Clients (if still needed for specific parts) ---
-
+ 
 // For older Server Components (e.g. if still using @supabase/auth-helpers-nextjs directly)
 // This was the typical way with `createServerComponentClient` from `@supabase/auth-helpers-nextjs`
 // It's kept here if some parts of the app still rely on it, but migration to @supabase/ssr is preferred.
-export const getLegacySupabaseServerComponentClient = () => {
-  console.log("[Supabase] Creating/getting Legacy Supabase Server Component client (auth-helpers)");
-  // createOldClientComponentClient from @supabase/auth-helpers-nextjs handles cookies implicitly
-  // when used in Server Components, or expects a specific cookie store for Route Handlers.
-  // For Server Components, it's often used without explicit cookie handling passed here,
-  // relying on the Next.js context. If this is for a Route Handler context,
-  // it would need the { cookies } from next/headers passed differently.
-  // Given the original setup likely used it in Server Components, omitting explicit cookies
-  // might be the intended way for it to pick up Next.js's cookie context.
-  // If issues persist, this specific client might need to be replaced with getSupabaseServerComponentClient (ssr).
-  return createOldClientComponentClient<Database>();
-};
+// export const getLegacySupabaseServerComponentClient = () => {
+//   console.log("[Supabase] Creating/getting Legacy Supabase Server Component client (auth-helpers)");
+//   // createOldClientComponentClient from @supabase/auth-helpers-nextjs handles cookies implicitly
+//   // when used in Server Components, or expects a specific cookie store for Route Handlers.
+//   // For Server Components, it's often used without explicit cookie handling passed here,
+//   // relying on the Next.js context. If this is for a Route Handler context,
+//   // it would need the { cookies } from next/headers passed differently.
+//   // Given the original setup likely used it in Server Components, omitting explicit cookies
+//   // might be the intended way for it to pick up Next.js's cookie context.
+//   // If issues persist, this specific client might need to be replaced with getSupabaseServerComponentClient (ssr).
+//   return createOldClientComponentClient<Database>();
+// };

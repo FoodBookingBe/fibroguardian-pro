@@ -33,8 +33,8 @@ export interface TaskLog {
   id: string;
   task_id: string;
   user_id: string;
-  start_tijd: Date;
-  eind_tijd?: Date;
+  start_tijd: string; // Changed from Date to string (ISO string)
+  eind_tijd?: string; // Changed from Date to string (ISO string)
   energie_voor?: number;
   energie_na?: number;
   pijn_score?: number;

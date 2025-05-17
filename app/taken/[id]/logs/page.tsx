@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react'; // Added Suspense
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
-import TaskLogs from '@/components/tasks/TaskLogs';
-import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton'; // Import skeleton
+import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer'; // Updated import
+import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton';
 import { Task } from '@/types';
 import Link from 'next/link';
 
@@ -145,7 +145,7 @@ export default function TaskSpecificLogsPage() {
       </div>
       
       <Suspense fallback={<TaskLogsLoadingSkeleton />}>
-        <TaskLogs taskId={task.id} limit={100} showTaskDetails={false} />
+        <TaskLogsContainer taskId={task.id} limit={100} title={`Logs voor ${task.titel}`} />
       </Suspense>
       
       <div className="mt-6 flex justify-center">

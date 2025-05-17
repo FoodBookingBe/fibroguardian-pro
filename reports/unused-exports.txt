@@ -1,0 +1,149 @@
+\app\page.tsx:4 - default
+\context\NotificationContext.tsx:5 - NotificationType (used in module)
+\hooks\useForm.ts:9 - useForm
+\hooks\useLazyLoading.ts:4 - useLazyLoading
+\hooks\useMutations.ts:217 - useDeleteTaskLog
+\hooks\useRefactorPlan.ts:4 - useRefactorPlan
+\hooks\useSupabaseQuery.ts:232 - useMyPatients
+\hooks\useSupabaseQuery.ts:13 - PatientWithRelation (used in module)
+\lib\api-error.ts:17 - formatApiError
+\lib\env-config.ts:17 - config
+\lib\error-boundary.tsx:111 - default
+\lib\middleware.ts:5 - middleware
+\lib\middleware.ts:85 - config
+\lib\offline-db.ts:73 - useOfflineAwareTasks
+\lib\offline-db.ts:157 - addOfflineTask
+\lib\offline-db.ts:8 - TaskWithMeta (used in module)
+\lib\offline-db.ts:12 - TaskLogWithMeta (used in module)
+\lib\offline-db.ts:16 - ReflectieWithMeta (used in module)
+\lib\offline-db.ts:20 - PendingMutation (used in module)
+\lib\offline-db.ts:50 - offlineDB (used in module)
+\lib\security-headers.ts:58 - securityHeaders
+\lib\stripe.ts:7 - getStripe (used in module)
+\lib\supabase.ts:101 - getLegacySupabaseServerComponentClient
+\types\core.ts:36 - isErrorResponse
+\types\core.ts:40 - isSuccessResponse
+\types\core.ts:44 - isNonNullable
+\types\core.ts:8 - SuccessResponse (used in module)
+\types\core.ts:13 - ApiResponse
+\types\core.ts:16 - WithId
+\types\core.ts:20 - FormState
+\types\core.ts:32 - Nullable
+\types\core.ts:33 - Optional
+\types\core.ts:51 - AppError (used in module)
+\types\core.ts:59 - CustomError (used in module)
+\types\database.ts:1 - Json (used in module)
+\types\index.ts:49 - Planning
+\types\index.ts:95 - Abonnement
+\types\query.ts:13 - MutationHookOptions
+\utils\accessibility.ts:113 - useFocusTrap
+\utils\email-templates.ts:31 - EmailContent (used in module)
+\utils\error-handling.ts:3 - handleClientError
+\utils\memoize.ts:4 - arePropsEqual (used in module)
+\utils\memoize.ts:60 - memoWithKeys
+\utils\validation.ts:6 - sanitizeInput
+\utils\validation.ts:70 - validateDateString
+\utils\validation.ts:81 - validateDuration
+\utils\validation.ts:92 - validateScoreRange
+\utils\validation.ts:103 - validatePostcode
+\utils\validation.ts:114 - formatDate (used in module)
+\utils\validation.ts:130 - formatTime (used in module)
+\utils\validation.ts:145 - formatDateTime
+\app\auth-test\layout.tsx:3 - default
+\app\auth-test\page.tsx:6 - default
+\app\auth-test\page.tsx:3 - dynamic
+\app\auth-test\page.tsx:4 - revalidate
+\app\dashboard\error.tsx:4 - default
+\app\inzichten\page.tsx:9 - default
+\app\opdrachten\page.tsx:6 - default
+\app\pricing\page.tsx:54 - default
+\app\pricing\page.tsx:9 - metadata
+\app\reflecties\page.tsx:9 - default
+\app\specialisten\page.tsx:8 - default
+\components\common\SkeletonLoader.tsx:95 - default
+\components\onboarding\GuidedTour.tsx:72 - GuidedTour
+\components\onboarding\GuidedTour.tsx:39 - TourStep (used in module)
+\components\rapporten\RapportGeneratorPresentational.tsx:5 - RapportFormatP (used in module)
+\components\reflecties\ReflectiesListContainer.tsx:30 - ReflectiesListContainer
+\components\specialisten\SpecialistsListContainer.tsx:24 - SpecialistsListContainer
+\components\subscription\PricingTables.tsx:57 - PricingTables
+\components\subscription\SubscriptionManagement.tsx:101 - SubscriptionManagement
+\components\subscription\withFeatureAccess.tsx:25 - withFeatureAccess
+\components\support\SupportWidget.tsx:62 - SupportWidget
+\containers\specialisten\PatientDetailsContainer.tsx:23 - default
+\lib\analytics\eventTracking.ts:251 - useAnalytics
+\lib\analytics\userJourney.ts:49 - getLatestCompletedOnboardingStep
+\lib\analytics\userJourney.ts:77 - trackSubscriptionJourneyStep
+\lib\analytics\userJourney.ts:87 - trackFeatureUsage
+\lib\analytics\userJourney.ts:15 - SubscriptionJourneyStepName (used in module)
+\lib\cache\supabaseLocalCache.ts:42 - CachedSupabaseClient (used in module)
+\lib\cache\supabaseLocalCache.ts:59 - createCachedSupabaseClient (used in module)
+\lib\cache\supabaseLocalCache.ts:136 - cachedSupabase
+\lib\feedback\feedbackCollector.ts:64 - useFeedbackCollector
+\lib\feedback\feedbackCollector.ts:24 - FeedbackType (used in module)
+\lib\monitoring\logger.ts:190 - logger (used in module)
+\lib\onboarding\onboardingEngine.ts:21 - OnboardingEngineConfig (used in module)
+\lib\onboarding\onboardingEngine.ts:35 - OnboardingEngine
+\lib\performance\imageLazyOptimizer.tsx:24 - default
+\lib\performance\useInfiniteLoading.ts:16 - useInfiniteLoading
+\lib\security\inputValidation.ts:157 - validateForm
+\lib\security\inputValidation.ts:20 - ValidationResult (used in module)
+\lib\security\inputValidation.ts:26 - validate
+\lib\security\inputValidation.ts:119 - sanitize
+\lib\security\rateLimit.ts:44 - rateLimit
+\lib\security\rateLimit.ts:6 - RateLimitOptions (used in module)
+\lib\security\rateLimit.ts:35 - RateLimitResult (used in module)
+\.next\types\app\layout.ts:49 - PageProps
+\.next\types\app\layout.ts:53 - LayoutProps (used in module)
+\app\api\create-checkout-session\route.ts:15 - POST
+\app\api\reflecties\route.ts:48 - GET
+\app\api\reflecties\route.ts:82 - POST
+\app\api\specialist-patienten\route.ts:7 - POST
+\app\api\task-logs\route.ts:30 - GET
+\app\api\task-logs\route.ts:66 - POST
+\app\api\tasks\route.ts:9 - GET
+\app\api\tasks\route.ts:60 - POST
+\app\auth\register\page.tsx:6 - default
+\app\dev\performance\page.tsx:14 - default
+\app\opdrachten\nieuw\page.tsx:4 - default
+\app\rapporten\nieuw\page.tsx:4 - default
+\app\reflecties\nieuw\page.tsx:4 - default
+\app\specialisten\patienten\page.tsx:8 - default
+\app\taken\logs\page.tsx:11 - default
+\app\taken\nieuw\page.tsx:4 - default
+\.next\types\app\dashboard\layout.ts:49 - PageProps
+\.next\types\app\dashboard\layout.ts:53 - LayoutProps (used in module)
+\.next\types\app\dashboard\page.ts:49 - PageProps (used in module)
+\.next\types\app\dashboard\page.ts:53 - LayoutProps
+\.next\types\app\instellingen\page.ts:49 - PageProps (used in module)
+\.next\types\app\instellingen\page.ts:53 - LayoutProps
+\.next\types\app\mijn-specialisten\layout.ts:49 - PageProps
+\.next\types\app\mijn-specialisten\layout.ts:53 - LayoutProps (used in module)
+\.next\types\app\mijn-specialisten\page.ts:49 - PageProps (used in module)
+\.next\types\app\mijn-specialisten\page.ts:53 - LayoutProps
+\.next\types\app\overzicht\layout.ts:49 - PageProps
+\.next\types\app\overzicht\layout.ts:53 - LayoutProps (used in module)
+\.next\types\app\overzicht\page.ts:49 - PageProps (used in module)
+\.next\types\app\overzicht\page.ts:53 - LayoutProps
+\.next\types\app\rapporten\page.ts:49 - PageProps (used in module)
+\.next\types\app\rapporten\page.ts:53 - LayoutProps
+\.next\types\app\taken\page.ts:49 - PageProps (used in module)
+\.next\types\app\taken\page.ts:53 - LayoutProps
+\app\api\auth\callback\route.ts:7 - GET
+\app\api\auth\callback\route.ts:6 - dynamic
+\app\api\profiles\[id]\route.ts:7 - PUT
+\app\api\profiles\[id]\route.ts:54 - GET
+\app\api\profiles\me\route.ts:6 - GET
+\app\api\reflecties\[id]\route.ts:7 - PUT
+\app\api\reflecties\[id]\route.ts:54 - DELETE
+\app\api\specialist-patienten\[id]\route.ts:6 - DELETE
+\app\api\task-logs\[id]\route.ts:7 - PUT
+\app\api\task-logs\[id]\route.ts:50 - DELETE
+\app\api\tasks\[id]\route.ts:8 - DELETE
+\app\api\tasks\[id]\route.ts:48 - PUT
+\app\api\tasks\[id]\route.ts:91 - GET
+\app\taken\[id]\bewerk\page.tsx:16 - default
+\app\taken\[id]\logs\page.tsx:10 - default
+\app\taken\[id]\start\page.tsx:19 - default
+\.next\types\app\auth\login\page.ts:49 - PageProps (used in module)
+\.next\types\app\auth\login\page.ts:53 - LayoutProps

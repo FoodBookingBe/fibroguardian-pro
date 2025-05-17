@@ -1,24 +1,28 @@
 'use client';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+// import { getSupabaseBrowserClient } from '@/lib/supabase'; // Will be used by hooks
+import { useSignInEmailPassword, useSignUpWithEmailPassword } from '@/hooks/useMutations'; // Import new hooks
 import { validateEmail, validatePassword } from '@/utils/validation';
-// import { AlertMessage } from '@/components/common/AlertMessage'; // Replaced by global notifications
-import { useNotification } from '@/context/NotificationContext'; // Import useNotification
+import { useNotification } from '@/context/NotificationContext';
 
 export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) {
-  const router = useRouter();
+  const router = useRouter(); // Keep for navigation toggle
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [voornaam, setVoornaam] = useState<string>('');
   const [achternaam, setAchternaam] = useState<string>('');
   const [userType, setUserType] = useState<string>('patient'); // Default to patient
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isLogin] = useState<boolean>(initialIsLogin ?? true); // setIsLogin is not used, navigation handles mode switch
-  // const [message, setMessage] = useState<string>(''); // Replaced by global notifications for success/error
+  // const [loading, setLoading] = useState<boolean>(false); // Will use isPending from hooks
+  const [isLogin] = useState<boolean>(initialIsLogin ?? true);
   const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; userType?: string; }>({});
   const { addNotification } = useNotification();
 
+  const { mutate: signIn, isPending: isSigningIn, error: signInErrorHook } = useSignInEmailPassword();
+  const { mutate: signUp, isPending: isSigningUp, error: signUpErrorHook } = useSignUpWithEmailPassword();
+
+  const loading = isSigningIn || isSigningUp;
+ 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string; voornaam?: string; achternaam?: string; } = {};
     
@@ -64,72 +68,54 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     if (!validateForm()) {
       return;
     }
-    
-    setLoading(true);
-    // setMessage(''); // Clear local message if it were used
-
-    try {
-      if (isLogin) {
-        // console.log('Login attempt starting with email:', email); // Keep for debugging if needed
-        const supabase = getSupabaseBrowserClient();
-        
-        // Inloggen
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        console.log('Login response:', {
-          user: !!signInData?.user,
-          session: !!signInData?.session,
-          error: signInError ? signInError.message : null
-        });
-
-        if (signInError) {
-          addNotification({ type: 'error', message: `Fout bij inloggen: ${signInError.message}` });
-        } else if (signInData?.user) {
-          const { data: sessionData } = await supabase.auth.getSession();
-          if (sessionData.session) {
-            addNotification({ type: 'success', message: 'Succesvol ingelogd! U wordt doorverwezen...' });
-            // AuthProvider handles redirect
-          } else {
-            addNotification({ type: 'warning', message: 'Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.' });
-          }
-        } else {
-          addNotification({ type: 'error', message: 'Onbekende fout bij inloggen. Probeer het opnieuw.' });
-        }
-      } else {
-        // Registratie
-        const supabase = getSupabaseBrowserClient();
-        const { error: signUpError } = await supabase.auth.signUp({ // signUpData was unused
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              voornaam: voornaam.trim(),
-              achternaam: achternaam.trim(),
-              type: userType // Set the user type based on selection
-            }
-          }
-        });
-        if (signUpError) { 
-          console.error('AuthForm: SignUp failed with error object:', signUpError);
-          addNotification({ type: 'error', message: `Fout bij registratie: ${signUpError.message}` });
-        } else {
-          addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.' });
-        }
-      }
-    } catch (error: any) { 
-      console.error('AuthForm: Unexpected error in handleSubmit:', error);
-      addNotification({ type: 'error', message: `Onverwachte fout: ${error.message}` });
-    } finally {
-      setLoading(false);
+    if (!validateForm()) {
+      return;
     }
+    // setLoading(true); // Handled by isPending from hooks
+ 
+    if (isLogin) {
+      signIn({ email, password }, {
+        onSuccess: (user) => {
+          // Check if user object is valid (Supabase might return user even if session setup fails in some edge cases)
+          if (user && user.id) {
+            addNotification({ type: 'success', message: 'Succesvol ingelogd! U wordt doorverwezen...' });
+            // AuthProvider handles redirect based on auth state change
+          } else {
+            // This case should ideally be caught by onError if data.user is null from the hook's perspective
+            addNotification({ type: 'error', message: 'Inloggen mislukt, ongeldige gebruikersdata ontvangen.' });
+          }
+        },
+        onError: (error) => {
+          addNotification({ type: 'error', message: error.userMessage || 'Fout bij inloggen.' });
+        }
+      });
+    } else {
+      signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            voornaam: voornaam.trim(),
+            achternaam: achternaam.trim(),
+            type: userType as 'patient' | 'specialist', // Ensure type safety
+          }
+        }
+      }, {
+        onSuccess: (data) => {
+          if (data.user) { // User object exists, email likely sent
+            addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.' });
+          } else { // User is null, but no immediate error from Supabase (e.g. email already in use but confirmation not sent)
+             addNotification({ type: 'info', message: 'Verzoek tot registratie ontvangen. Als u al een account heeft, probeer in te loggen. Anders, controleer uw e-mail.' });
+          }
+        },
+        onError: (error) => {
+          addNotification({ type: 'error', message: error.userMessage || 'Fout bij registratie.' });
+        }
+      });
+    }
+    // setLoading(false); // Handled by isPending from hooks
   };
-
-  return (
-    <section id="auth-form" className="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
       <h2 className="text-2xl font-semibold mb-6 text-center text-purple-800">
         {isLogin ? 'Inloggen' : 'Registreren'} bij FibroGuardian Pro
       </h2>

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
 import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
-import { ErrorMessage } from '@/lib/error-handler'; 
+import { ErrorMessage } from '@/lib/error-handler';
+import { getSupabaseBrowserClient } from '@/lib/supabase'; // Added import
 
 // Taak toevoegen/bijwerken
 // TData is the type of data returned by the mutationFn on success (e.g., the updated/created task)
@@ -211,50 +212,48 @@ export function useUpdateTaskLog(
     ...options,
   });
 }
-
 // Task Log verwijderen
-export function useDeleteTaskLog(
-  options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>, 'mutationFn'>
-) {
-  const queryClient = useQueryClient();
+// export function useDeleteTaskLog(
+//   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>, 'mutationFn'>
+// ) {
+//   const queryClient = useQueryClient();
   
-  return useMutation<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>({
-    mutationFn: async ({ id }) => {
-      const response = await fetch(`/api/task-logs/${id}`, {
-        method: 'DELETE',
-      });
+//   return useMutation<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>({
+//     mutationFn: async ({ id }) => {
+//       const response = await fetch(`/api/task-logs/${id}`, {
+//         method: 'DELETE',
+//       });
       
-      const responseData = await response.json();
-      if (!response.ok) {
-        const err: ErrorMessage = {
-            userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de log',
-            technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
-        };
-        throw err;
-      }
-      return responseData;
-    },
-    onSuccess: (data, variables) => {
-      if (variables.taskId) {
-        queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.taskId] });
-      }
-      if (variables.userId) {
-        queryClient.invalidateQueries({ queryKey: ['recentLogs', variables.userId] });
-      } else {
-         queryClient.invalidateQueries({ queryKey: ['recentLogs'] }); 
-      }
-      queryClient.removeQueries({ queryKey: ['taskLog', variables.id] });
-    },
-    onError: (error: ErrorMessage, variables) => { 
-      console.error(`Fout bij verwijderen taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
-    },
-    ...options,
-  });
-}
-
+//       const responseData = await response.json();
+//       if (!response.ok) {
+//         const err: ErrorMessage = {
+//             userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de log',
+//             technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
+//         };
+//         throw err;
+//       }
+//       return responseData;
+//     },
+//     onSuccess: (data, variables) => {
+//       if (variables.taskId) {
+//         queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.taskId] });
+//       }
+//       if (variables.userId) {
+//         queryClient.invalidateQueries({ queryKey: ['recentLogs', variables.userId] });
+//       } else {
+//          queryClient.invalidateQueries({ queryKey: ['recentLogs'] });
+//       }
+//       queryClient.removeQueries({ queryKey: ['taskLog', variables.id] });
+//     },
+//     onError: (error: ErrorMessage, variables) => {
+//       console.error(`Fout bij verwijderen taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+//     },
+//     ...options,
+//   });
+// }
+ 
 // Reflectie Mutations
-
-// Reflectie toevoegen/bijwerken (POST in API route handles upsert)
+ 
 export function useUpsertReflectie(
   options?: Omit<UseMutationOptions<Reflectie, ErrorMessage, ReflectieFormData>, 'mutationFn'>
 ) {
@@ -402,6 +401,123 @@ export function useDeleteSpecialistPatientRelation(
     },
     onError: (error: ErrorMessage, variables) => {
       console.error(`Fout bij verwijderen relatie (ID: ${variables.relationshipId}):`, error.userMessage, error.technicalMessage);
+    },
+    ...options,
+  });
+}
+// Authentication Mutations
+
+interface SignInVariables {
+  email: string;
+  password: string;
+}
+
+// Supabase signInWithPassword returns { data: { user: User; session: Session; }; error: AuthError | null }
+// For simplicity, we'll type the success data (TData) as the user object, session handling is often implicit.
+// Or more explicitly: interface SignInSuccessData { user: SupabaseUser; session: Session | null }
+// Sticking to User for now, as session is managed by Supabase client.
+import { User as SupabaseUser, AuthError, Session } from '@supabase/supabase-js'; // Import Supabase types
+
+export function useSignInEmailPassword(
+  options?: Omit<UseMutationOptions<SupabaseUser, ErrorMessage, SignInVariables>, 'mutationFn'>
+) {
+  const queryClient = useQueryClient();
+  // const { addNotification } = useNotification(); // Notifications can be handled by the component or here
+
+  return useMutation<SupabaseUser, ErrorMessage, SignInVariables>({
+    mutationFn: async ({ email, password }) => {
+      const supabase = getSupabaseBrowserClient(); // Defined in lib/supabase.ts
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        throw {
+          userMessage: error.message || 'Fout bij inloggen.',
+          technicalMessage: `Supabase signInError: ${error.message}`,
+          httpStatus: error.status,
+        } as ErrorMessage;
+      }
+      if (!data.user) {
+        throw {
+          userMessage: 'Inloggen mislukt, geen gebruiker data ontvangen.',
+          technicalMessage: 'Supabase signIn did not return user data.',
+        } as ErrorMessage;
+      }
+      return data.user;
+    },
+    onSuccess: (user) => {
+      queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] }); // General user query if used
+      // addNotification({ type: 'success', message: 'Succesvol ingelogd!' });
+      // Navigation is typically handled by the component after successful login
+    },
+    onError: (error: ErrorMessage) => {
+      console.error('Fout bij inloggen (hook):', error.userMessage, error.technicalMessage);
+      // addNotification({ type: 'error', message: error.userMessage || 'Inloggen mislukt.' });
+    },
+    ...options,
+  });
+}
+
+interface SignUpOptionsData {
+  voornaam: string;
+  achternaam: string;
+  type: 'patient' | 'specialist';
+  [key: string]: any;
+}
+
+interface SignUpVariables {
+  email: string;
+  password: string;
+  options?: {
+    emailRedirectTo?: string;
+    data?: SignUpOptionsData;
+  };
+}
+
+// Supabase signUp returns { data: { user: User | null; session: Session | null; }; error: AuthError | null }
+// TData can be { user: SupabaseUser | null }
+interface SignUpSuccessData {
+    user: SupabaseUser | null;
+    // session: Session | null; // session is usually handled by Supabase client automatically
+}
+
+export function useSignUpWithEmailPassword(
+  options?: Omit<UseMutationOptions<SignUpSuccessData, ErrorMessage, SignUpVariables>, 'mutationFn'>
+) {
+  // const { addNotification } = useNotification();
+
+  return useMutation<SignUpSuccessData, ErrorMessage, SignUpVariables>({
+    mutationFn: async ({ email, password, options: signUpOptions }) => {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: signUpOptions,
+      });
+
+      if (error) {
+        throw {
+          userMessage: error.message || 'Fout bij registreren.',
+          technicalMessage: `Supabase signUpError: ${error.message}`,
+          httpStatus: error.status,
+        } as ErrorMessage;
+      }
+      // data.user can be null if email confirmation is required.
+      // data.session will also be null in that case.
+      return { user: data.user }; 
+    },
+    onSuccess: (data) => {
+      // if (data.user) {
+        // addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail.' });
+      // } else {
+        // addNotification({ type: 'info', message: 'Registratie deels gelukt. Controleer uw e-mail voor bevestiging.' });
+      // }
+      // No specific query invalidation needed immediately on sign-up typically,
+      // as user needs to confirm email. Profile is created via trigger.
+    },
+    onError: (error: ErrorMessage) => {
+      console.error('Fout bij registreren (hook):', error.userMessage, error.technicalMessage);
+      // addNotification({ type: 'error', message: error.userMessage || 'Registratie mislukt.' });
     },
     ...options,
   });
