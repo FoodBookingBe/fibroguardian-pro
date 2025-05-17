@@ -1,29 +1,11 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Task } from '@/types';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import TasksPageClient from '@/components/tasks/TasksPageClient';
+import { TasksPageContainer } from '@/containers/tasks/TasksPageContainer'; // Updated import
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Import server client helper
 
 export default async function TakenPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
+  const supabase = getSupabaseServerComponentClient(); // Use helper
   
   // Check authentication op server
   const { data: { user } } = await supabase.auth.getUser();
@@ -47,7 +29,7 @@ export default async function TakenPage() {
   
   return (
     <DashboardLayout>
-      <TasksPageClient initialTasks={tasks} />
+      <TasksPageContainer initialTasks={tasks} />
     </DashboardLayout>
   );
 }

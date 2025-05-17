@@ -1,11 +1,11 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
-// import { createServerClient } from '@supabase/ssr'; // New import for App Router - Replaced by centralized client
-// import { cookies } from 'next/headers'; // Handled by getSupabaseServerComponentClient
-import { getSupabaseServerComponentClient } from '@/lib/supabase'; // Import centralized client
-import DailyPlanner from '@/components/dashboard/DailyPlanner';
+// import { createServerClient } from '@supabase/ssr'; 
+// import { cookies } from 'next/headers'; 
+import { getSupabaseServerComponentClient } from '@/lib/supabase'; 
+import { DailyPlannerContainer } from '@/containers/dashboard/DailyPlannerContainer'; // Updated import
 import HealthMetrics from '@/components/dashboard/HealthMetrics';
-import AIInsights from '@/components/dashboard/AIInsights';
+import { AIInsightsContainer } from '@/containers/dashboard/AIInsightsContainer'; // Updated import
 import QuickActions from '@/components/dashboard/QuickActions';
 import SessionStatus from '@/components/debug/SessionStatus';
 import { Database } from '@/types/database'; // Assuming you have this type
@@ -75,7 +75,8 @@ export default async function Dashboard() {
         {/* Dashboard content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <section id="daily-planner" className="lg:col-span-2">
-            <DailyPlanner tasks={tasksData || []} userId={user.id} /> 
+            {/* DailyPlannerContainer does not take tasks or userId as props, it fetches its own */}
+            <DailyPlannerContainer /> 
           </section>
 
           <section id="health-metrics">
@@ -84,7 +85,7 @@ export default async function Dashboard() {
         </div>
 
         <section id="ai-insights" className="mt-8">
-          <AIInsights insights={insightsData || []} />
+          <AIInsightsContainer initialInsightsProp={insightsData || []} />
         </section>
 
         <section id="quick-actions" className="mt-8">

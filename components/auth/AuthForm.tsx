@@ -1,11 +1,12 @@
 'use client';
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation'; // Added useRouter
+import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { validateEmail, validatePassword } from '@/utils/validation';
-import { AlertMessage } from '@/components/common/AlertMessage'; // Use named import
+import { AlertMessage } from '@/components/common/AlertMessage';
+import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 
-export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) { // Accept initialIsLogin prop
+export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -13,9 +14,10 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
   const [achternaam, setAchternaam] = useState<string>('');
   const [userType, setUserType] = useState<string>('patient'); // Default to patient
   const [loading, setLoading] = useState<boolean>(false);
-  const [isLogin, setIsLogin] = useState<boolean>(initialIsLogin ?? true); // Use prop for initial state
-  const [message, setMessage] = useState<string>('');
+  const [isLogin, setIsLogin] = useState<boolean>(initialIsLogin ?? true);
+  // const [message, setMessage] = useState<string>(''); // Replaced by global notifications for success/error
   const [errors, setErrors] = useState<{ email?: string; password?: string; voornaam?: string; achternaam?: string; userType?: string; }>({});
+  const { addNotification } = useNotification();
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string; voornaam?: string; achternaam?: string; } = {};
@@ -64,11 +66,11 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     }
     
     setLoading(true);
-    setMessage('');
+    // setMessage(''); // Clear local message if it were used
 
     try {
       if (isLogin) {
-        console.log('Login attempt starting with email:', email);
+        // console.log('Login attempt starting with email:', email); // Keep for debugging if needed
         const supabase = getSupabaseBrowserClient();
         
         // Inloggen
@@ -84,26 +86,17 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
         });
 
         if (signInError) {
-          setMessage(`Fout bij inloggen: ${signInError.message}`);
+          addNotification('error', `Fout bij inloggen: ${signInError.message}`);
         } else if (signInData?.user) {
-          // Expliciete sessie controle
           const { data: sessionData } = await supabase.auth.getSession();
-          console.log('Session check:', { hasSession: !!sessionData.session });
-          
           if (sessionData.session) {
-            setMessage('Succesvol ingelogd! Even geduld...');
-            
-            // Gebruik een korte timeout om zeker te zijn dat cookies zijn opgeslagen
-            // setTimeout(() => {
-            //   // Hard redirect voor volledig pagina refresh
-            //   window.location.href = '/dashboard';
-            // }, 300);
-            // Rely on AuthProvider to redirect based on session state change
+            addNotification('success', 'Succesvol ingelogd! U wordt doorverwezen...');
+            // AuthProvider handles redirect
           } else {
-            setMessage('Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.');
+            addNotification('warning', 'Inloggen gelukt, maar sessie kon niet worden opgezet. Probeer het opnieuw.');
           }
         } else {
-          setMessage('Onbekende fout bij inloggen. Probeer het opnieuw.');
+          addNotification('error', 'Onbekende fout bij inloggen. Probeer het opnieuw.');
         }
       } else {
         // Registratie
@@ -120,19 +113,16 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
             }
           }
         });
-        if (signUpError) { // Check signUpError specifically
-          console.error('AuthForm: SignUp failed with error object:', signUpError); // DEBUG LINE
-          setMessage(`Fout bij registratie: ${signUpError.message}`);
+        if (signUpError) { 
+          console.error('AuthForm: SignUp failed with error object:', signUpError);
+          addNotification('error', `Fout bij registratie: ${signUpError.message}`);
         } else {
-          // Note: After signUp, Supabase sends a confirmation email.
-          // The user object in signUpData.user will exist but session might be null until email is confirmed.
-          // The profile creation from options.data usually happens via a DB trigger on auth.users insert.
-          setMessage('Controleer uw e-mail voor de bevestigingslink.');
+          addNotification('success', 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.');
         }
       }
-    } catch (error: any) { // This catch is for unexpected errors, not for Supabase auth errors handled above.
-      console.error('AuthForm: Unexpected error in handleSubmit:', error); // DEBUG LINE
-      setMessage(`Onverwachte fout: ${error.message}`);
+    } catch (error: any) { 
+      console.error('AuthForm: Unexpected error in handleSubmit:', error);
+      addNotification('error', `Onverwachte fout: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -144,13 +134,11 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
         {isLogin ? 'Inloggen' : 'Registreren'} bij FibroGuardian Pro
       </h2>
 
-      {message && (
-        <AlertMessage 
-          type={message.toLowerCase().startsWith('fout') ? 'error' : 'success'} 
-          message={message} 
-        />
-      )}
-
+      {/* Global notifications will handle async operation success/errors.
+          Local form validation errors (from `errors` state) are displayed below each field.
+          The AlertMessage that previously showed `message` state can be removed. 
+      */}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <>
@@ -267,12 +255,10 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
           } else {
             router.push('/auth/login');
           }
-          // It's good practice to also clear messages/errors if navigation is successful,
-          // but the component will unmount/remount or re-initialize on page navigation,
-          // so explicit clearing here might not be strictly necessary if initialIsLogin handles it.
-          // However, to be safe and handle potential SPA-like transitions if Next.js optimizes:
-          setMessage('');
+          // It's good practice to also clear messages/errors if navigation is successful.
+          // Global notifications clear themselves. Local form errors should be cleared.
           setErrors({});
+          // setMessage(''); // setMessage is removed
         }}
         className="mt-4 w-full text-center text-sm text-purple-600 hover:text-purple-800"
       >

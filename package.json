@@ -7,8 +7,24 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "cypress": "cypress open"
+    "test": "jest --coverage",
+    "cypress": "cypress open",
+    "prepare": "husky install",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "audit:dead-code": "node scripts/find-dead-code.js",
+    "audit:components": "ts-node scripts/audit-components.ts",
+    "audit:all": "npm run audit:dead-code && npm run audit:components",
+    "analyze": "ANALYZE=true next build"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",

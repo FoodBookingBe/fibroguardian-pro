@@ -24,10 +24,16 @@ const withPWA = require('next-pwa')({
   // ],
 });
 
-const nextConfig = withPWA({
+// Bundle Analyzer configuratie
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+// Combineer PWA en Bundle Analyzer met de hoofdconfiguratie
+const nextConfig = withPWA(withBundleAnalyzer({
   reactStrictMode: true,
-  swcMinify: false, // Disabled for testing
-  cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes (Next.js expects bytes)
+  swcMinify: false, // Disabled for testing. Overweeg true voor productie.
+  cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes
   
   images: {
     remotePatterns: [

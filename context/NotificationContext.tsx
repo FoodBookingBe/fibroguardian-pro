@@ -4,17 +4,26 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 // Definieer typen voor notificaties
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
+export interface NotificationAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface Notification {
   id: string;
   type: NotificationType;
-  message: string;
-  duration?: number; // in milliseconden
+  message: string; // Kan HTML bevatten als isHtml true is
+  duration?: number; // in milliseconden, 0 of negatief voor persistent
+  action?: NotificationAction;
+  isHtml?: boolean;
+  icon?: React.ReactNode; // Custom icon kan hier worden meegegeven
 }
 
 // Context type
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (type: NotificationType, message: string, duration?: number) => void;
+  // Update addNotification signature to accept new properties
+  addNotification: (notificationDetails: Omit<Notification, 'id'>) => string; // Returns the ID of the new notification
   removeNotification: (id: string) => void;
 }
 
@@ -25,15 +34,21 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   
-  const addNotification = (type: NotificationType, message: string, duration = 5000) => {
-    const id = Date.now().toString() + Math.random().toString(36).substring(2, 7); // Ensure more unique ID
-    setNotifications(prev => [...prev, { id, type, message, duration }]);
+  const addNotification = (notificationDetails: Omit<Notification, 'id'>): string => {
+    const id = Date.now().toString() + Math.random().toString(36).substring(2, 7);
+    const newNotification: Notification = { 
+      id, 
+      ...notificationDetails,
+      duration: notificationDetails.duration === undefined ? 5000 : notificationDetails.duration, // Default duration
+    };
+    setNotifications(prev => [...prev, newNotification]);
     
-    if (duration > 0) {
+    if (newNotification.duration && newNotification.duration > 0) {
       setTimeout(() => {
         removeNotification(id);
-      }, duration);
+      }, newNotification.duration);
     }
+    return id; // Return the ID so it can be programmatically removed if needed
   };
   
   const removeNotification = (id: string) => {

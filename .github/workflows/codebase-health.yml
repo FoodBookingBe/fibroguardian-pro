@@ -1,0 +1,112 @@
+name: Codebase Health Check
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # Elke maandagochtend om 4:00 UTC
+  workflow_dispatch: # Maakt handmatig triggeren mogelijk via de Actions tab
+
+jobs:
+  analyze-bundles:
+    name: Analyze Bundle Sizes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with bundle analyzer
+        run: ANALYZE=true npm run build # Zorg dat 'analyze' script in package.json staat
+        env: # Voeg environment variabelen toe die nodig zijn voor de build
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL_DUMMY || 'http://localhost:54321' }} # Gebruik dummy waarden als echte niet nodig zijn voor analyze
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY_DUMMY || 'dummykey' }}
+
+      - name: Upload bundle analysis artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-report
+          path: .next/analyze/ # Standaard output pad van @next/bundle-analyzer
+
+  check-dependencies:
+    name: Check Dependencies Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for unused dependencies (depcheck)
+        run: npx depcheck # Genereert output naar stdout, kan naar bestand worden gepiped indien nodig
+
+      - name: Check for outdated dependencies (npm outdated)
+        run: npm outdated --json > outdated-dependencies.json || true # || true om de workflow niet te laten falen als er outdated deps zijn
+      
+      - name: Check for vulnerabilities (npm audit)
+        run: npm audit --json > audit-report.json || true # || true om de workflow niet te laten falen op vulnerabilities
+
+      - name: Upload dependency reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-health-reports
+          path: |
+            outdated-dependencies.json
+            audit-report.json
+            
+  lighthouse-analysis: # Hernoemd voor duidelijkheid
+    name: Lighthouse Performance Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL_DUMMY || 'http://localhost:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY_DUMMY || 'dummykey' }}
+          
+      - name: Start server
+        run: npm run start & # Draai server op achtergrond
+        env:
+          PORT: 3000 # Zorg dat Lighthouse de juiste poort gebruikt
+
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000 # Wacht tot de server reageert
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10 # Gebruik nieuwste versie (v10 op moment van schrijven)
+        with:
+          urls: |
+            http://localhost:3000/
+            http://localhost:3000/dashboard
+            http://localhost:3000/taken
+            http://localhost:3000/auth/login
+          # budgetPath: './lighthouse-budgets.json' # Optioneel: definieer performance budgets
+          uploadArtifacts: true # Uploads Lighthouse report as an artifact
+          temporaryPublicStorage: true # Uploads to temporary public storage to view reports
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }} # Optioneel, voor status checks op PRs

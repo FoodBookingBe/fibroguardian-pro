@@ -7,7 +7,7 @@ import { ConditionalRender } from '@/components/ui/ConditionalRender';
 import { useNotification } from '@/context/NotificationContext';
 import AIInsightsPresentational from '@/components/dashboard/AIInsightsPresentational'; // New presentational component
 import { Inzicht, TaskLog } from '@/types';
-import { ErrorMessage } from '@/lib/error-handler'; // For typing error from hooks
+import { ErrorMessage } from '@/lib/error-handler'; 
 
 // Define an EmptyState component or use inline JSX for emptyFallback
 const EmptyInsightsState = () => (
@@ -18,7 +18,12 @@ const EmptyInsightsState = () => (
   </div>
 );
 
-export function AIInsightsContainer({ limit = 3 }: { limit?: number }) {
+interface AIInsightsContainerProps {
+  initialInsightsProp?: Inzicht[]; // Renamed prop for clarity
+  limit?: number;
+}
+
+export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsightsContainerProps) {
   const { user } = useAuth();
   const userId = user?.id;
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);

@@ -6,10 +6,23 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    // Toegevoegde strikte opties
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true, // Kan problemen veroorzaken met class constructors, evalueer
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true, // Helpt bij opschonen
+    "noUnusedParameters": true, // Helpt bij opschonen
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    // Einde toegevoegde strikte opties
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "node", // Behoud 'node' als dat de huidige werkende instelling is
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
