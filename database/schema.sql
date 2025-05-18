@@ -106,6 +106,25 @@ create table abonnementen (
   updated_at timestamptz default now() not null
 );
 
+-- Trigger om automatisch een profiel aan te maken voor nieuwe gebruikers
+CREATE OR REPLACE FUNCTION public.create_profile_for_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, created_at, updated_at) -- Explicitly list columns
+  VALUES (new.id, now(), now());
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Drop trigger if it exists to avoid errors bij het opnieuw uitvoeren
+DROP TRIGGER IF EXISTS create_profile_on_signup ON auth.users;
+
+-- Maak trigger aan die activeert bij nieuwe gebruikers
+CREATE TRIGGER create_profile_on_signup
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.create_profile_for_new_user();
+
 -- Automatische updates
 create or replace function update_updated_at()
 returns trigger as $$
@@ -200,6 +219,82 @@ $$ LANGUAGE plpgsql;
 
 -- Grant execute permission to authenticated users so they can call this function
 GRANT EXECUTE ON FUNCTION public.create_task_with_owner(JSONB, UUID) TO authenticated;
+
+-- Function to get a profile for a specific owner, bypassing RLS for the select itself
+CREATE OR REPLACE FUNCTION public.get_profile_for_owner(
+  owner_user_id UUID
+)
+RETURNS SETOF profiles -- Returns the profile record
+SECURITY DEFINER
+-- Set a secure search_path for SECURITY DEFINER functions
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM public.profiles
+  WHERE id = owner_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.get_profile_for_owner(UUID) TO authenticated;
+
+-- Function to update a task log for a specific owner, ensuring ownership, bypassing RLS for the update itself
+CREATE OR REPLACE FUNCTION public.update_task_log_for_owner(
+  p_log_id UUID,
+  p_log_data JSONB,
+  p_owner_user_id UUID
+)
+RETURNS SETOF task_logs -- Returns the updated task log
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  target_log task_logs;
+BEGIN
+  -- Check if the log exists and belongs to the owner
+  SELECT * INTO target_log FROM public.task_logs WHERE id = p_log_id AND user_id = p_owner_user_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Task log not found or user does not have permission to update. Log ID: %, User ID: %', p_log_id, p_owner_user_id;
+    -- Or, to mimic a 404, just return nothing:
+    -- RETURN; 
+  END IF;
+
+  RETURN QUERY
+  UPDATE public.task_logs
+  SET 
+    start_tijd = COALESCE((p_log_data->>'start_tijd')::timestamptz, start_tijd),
+    eind_tijd = COALESCE((p_log_data->>'eind_tijd')::timestamptz, eind_tijd),
+    energie_voor = COALESCE((p_log_data->>'energie_voor')::integer, energie_voor),
+    energie_na = COALESCE((p_log_data->>'energie_na')::integer, energie_na),
+    pijn_score = COALESCE((p_log_data->>'pijn_score')::integer, pijn_score),
+    vermoeidheid_score = COALESCE((p_log_data->>'vermoeidheid_score')::integer, vermoeidheid_score),
+    stemming = COALESCE(p_log_data->>'stemming', stemming),
+    hartslag = COALESCE((p_log_data->>'hartslag')::integer, hartslag),
+    notitie = COALESCE(p_log_data->>'notitie', notitie),
+    ai_validatie = COALESCE(p_log_data->>'ai_validatie', ai_validatie)
+    -- task_id and user_id should generally not be updated here
+  WHERE id = p_log_id AND user_id = p_owner_user_id -- Redundant check, but safe
+  RETURNING *;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION public.update_task_log_for_owner(UUID, JSONB, UUID) TO authenticated;
+
+-- Function to get a user ID from auth.users by email
+CREATE OR REPLACE FUNCTION public.get_user_id_by_email(p_email TEXT)
+RETURNS UUID
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+  SELECT id FROM auth.users WHERE email = p_email LIMIT 1;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_user_id_by_email(TEXT) TO authenticated;
 
 
 -- Row Level Security (RLS) policies

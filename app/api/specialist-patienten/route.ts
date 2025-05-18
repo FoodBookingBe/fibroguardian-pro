@@ -1,11 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Admin client no longer needed here for this specific task
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 import { Profile, SpecialistPatient } from '@/types';
 
 // POST to create a specialist-patient relationship
 export async function POST(request: NextRequest) {
-  const supabase = getSupabaseRouteHandlerClient();
+  const supabase = getSupabaseRouteHandlerClient(); // For current user auth and RPC calls
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -28,15 +28,38 @@ export async function POST(request: NextRequest) {
       }
       specialistId = user.id;
 
-      const { data: patientProfile, error: patientError } = await supabase
+      // Step 1: Find user ID by email using the new RPC function
+      const { data: patientUserId, error: rpcError } = await supabase
+        .rpc('get_user_id_by_email', { p_email: patient_email })
+        .single(); // Expecting a single UUID or null
+
+      if (rpcError) {
+        console.error(`[API SP-POST] Error calling RPC get_user_id_by_email for ${patient_email}:`, rpcError);
+        // Check if it's a "function not found" error vs. other errors
+        if (rpcError.code === 'PGRST202') { // Function not found
+             return NextResponse.json(formatApiError(500, 'Serverconfiguratiefout: functie voor e-mailopzoeking niet gevonden.'), { status: 500 });
+        }
+        return NextResponse.json(formatApiError(500, 'Fout bij het zoeken naar gebruiker via e-mail.'), { status: 500 });
+      }
+
+      if (!patientUserId) { // RPC returned null, meaning no user found with that email
+        console.log(`[API SP-POST] No user found with email ${patient_email} via RPC.`);
+        return NextResponse.json(formatApiError(404, 'Geen gebruiker gevonden met dit e-mailadres.'), { status: 404 });
+      }
+      
+      const potentialPatientId = patientUserId as string; // RPC returns the UUID directly
+
+      // Step 2: Verify this user is a 'patient' in the profiles table
+      const { data: patientProfile, error: patientProfileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', patient_email)
+        .eq('id', potentialPatientId)
         .eq('type', 'patient')
         .single();
       
-      if (patientError || !patientProfile) {
-        return NextResponse.json(formatApiError(404, 'Patiënt niet gevonden met dit e-mailadres.'), { status: 404 });
+      if (patientProfileError || !patientProfile) {
+        console.error(`[API SP-POST] User ${potentialPatientId} found in auth.users but not as 'patient' in profiles or profile query error:`, patientProfileError);
+        return NextResponse.json(formatApiError(404, 'Patiëntprofiel niet gevonden of gebruiker is geen patiënt.'), { status: 404 });
       }
       patientId = patientProfile.id;
     } 

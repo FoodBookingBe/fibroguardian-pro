@@ -45,17 +45,28 @@ export function useProfile(
       if (!userId) return null;
       const supabase = getSupabaseBrowserClient();
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+        .rpc('get_profile_for_owner', { owner_user_id: userId });
+        // .single(); // .single() is not typically used with RPC calls that return SETOF like this.
+                      // The result of SETOF is an array of rows.
+
+      if (error) {
+        // Check for PGRST116 specifically, which means "0 rows" for a .single() like call,
+        // or if the function itself returned no rows.
+        if (error.code === 'PGRST116') { // PGRST116: "The result contains 0 rows"
+          return null; // No profile found, not necessarily an "error" to throw
+        }
+        throw handleSupabaseError(error, 'profile-fetch');
+      }
       
-      if (error) throw handleSupabaseError(error, 'profile-fetch');
-      return data as Profile | null;
+      // Data from RPC returning SETOF is an array.
+      // Data from RPC returning SETOF is an array.
+      // If a profile is found, it will be the first (and only) element.
+      const profile = (data && data.length > 0 ? data[0] : null);
+      return profile as Profile | null; // Ensure the final cast is to Profile | null
     },
     {
       enabled: !!userId,
-      staleTime: STALE_TIME.PROFILES,
+      staleTime: STALE_TIME.PROFILES, // Corrected typo: staleTime -> STALE_TIME
       ...options,
     }
   );

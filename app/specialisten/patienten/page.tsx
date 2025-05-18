@@ -3,7 +3,7 @@ import PatientList from '@/components/specialisten/PatientList';
 import AddPatientButtonContainer from '@/containers/specialisten/AddPatientButtonContainer'; // Updated import
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
 // import { cookies } from 'next/headers'; // Handled by centralized client
-import { getSupabaseServerComponentClient } from '@/lib/supabase'; // New import
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Corrected import path
 
 export default async function PatientenPage() {
   const supabase = getSupabaseServerComponentClient(); // Use centralized server client
