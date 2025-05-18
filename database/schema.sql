@@ -6,7 +6,7 @@ create table profiles (
   voornaam text,
   achternaam text,
   avatar_url text,
-  type text check (type in ('patient', 'specialist')) default 'patient',
+  type text check (type in ('patient', 'specialist', 'admin')) default 'patient', -- Added 'admin'
   postcode text,
   gemeente text,
   geboortedatum date,
@@ -131,6 +131,20 @@ create trigger abonnementen_updated_at
 before update on abonnementen
 for each row execute function update_updated_at();
 
+-- Helper function to check if current user is an admin
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+-- SET search_path = public -- Ensure 'profiles' table is found if not in public schema and using a different search_path
+as $$
+  select exists (
+    select 1
+    from public.profiles -- Explicitly schema-qualify if needed, assuming 'profiles' is in 'public'
+    where id = auth.uid() and type = 'admin'
+  );
+$$;
+
 -- Row Level Security (RLS) policies
 alter table profiles enable row level security;
 alter table tasks enable row level security;
@@ -147,6 +161,15 @@ on profiles for select using (auth.uid() = id);
 
 create policy "Gebruikers kunnen alleen eigen profiel bewerken"
 on profiles for update using (auth.uid() = id);
+
+create policy "Admins hebben volledige toegang tot profielen"
+on profiles for all -- SELECT, INSERT, UPDATE, DELETE
+using (public.is_admin())
+with check (public.is_admin());
+
+-- RLS-beleid voor tasks
+create policy "Admins hebben volledige toegang tot tasks"
+on tasks for all using (public.is_admin()) with check (public.is_admin());
 
 create policy "Gebruikers kunnen alleen eigen taken zien"
 on tasks for select using (auth.uid() = user_id);
@@ -182,6 +205,9 @@ on tasks for insert with check (
 );
 
 -- RLS-beleid voor task logs
+create policy "Admins hebben volledige toegang tot task_logs"
+on task_logs for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen alleen eigen logs zien"
 on task_logs for select using (auth.uid() = user_id);
 
@@ -199,6 +225,9 @@ on task_logs for select using (
 );
 
 -- RLS-beleid voor planning
+create policy "Admins hebben volledige toegang tot planning"
+on planning for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen alleen eigen planning zien"
 on planning for select using (auth.uid() = user_id);
 
@@ -222,6 +251,9 @@ on planning for select using (
 );
 
 -- RLS-beleid voor reflecties
+create policy "Admins hebben volledige toegang tot reflecties"
+on reflecties for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen alleen eigen reflecties zien"
 on reflecties for select using (auth.uid() = user_id);
 
@@ -245,6 +277,9 @@ on reflecties for select using (
 );
 
 -- RLS-beleid voor specialist_patienten
+create policy "Admins hebben volledige toegang tot specialist_patienten"
+on specialist_patienten for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen zien met welke specialisten ze verbonden zijn"
 on specialist_patienten for select using (auth.uid() = patient_id);
 
@@ -261,6 +296,9 @@ create policy "Specialisten kunnen patiëntrelaties verwijderen"
 on specialist_patienten for delete using (auth.uid() = specialist_id);
 
 -- RLS-beleid voor inzichten
+create policy "Admins hebben volledige toegang tot inzichten"
+on inzichten for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen alleen eigen inzichten zien"
 on inzichten for select using (auth.uid() = user_id);
 
@@ -278,6 +316,9 @@ on inzichten for select using (
 );
 
 -- RLS-beleid voor abonnementen
+create policy "Admins hebben volledige toegang tot abonnementen"
+on abonnementen for all using (public.is_admin()) with check (public.is_admin());
+
 create policy "Gebruikers kunnen alleen eigen abonnementen zien"
 on abonnementen for select using (auth.uid() = user_id);
 
