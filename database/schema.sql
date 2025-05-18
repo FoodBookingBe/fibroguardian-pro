@@ -131,17 +131,16 @@ create trigger abonnementen_updated_at
 before update on abonnementen
 for each row execute function update_updated_at();
 
--- Helper function to check if current user is an admin
-create or replace function public.is_admin()
-returns boolean
-language sql
-security definer
--- SET search_path = public -- Ensure 'profiles' table is found if not in public schema and using a different search_path
-as $$
-  select exists (
-    select 1
-    from public.profiles -- Explicitly schema-qualify if needed, assuming 'profiles' is in 'public'
-    where id = auth.uid() and type = 'admin'
+-- Helper function to check if current user is an admin (User's optimized version)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = (SELECT auth.uid()) AND type = 'admin'
   );
 $$;
 
@@ -155,7 +154,7 @@ alter table specialist_patienten enable row level security;
 alter table inzichten enable row level security;
 alter table abonnementen enable row level security;
 
--- RLS-beleid voor gebruikers
+-- RLS-beleid voor profiles (Behouden van bestaande, inclusief admin)
 create policy "Gebruikers kunnen alleen eigen profiel zien"
 on profiles for select using (auth.uid() = id);
 
@@ -163,11 +162,11 @@ create policy "Gebruikers kunnen alleen eigen profiel bewerken"
 on profiles for update using (auth.uid() = id);
 
 create policy "Admins hebben volledige toegang tot profielen"
-on profiles for all -- SELECT, INSERT, UPDATE, DELETE
+on profiles for all
 using (public.is_admin())
 with check (public.is_admin());
 
--- RLS-beleid voor tasks
+-- RLS-beleid voor tasks (Behouden van bestaande, inclusief admin)
 create policy "Admins hebben volledige toegang tot tasks"
 on tasks for all using (public.is_admin()) with check (public.is_admin());
 
@@ -183,7 +182,6 @@ on tasks for update using (auth.uid() = user_id);
 create policy "Gebruikers kunnen alleen eigen taken verwijderen"
 on tasks for delete using (auth.uid() = user_id);
 
--- RLS-beleid voor specialisten
 create policy "Specialisten kunnen taken zien van hun patiënten"
 on tasks for select using (
   exists (
@@ -204,7 +202,7 @@ on tasks for insert with check (
   )
 );
 
--- RLS-beleid voor task logs
+-- RLS-beleid voor task logs (Behouden van bestaande, inclusief admin)
 create policy "Admins hebben volledige toegang tot task_logs"
 on task_logs for all using (public.is_admin()) with check (public.is_admin());
 
@@ -224,109 +222,189 @@ on task_logs for select using (
   )
 );
 
--- RLS-beleid voor planning
-create policy "Admins hebben volledige toegang tot planning"
-on planning for all using (public.is_admin()) with check (public.is_admin());
-
-create policy "Gebruikers kunnen alleen eigen planning zien"
-on planning for select using (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen planning bewerken"
-on planning for update using (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen planning aanmaken"
-on planning for insert with check (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen planning verwijderen"
-on planning for delete using (auth.uid() = user_id);
-
-create policy "Specialisten kunnen planning zien van hun patiënten"
-on planning for select using (
-  exists (
-    select 1 from specialist_patienten
-    where specialist_id = auth.uid() 
-    and patient_id = user_id
-    and 'view_tasks' = any(toegangsrechten)
+-- Nieuwe geoptimaliseerde policies van gebruiker:
+-- ===== planning tabel =====
+CREATE POLICY "Planning_policy"
+ON planning
+FOR SELECT
+USING (
+  (SELECT auth.uid()) = user_id
+  OR EXISTS (
+    SELECT 1 FROM specialist_patienten
+    WHERE specialist_id = (SELECT auth.uid())
+    AND patient_id = user_id
+    AND 'view_tasks' = ANY(toegangsrechten)
   )
+  OR (SELECT public.is_admin())
 );
 
--- RLS-beleid voor reflecties
-create policy "Admins hebben volledige toegang tot reflecties"
-on reflecties for all using (public.is_admin()) with check (public.is_admin());
-
-create policy "Gebruikers kunnen alleen eigen reflecties zien"
-on reflecties for select using (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen reflecties aanmaken"
-on reflecties for insert with check (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen reflecties bewerken"
-on reflecties for update using (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen reflecties verwijderen"
-on reflecties for delete using (auth.uid() = user_id);
-
-create policy "Specialisten kunnen reflecties zien van hun patiënten"
-on reflecties for select using (
-  exists (
-    select 1 from specialist_patienten
-    where specialist_id = auth.uid() 
-    and patient_id = user_id
-    and 'view_reflecties' = any(toegangsrechten)
-  )
+CREATE POLICY "Planning_insert_policy"
+ON planning
+FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
 );
 
--- RLS-beleid voor specialist_patienten
-create policy "Admins hebben volledige toegang tot specialist_patienten"
-on specialist_patienten for all using (public.is_admin()) with check (public.is_admin());
-
-create policy "Gebruikers kunnen zien met welke specialisten ze verbonden zijn"
-on specialist_patienten for select using (auth.uid() = patient_id);
-
-create policy "Specialisten kunnen hun eigen patiënten zien"
-on specialist_patienten for select using (auth.uid() = specialist_id);
-
-create policy "Specialisten kunnen patiënten toevoegen"
-on specialist_patienten for insert with check (auth.uid() = specialist_id);
-
-create policy "Specialisten kunnen patiëntrelaties bijwerken"
-on specialist_patienten for update using (auth.uid() = specialist_id);
-
-create policy "Specialisten kunnen patiëntrelaties verwijderen"
-on specialist_patienten for delete using (auth.uid() = specialist_id);
-
--- RLS-beleid voor inzichten
-create policy "Admins hebben volledige toegang tot inzichten"
-on inzichten for all using (public.is_admin()) with check (public.is_admin());
-
-create policy "Gebruikers kunnen alleen eigen inzichten zien"
-on inzichten for select using (auth.uid() = user_id);
-
-create policy "Gebruikers kunnen alleen eigen inzichten aanmaken"
-on inzichten for insert with check (auth.uid() = user_id);
-
-create policy "Specialisten kunnen inzichten zien van hun patiënten"
-on inzichten for select using (
-  exists (
-    select 1 from specialist_patienten
-    where specialist_id = auth.uid() 
-    and patient_id = user_id
-    and 'view_inzichten' = any(toegangsrechten)
-  )
+CREATE POLICY "Planning_update_policy"
+ON planning
+FOR UPDATE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
 );
 
--- RLS-beleid voor abonnementen
-create policy "Admins hebben volledige toegang tot abonnementen"
-on abonnementen for all using (public.is_admin()) with check (public.is_admin());
+CREATE POLICY "Planning_delete_policy"
+ON planning
+FOR DELETE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
 
-create policy "Gebruikers kunnen alleen eigen abonnementen zien"
-on abonnementen for select using (auth.uid() = user_id);
+-- ===== reflecties tabel =====
+CREATE POLICY "Reflecties_policy"
+ON reflecties
+FOR SELECT
+USING (
+  (SELECT auth.uid()) = user_id
+  OR EXISTS (
+    SELECT 1 FROM specialist_patienten
+    WHERE specialist_id = (SELECT auth.uid())
+    AND patient_id = user_id
+    AND 'view_reflecties' = ANY(toegangsrechten)
+  )
+  OR (SELECT public.is_admin())
+);
 
-create policy "Gebruikers kunnen alleen eigen abonnementen aanmaken"
-on abonnementen for insert with check (auth.uid() = user_id);
+CREATE POLICY "Reflecties_insert_policy"
+ON reflecties
+FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
 
-create policy "Gebruikers kunnen alleen eigen abonnementen bijwerken"
-on abonnementen for update using (auth.uid() = user_id);
+CREATE POLICY "Reflecties_update_policy"
+ON reflecties
+FOR UPDATE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Reflecties_delete_policy"
+ON reflecties
+FOR DELETE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+-- ===== specialist_patienten tabel =====
+CREATE POLICY "Specialist_patienten_select_policy"
+ON specialist_patienten
+FOR SELECT
+USING (
+  (SELECT auth.uid()) = patient_id
+  OR (SELECT auth.uid()) = specialist_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Specialist_patienten_insert_policy"
+ON specialist_patienten
+FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid()) = specialist_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Specialist_patienten_update_policy"
+ON specialist_patienten
+FOR UPDATE
+USING (
+  (SELECT auth.uid()) = specialist_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Specialist_patienten_delete_policy"
+ON specialist_patienten
+FOR DELETE
+USING (
+  (SELECT auth.uid()) = specialist_id
+  OR (SELECT public.is_admin())
+);
+
+-- ===== inzichten tabel =====
+CREATE POLICY "Inzichten_policy"
+ON inzichten
+FOR SELECT
+USING (
+  (SELECT auth.uid()) = user_id
+  OR EXISTS (
+    SELECT 1 FROM specialist_patienten
+    WHERE specialist_id = (SELECT auth.uid())
+    AND patient_id = user_id
+    AND 'view_inzichten' = ANY(toegangsrechten)
+  )
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Inzichten_insert_policy"
+ON inzichten
+FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Inzichten_update_policy"
+ON inzichten
+FOR UPDATE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Inzichten_delete_policy"
+ON inzichten
+FOR DELETE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+-- ===== abonnementen tabel =====
+CREATE POLICY "Abonnementen_select_policy"
+ON abonnementen
+FOR SELECT
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Abonnementen_insert_policy"
+ON abonnementen
+FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Abonnementen_update_policy"
+ON abonnementen
+FOR UPDATE
+USING (
+  (SELECT auth.uid()) = user_id
+  OR (SELECT public.is_admin())
+);
+
+CREATE POLICY "Abonnementen_delete_policy"
+ON abonnementen
+FOR DELETE
+USING (
+  (SELECT public.is_admin())
+);
 
 -- Index creation for performance
 create index idx_tasks_user_id on tasks(user_id);
