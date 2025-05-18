@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced by centralized helper
 // import { cookies } from 'next/headers'; // Handled by centralized helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Import centralized helper
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
 import { formatApiError } from '@/lib/error-handler'; // Corrected import path
 import { handleSupabaseError } from '@/lib/error-handler';
 import { Task } from '@/types'; // Import Task type for better type safety
@@ -11,9 +11,10 @@ export async function GET(req: NextRequest) {
   
   try {
     // Auth check
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
     
-    if (!session) {
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API Tasks GET] Error fetching user:', getUserError.message);
       return NextResponse.json(
         formatApiError(401, 'Niet geautoriseerd'),
         { status: 401 }
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('tasks')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     
     // Voeg filters toe
@@ -62,9 +63,10 @@ export async function POST(req: NextRequest) {
   
   try {
     // Auth check
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
     
-    if (!session) {
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API Tasks POST] Error fetching user:', getUserError.message);
       return NextResponse.json(
         formatApiError(401, 'Niet geautoriseerd'),
         { status: 401 }
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
     // Voeg user_id toe
     const taskWithUserId = {
       ...taskData,
-      user_id: session.user.id,
+      user_id: user.id,
     };
     
     // Voeg taak toe

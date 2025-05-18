@@ -34,6 +34,29 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
     enabled: !!taskId,
   });
 
+  // Dummy task for debugging - REMOVED
+  // const task: Task = initialTask || { 
+  //   id: taskId, 
+  //   titel: 'Laden...', 
+  //   beschrijving: '', 
+  //   user_id: user?.id || 'dummy-user-id', 
+  //   type: 'taak', 
+  //   created_at: new Date(), 
+  //   updated_at: new Date(), 
+  //   herhaal_patroon: 'eenmalig', 
+  //   duur: 30, 
+  //   notities: undefined, 
+  //   labels: undefined, 
+  //   hartslag_doel: undefined,
+  //   dagen_van_week: undefined,
+  //   metingen: undefined,
+  //   specialist_id: undefined,
+  // };
+  // const isLoadingTask = false; // Will come from useTask
+  // const fetchTaskError = null; // Will come from useTask
+  //   const isFetchTaskError = false; // Will come from useTask
+
+
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [currentLogId, setCurrentLogId] = useState<string | null>(null);
@@ -87,6 +110,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
 
     addTaskLog(logDataToCreateInput, { // Removed the problematic cast
       onSuccess: (createdLog) => {
+        console.log('[TaskExecutionContainer] addTaskLog onSuccess, createdLog:', createdLog); // Log the createdLog
         if (createdLog && createdLog.id) {
           setStartTime(now);
           setCurrentLogId(createdLog.id);
@@ -112,8 +136,10 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
   const handleSubmitFeedback = async () => {
     if (!startTime || !currentLogId || !user || !task) {
         addNotification({ type: 'error', message: 'Sessie ongeldig of taakdetails ontbreken.' });
+        console.error('handleSubmitFeedback validation failed:', { startTime, currentLogId, userExists: !!user, taskExists: !!task });
         return;
     }
+    console.log('Attempting to update task log with ID:', currentLogId); // Log the ID
 
     const logDataToUpdate: Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id' | 'task_id' | 'start_tijd'>> & { eind_tijd: string } = {
       eind_tijd: new Date().toISOString(), // API expects ISO string
@@ -168,7 +194,25 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
     // Optionally, reset timer or navigate away if task is considered "abandoned"
   };
 
-  if (isLoadingTask && !initialTask) {
+  // if (isLoadingTask && !initialTask) { // Temporarily disable loading/error states for task fetching
+  //   return (
+  //       <div className="bg-white rounded-lg shadow-md p-6">
+  //           <SkeletonLoader type="form" count={3} />
+  //       </div>
+  //   );
+  // }
+  
+  // const typedFetchTaskError = fetchTaskError as ErrorMessage | null;
+  // if (isFetchTaskError && typedFetchTaskError) {
+  //   return (
+  //       <div className="bg-white rounded-lg shadow-md p-6">
+  //           <AlertMessage type="error" title="Fout bij laden taak" message={typedFetchTaskError.userMessage || "Kon taakdetails niet laden."} />
+  //       </div>
+  //   );
+  // }
+
+  // if (!task) { // Task is now dummied up
+  if (isLoadingTask && !initialTask) { // Restore loading/error states for task fetching
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <SkeletonLoader type="form" count={3} />
@@ -185,7 +229,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
     );
   }
 
-  if (!task) {
+  if (!task) { // Restore check for task
     return <div className="p-6 text-center text-gray-500">Taak niet gevonden of kon niet worden geladen.</div>;
   }
 

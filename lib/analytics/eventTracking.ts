@@ -1,6 +1,7 @@
 import { useEffect } from 'react'; // Import useEffect
+import { User, AuthError, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { AnalyticsEvent, EventCallback, EventProperties, EventSchema } from './types';
-import { getSupabaseBrowserClient } from '@/lib/supabase'; // Voor user ID uit sessie
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Voor user ID uit sessie
 
 // Validatie schema's voor verschillende events
 const eventSchemas: Record<string, EventSchema> = {
@@ -68,13 +69,16 @@ class AnalyticsService {
     if (typeof window !== 'undefined') {
       this.sessionId = this.getOrCreateSessionId();
       // Probeer user ID te halen als die al bestaat (bv. na page refresh)
-      this.supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user?.id) {
-          this.userId = data.session.user.id;
+      this.supabase.auth.getUser().then(({ data: { user } , error }: { data: { user: User | null }, error: AuthError | null }) => {
+        if (error) {
+          console.error('[Analytics] Error fetching user for session:', error.message);
+          this.userId = null;
+        } else {
+          this.userId = user?.id || null;
         }
       });
        // Luister naar auth changes om userId bij te werken
-      this.supabase.auth.onAuthStateChange((_event, session) => { // event parameter was unused
+      this.supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => { 
         this.userId = session?.user?.id || null;
         if (this.debugMode) {
             console.log('[Analytics] Auth state changed, new userId:', this.userId);
@@ -188,7 +192,7 @@ class AnalyticsService {
     this.eventCallbacks.push(callback);
   }
   
-  private async sendToBackend(event: AnalyticsEvent) {
+  private async sendToBackend(_event: AnalyticsEvent) { // Prefixed event as it's unused in the current (commented-out) body
     // In een echte app zou je hier een API endpoint aanroepen.
     // Voorbeeld:
     // try {

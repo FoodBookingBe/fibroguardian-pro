@@ -230,7 +230,7 @@ export function useReflecties(
  
 // Hook to get specialists for a patient, including relationId
 export function useMySpecialists(
-  patientId: string | undefined, // Added missing patientId parameter
+  patientId: string | undefined,
   options?: SupabaseQueryHookOptions<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>
 ): QueryHookResult<SpecialistWithRelation[], ErrorMessage> {
   return useSupabaseQuery<SpecialistWithRelation[], ErrorMessage, SpecialistWithRelation[]>(
@@ -239,34 +239,41 @@ export function useMySpecialists(
       if (!patientId) return [];
       const supabase = getSupabaseBrowserClient();
       
-      const { data: relations, error: relationError } = await supabase
+      const { data, error } = await supabase
         .from('specialist_patienten')
-        .select('id, specialist_id') // Select relation ID and specialist_id
+        .select(`
+          id, 
+          specialist_id, 
+          profiles:specialist_id (
+            id,
+            voornaam,
+            achternaam,
+            avatar_url,
+            type,
+            postcode,
+            gemeente,
+            geboortedatum
+          )
+        `)
         .eq('patient_id', patientId);
 
-      if (relationError) throw handleSupabaseError(relationError, `mySpecialists-relations-fetch-${patientId}`);
-      if (!relations || relations.length === 0) return [];
-      
-      const specialistIds = relations.map(r => r.specialist_id);
-      if (specialistIds.length === 0) return [];
+      if (error) throw handleSupabaseError(error, `mySpecialists-fetch-${patientId}`);
+      if (!data) return [];
 
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select<string, Profile>('*')
-        .in('id', specialistIds);
-        
-      if (profileError) throw handleSupabaseError(profileError, `mySpecialists-profiles-fetch-${patientId}`);
-      
-      const relationMap = relations.reduce((map, relation) => {
-        map[relation.specialist_id] = relation.id;
-        return map;
-      }, {} as Record<string, string>);
+      const specialistsWithRelation = data.map(relation => {
+        // Ensure relation.profiles is treated as Profile, not an array if .single() was implied by FK
+        const profileData = Array.isArray(relation.profiles) ? relation.profiles[0] : relation.profiles;
 
-      const specialistsWithRelation = (profiles || []).map(profile => ({
-        ...profile,
-        relationId: relationMap[profile.id]
-      }));
-      
+        if (!profileData) {
+          console.warn(`Profile data missing for specialist_id: ${relation.specialist_id} in relation ${relation.id}`);
+          return null; 
+        }
+        return {
+          ...(profileData as Profile), 
+          relationId: relation.id,
+        };
+      }).filter(Boolean) as SpecialistWithRelation[]; // Filter out any nulls if profile was missing
+
       return specialistsWithRelation;
     },
     {

@@ -1,8 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-// 'use client' is not needed here if we remove client-side fetching from this page component
-// import { useState, useEffect } from 'react'; // No longer needed for task fetching
-import { useParams, useRouter } from 'next/navigation'; // useRouter might still be needed for onComplete
+// import { useState, useEffect } from 'react'; // Unused imports
+import { useParams } from 'next/navigation'; // useRouter removed as it's unused
 // import { getSupabaseBrowserClient } from '@/lib/supabase'; // No longer needed for task fetching
 import TaskExecutionContainer from '@/containers/tasks/TaskExecutionContainer'; // Updated import
 // import { Task } from '@/types'; // Task type might not be needed here if not passing initialTask
@@ -10,42 +8,21 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout'; // Assuming this page uses DashboardLayout
 
 // This page can become simpler as the container handles loading/error states for the task itself.
-// We might still want a server-side auth check here.
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+// Server-side auth check is removed as this is a client component.
+// Middleware and AuthProvider should handle auth.
+// import { createServerClient } from '@supabase/ssr'; // Server-side
+// import { cookies } from 'next/headers'; // Server-side
+// import { redirect } from 'next/navigation'; // Server-side redirect
 
 
-export default async function TaskStartPage() {
+export default function TaskStartPage() { // Removed async
   const params = useParams();
-  const router = useRouter(); // Keep for onComplete, or pass onComplete from server component if possible
+  // const router = useRouter(); // router is unused
   const taskId = params.id as string;
 
-  // Optional: Server-side auth check before rendering the page structure
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect('/auth/login');
-  }
-  // Note: Access control (if this user can start this specific task)
-  // would ideally be handled within TaskExecutionContainer or its data fetching logic.
+  // Client-side auth check can be added here using useAuth() if needed,
+  // but middleware should have already redirected unauthenticated users.
+  // TaskExecutionContainer will handle fetching task data and its own loading/error states.
 
   if (!taskId) {
     return (

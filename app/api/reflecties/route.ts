@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced
 // import { cookies } from 'next/headers'; // Handled by helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Import centralized helper
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler'; // Corrected import path
 import { Reflectie } from '@/types'; // Import type
 
@@ -49,8 +49,11 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API Reflecties GET] Error fetching user:', getUserError.message);
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
     
     const { searchParams } = new URL(req.url);
     const startDate = searchParams.get('start_date');
@@ -61,7 +64,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('reflecties')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('datum', { ascending: false }) // Most recent first
       .limit(limit)
       .range(offset, offset + limit - 1);
@@ -83,8 +86,11 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API Reflecties POST] Error fetching user:', getUserError.message);
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
     
     const reflectieData: Partial<Omit<Reflectie, 'id' | 'created_at' | 'user_id' | 'ai_validatie'>> & { datum: string } = await req.json();
     
@@ -94,7 +100,7 @@ export async function POST(req: NextRequest) {
     
     const reflectieWithUserId = {
       ...reflectieData,
-      user_id: session.user.id,
+      user_id: user.id,
       // Ensure created_at and updated_at are handled by DB or set here if needed
     };
     
@@ -102,7 +108,7 @@ export async function POST(req: NextRequest) {
     const { data: existingReflectie, error: checkError } = await supabase
       .from('reflecties')
       .select('id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .eq('datum', reflectieData.datum)
       .maybeSingle(); // Use maybeSingle to not throw error if not found
 

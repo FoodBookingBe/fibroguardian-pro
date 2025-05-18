@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { format, parseISO, isToday, addDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -62,82 +62,85 @@ export default function OverzichtClient({
   const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   const [activeTab, setActiveTab] = useState<'dag' | 'week'>('dag');
-  const [aiInsights, setAiInsights] = useState<string[]>([]);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    const generateAiInsights = () => {
-      const insights: string[] = [];
-      
-      if (!reflecties || reflecties.length === 0) {
-        insights.push("Er zijn nog geen reflecties voor deze week. Voeg dagelijkse reflecties toe om meer inzicht te krijgen in uw voortgang.");
-        setAiInsights(insights);
-        return;
-      }
-      
-      if (!taskLogs || taskLogs.length === 0) {
-        insights.push("Er zijn nog geen taken uitgevoerd deze week. Voer taken uit om meer inzicht te krijgen in uw voortgang.");
-        setAiInsights(insights);
-        return;
-      }
-      
-      reflecties.forEach(reflectie => {
-        const reflectieDatumString = typeof reflectie.datum === 'string' ? reflectie.datum : (reflectie.datum as unknown as Date)?.toISOString?.();
-        if (!reflectieDatumString) return;
-        const reflectieDatum = parseISO(reflectieDatumString);
+  const aiInsights = useMemo(() => {
+    if (!isClient) return []; // Don't compute on server or before client mount
 
-        const logsVanDag = taskLogs.filter(log => {
-          if (!log.eind_tijd || typeof log.eind_tijd !== 'string') return false;
+    const insights: string[] = [];
+    
+    if (!reflecties || reflecties.length === 0) {
+      insights.push("Er zijn nog geen reflecties voor deze week. Voeg dagelijkse reflecties toe om meer inzicht te krijgen in uw voortgang.");
+      return insights;
+    }
+    
+    if (!taskLogs || taskLogs.length === 0) {
+      insights.push("Er zijn nog geen taken uitgevoerd deze week. Voer taken uit om meer inzicht te krijgen in uw voortgang.");
+      return insights;
+    }
+    
+    reflecties.forEach(reflectie => {
+      // reflectie.datum is a Date object as per Reflectie type
+      const reflectieDatum = reflectie.datum; 
+      
+      // Ensure reflectieDatum is a valid Date object before proceeding
+      if (!(reflectieDatum instanceof Date) || isNaN(reflectieDatum.getTime())) {
+        console.warn(`Invalid Date object for reflectie ${reflectie.id}:`, reflectieDatum);
+        return; // Skip this reflection if date is invalid
+      }
+
+      const logsVanDag = taskLogs.filter(log => {
+        if (!log.eind_tijd || typeof log.eind_tijd !== 'string') return false;
+        // Add a check for valid date string before parsing
+        try {
           const logDatum = parseISO(log.eind_tijd);
-          return logDatum && reflectieDatum &&
-                 logDatum.getDate() === reflectieDatum.getDate() &&
+          return logDatum.getDate() === reflectieDatum.getDate() &&
                  logDatum.getMonth() === reflectieDatum.getMonth() &&
                  logDatum.getFullYear() === reflectieDatum.getFullYear();
-        });
-        
-        if (logsVanDag.length > 0) {
-          const validPainLogs = logsVanDag.filter(l => typeof l.pijn_score === 'number');
-          const avgPain = validPainLogs.length > 0 ? Math.round(validPainLogs.reduce((sum, log) => sum + (log.pijn_score ?? 0), 0) / validPainLogs.length) : 0;
-          
-          const validEnergyLogs = logsVanDag.filter(l => typeof l.energie_na === 'number' && typeof l.energie_voor === 'number');
-          const avgEnergyChange = validEnergyLogs.length > 0 ? Math.round(validEnergyLogs.reduce((sum, log) => sum + ((log.energie_na ?? 0) - (log.energie_voor ?? 0)), 0) / validEnergyLogs.length) : 0;
-
-          const validFatigueLogs = logsVanDag.filter(l => typeof l.vermoeidheid_score === 'number');
-          const avgFatigue = validFatigueLogs.length > 0 ? Math.round(validFatigueLogs.reduce((sum, log) => sum + (log.vermoeidheid_score ?? 0), 0) / validFatigueLogs.length) : 0;
-          
-          const isPositiveReflection = reflectie.stemming === 'goed' || reflectie.stemming === 'zeer goed';
-          const isNegativeReflection = reflectie.stemming === 'slecht' || reflectie.stemming === 'zeer slecht';
-          
-          const isPositiveTaskFeedback = avgPain < 10 && avgEnergyChange > 0 && avgFatigue < 10;
-          const isNegativeTaskFeedback = avgPain > 10 || avgEnergyChange < 0 || avgFatigue > 10;
-          
-          const reflectieDatumFormatted = format(reflectieDatum, 'EEEE d MMMM', { locale: nl });
-          
-          if (isPositiveReflection && isNegativeTaskFeedback) {
-            insights.push(`Op ${reflectieDatumFormatted} was uw reflectie positief, maar uw taakmetingen tonen hogere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk onderschat u de impact van activiteiten op uw lichaam.`);
-          } else if (isNegativeReflection && isPositiveTaskFeedback) {
-            insights.push(`Op ${reflectieDatumFormatted} was uw reflectie negatief, maar uw taakmetingen tonen lagere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk overschat u de impact van activiteiten op uw lichaam.`);
-          } else if (isPositiveReflection && isPositiveTaskFeedback) {
-            insights.push(`Op ${reflectieDatumFormatted} komen uw positieve reflectie en taakmetingen overeen. Uw activiteitenniveau lijkt goed afgestemd op uw capaciteiten.`);
-          } else if (isNegativeReflection && isNegativeTaskFeedback) {
-            insights.push(`Op ${reflectieDatumFormatted} komen uw negatieve reflectie en taakmetingen overeen. Overweeg om uw activiteitenniveau aan te passen of met uw specialist te overleggen.`);
-          }
+        } catch (e) {
+          console.warn(`Invalid date string for taskLog ${log.id}: ${log.eind_tijd}`);
+          return false;
         }
       });
       
-      if (insights.length === 0) {
-        insights.push("Er zijn nog niet genoeg gegevens om specifieke inzichten te genereren. Blijf taken uitvoeren en dagelijkse reflecties toevoegen.");
+      if (logsVanDag.length > 0) {
+        const validPainLogs = logsVanDag.filter(l => typeof l.pijn_score === 'number');
+        const avgPain = validPainLogs.length > 0 ? Math.round(validPainLogs.reduce((sum, log) => sum + (log.pijn_score ?? 0), 0) / validPainLogs.length) : 0;
+        
+        const validEnergyLogs = logsVanDag.filter(l => typeof l.energie_na === 'number' && typeof l.energie_voor === 'number');
+        const avgEnergyChange = validEnergyLogs.length > 0 ? Math.round(validEnergyLogs.reduce((sum, log) => sum + ((log.energie_na ?? 0) - (log.energie_voor ?? 0)), 0) / validEnergyLogs.length) : 0;
+
+        const validFatigueLogs = logsVanDag.filter(l => typeof l.vermoeidheid_score === 'number');
+        const avgFatigue = validFatigueLogs.length > 0 ? Math.round(validFatigueLogs.reduce((sum, log) => sum + (log.vermoeidheid_score ?? 0), 0) / validFatigueLogs.length) : 0;
+        
+        const isPositiveReflection = reflectie.stemming === 'goed' || reflectie.stemming === 'zeer goed';
+        const isNegativeReflection = reflectie.stemming === 'slecht' || reflectie.stemming === 'zeer slecht';
+        
+        const isPositiveTaskFeedback = avgPain < 10 && avgEnergyChange > 0 && avgFatigue < 10;
+        const isNegativeTaskFeedback = avgPain > 10 || avgEnergyChange < 0 || avgFatigue > 10;
+        
+        const reflectieDatumFormatted = format(reflectieDatum, 'EEEE d MMMM', { locale: nl });
+        
+        if (isPositiveReflection && isNegativeTaskFeedback) {
+          insights.push(`Op ${reflectieDatumFormatted} was uw reflectie positief, maar uw taakmetingen tonen hogere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk onderschat u de impact van activiteiten op uw lichaam.`);
+        } else if (isNegativeReflection && isPositiveTaskFeedback) {
+          insights.push(`Op ${reflectieDatumFormatted} was uw reflectie negatief, maar uw taakmetingen tonen lagere pijn (${avgPain}/20) en vermoeidheid (${avgFatigue}/20). Mogelijk overschat u de impact van activiteiten op uw lichaam.`);
+        } else if (isPositiveReflection && isPositiveTaskFeedback) {
+          insights.push(`Op ${reflectieDatumFormatted} komen uw positieve reflectie en taakmetingen overeen. Uw activiteitenniveau lijkt goed afgestemd op uw capaciteiten.`);
+        } else if (isNegativeReflection && isNegativeTaskFeedback) {
+          insights.push(`Op ${reflectieDatumFormatted} komen uw negatieve reflectie en taakmetingen overeen. Overweeg om uw activiteitenniveau aan te passen of met uw specialist te overleggen.`);
+        }
       }
-      
-      setAiInsights(insights);
-    };
+    });
     
-    if(isClient) {
-      generateAiInsights();
+    if (insights.length === 0) {
+      insights.push("Er zijn nog niet genoeg gegevens om specifieke inzichten te genereren. Blijf taken uitvoeren en dagelijkse reflecties toevoegen.");
     }
+    
+    return insights;
   }, [reflecties, taskLogs, isClient]);
   
   console.log('[OverzichtClient] Rendering with:', { 

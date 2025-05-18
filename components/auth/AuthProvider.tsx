@@ -49,30 +49,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Effect for fetching initial session and listening to auth changes
   useEffect(() => {
     setLoadingAuth(true);
-    // setAuthError(null);
     const supabase = getSupabaseBrowserClient();
-    
-    supabase.auth.getSession().then(({ data: { session: currentSession }, error }) => {
-      if (error) {
-        console.error("[AuthProvider] Error getting session:", error.message);
-        // setAuthError(error.message);
-        setSession(null);
-        setUser(null);
-        // Profile will be null if user is null via useProfile
+
+    // Get current session on mount
+    supabase.auth.getSession().then(({ data: { session: initialSession } , error: sessionError }) => {
+      if (sessionError) {
+        console.error("[AuthProvider] Error getting initial session:", sessionError.message);
+        // No session found or error, handleAuthStateChange will set user/session to null
+        handleAuthStateChange('INITIAL_SESSION_ERROR', null);
+      } else if (initialSession) {
+        // If a session exists, set it. onAuthStateChange might also fire,
+        // but this ensures we have it as soon as possible.
+        handleAuthStateChange('INITIAL_SESSION_SUCCESS', initialSession);
       } else {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        // No initial session, user is likely logged out.
+        // onAuthStateChange will handle future sign-ins.
+        handleAuthStateChange('NO_INITIAL_SESSION', null);
       }
-      setLoadingAuth(false);
-      // .catch is not needed here as error is handled in the .then callback
+      // setLoadingAuth(false); // setLoadingAuth is called within handleAuthStateChange
+    }).catch(error => {
+      // Catch any unexpected errors from getSession promise itself
+      console.error("[AuthProvider] Unexpected error in getSession():", error);
+      handleAuthStateChange('INITIAL_SESSION_PROMISE_ERROR', null);
     });
 
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
     
     return () => {
       subscription?.unsubscribe();
     };
-  }, [handleAuthStateChange]);
+  }, [handleAuthStateChange]); // handleAuthStateChange is memoized with useCallback
 
   // Fetch profile using useProfile hook
   const {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced by centralized helper
 // import { cookies } from 'next/headers'; // Handled by centralized helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Import centralized helper
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler'; // Corrected import path
 import { TaskLog, Task } from '@/types'; // Import types
 
@@ -31,8 +31,11 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API TaskLogs GET] Error fetching user:', getUserError.message);
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
     
     const { searchParams } = new URL(req.url);
     const taskId = searchParams.get('task_id');
@@ -44,7 +47,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('task_logs')
       .select('*, tasks(titel, type)') // Join with tasks table
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('start_tijd', { ascending: false }) // Order by start_tijd
       .limit(limit)
       .range(offset, offset + limit - 1);
@@ -67,8 +70,11 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !user) {
+      if (getUserError) console.error('[API TaskLogs POST] Error fetching user:', getUserError.message);
+      return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
     
     const logData: Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string } = await req.json();
     
@@ -76,7 +82,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(formatApiError(400, 'Task ID en starttijd zijn verplicht'), { status: 400 });
     }
     
-    const logWithUserId = { ...logData, user_id: session.user.id };
+    const logWithUserId = { ...logData, user_id: user.id };
     
     const { data: insertedLog, error: insertError } = await supabase
       .from('task_logs')

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react
 import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
 import { ErrorMessage } from '@/lib/error-handler';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Added import
+import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 
 // Taak toevoegen/bijwerken
 // TData is the type of data returned by the mutationFn on success (e.g., the updated/created task)
@@ -10,6 +11,7 @@ export function useUpsertTask(
   options?: Omit<UseMutationOptions<Task, ErrorMessage, Partial<Task>>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<Task, ErrorMessage, Partial<Task>>({
     mutationFn: async (task: Partial<Task>) => {
@@ -50,6 +52,7 @@ export function useUpsertTask(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij opslaan taak (ID: ${variables.id || 'new'}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Opslaan van taak mislukt.' });
     },
     ...options,
   });
@@ -60,6 +63,7 @@ export function useDeleteTask(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, string>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<{ message: string }, ErrorMessage, string>({ // TVariables is taskId (string)
     mutationFn: async (taskId: string) => {
@@ -87,6 +91,7 @@ export function useDeleteTask(
     },
     onError: (error: ErrorMessage, taskId) => {
       console.error(`Fout bij verwijderen taak (ID: ${taskId}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Verwijderen van taak mislukt.' });
     },
     ...options,
   });
@@ -99,6 +104,7 @@ export function useUpdateProfile(
   options?: Omit<UseMutationOptions<Profile, ErrorMessage, { id: string; data: Partial<Profile> }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<Profile, ErrorMessage, { id: string; data: Partial<Profile> }>({
     mutationFn: async ({ id, data }) => {
@@ -131,6 +137,7 @@ export function useUpdateProfile(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij bijwerken profiel (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Bijwerken van profiel mislukt.' });
     },
     ...options,
   });
@@ -143,6 +150,7 @@ export function useAddTaskLog(
   options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>({
     mutationFn: async (logData) => {
@@ -171,6 +179,7 @@ export function useAddTaskLog(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij opslaan taaklog voor taak ${variables.task_id}:`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Opslaan van taaklog mislukt.' });
     },
     ...options,
   });
@@ -181,6 +190,7 @@ export function useUpdateTaskLog(
   options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }>({
     mutationFn: async ({ id, data }) => {
@@ -208,6 +218,10 @@ export function useUpdateTaskLog(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij bijwerken taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+      // Notification for this is already handled in TaskExecutionContainer's direct onError callback for updateTaskLog
+      // However, adding it here provides a fallback if the component doesn't override onError.
+      // For consistency, we can add it.
+      addNotification({ type: 'error', message: error.userMessage || 'Bijwerken van taaklog mislukt.' });
     },
     ...options,
   });
@@ -258,6 +272,7 @@ export function useUpsertReflectie(
   options?: Omit<UseMutationOptions<Reflectie, ErrorMessage, ReflectieFormData>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<Reflectie, ErrorMessage, ReflectieFormData>({
     mutationFn: async (reflectieData: ReflectieFormData) => { // Use ReflectieFormData for input
@@ -286,6 +301,7 @@ export function useUpsertReflectie(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij opslaan reflectie (Datum: ${variables.datum}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Opslaan van reflectie mislukt.' });
     },
     ...options,
   });
@@ -296,6 +312,7 @@ export function useDeleteReflectie(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; userId?: string }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   
   return useMutation<{ message: string }, ErrorMessage, { id: string; userId?: string }>({
     mutationFn: async ({ id }) => {
@@ -323,6 +340,7 @@ export function useDeleteReflectie(
     },
     onError: (error: ErrorMessage, variables) => { 
       console.error(`Fout bij verwijderen reflectie (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Verwijderen van reflectie mislukt.' });
     },
     ...options,
   });
@@ -335,6 +353,7 @@ export function useAddSpecialistPatientRelation(
   options?: Omit<UseMutationOptions<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>({
     mutationFn: async (variables) => {
       const response = await fetch('/api/specialist-patienten', {
@@ -362,6 +381,7 @@ export function useAddSpecialistPatientRelation(
     },
     onError: (error: ErrorMessage) => {
       console.error('Fout bij toevoegen specialist-patiënt relatie:', error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Toevoegen van relatie mislukt.' });
     },
     ...options,
   });
@@ -372,6 +392,7 @@ export function useDeleteSpecialistPatientRelation(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>, 'mutationFn'>
 ) {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>({
     mutationFn: async ({ relationshipId }) => {
       const response = await fetch(`/api/specialist-patienten/${relationshipId}`, {
@@ -401,6 +422,7 @@ export function useDeleteSpecialistPatientRelation(
     },
     onError: (error: ErrorMessage, variables) => {
       console.error(`Fout bij verwijderen relatie (ID: ${variables.relationshipId}):`, error.userMessage, error.technicalMessage);
+      addNotification({ type: 'error', message: error.userMessage || 'Verwijderen van relatie mislukt.' });
     },
     ...options,
   });

@@ -30,10 +30,10 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error: getUserError } = await supabase.auth.getUser();
 
-  // If no session, redirect to login except for public paths
-  if (!session) {
+  // If no user or an error occurred, redirect to login except for public paths
+  if (getUserError || !user) {
     const url = req.nextUrl.clone();
     const publicPaths = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/api/auth/callback']; // Added /api/auth/callback
     if (!publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
@@ -41,12 +41,16 @@ export async function middleware(req: NextRequest) {
       url.searchParams.set('from', req.nextUrl.pathname); // Keep track of original path
       return NextResponse.redirect(url);
     }
-    return res; // Allow access to public paths
+    // Log error if it's not a simple "no user" case and it's a protected path attempt
+    if (getUserError && !publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+      console.error('[Middleware] Error fetching user:', getUserError.message);
+    }
+    return res; // Allow access to public paths or continue if error on public path
   }
 
-  // At this point, user has a session.
+  // At this point, user is authenticated.
   // Perform role checks for specific routes.
-  const user = session.user; // User is guaranteed to exist if session exists
+  // const user = session.user; // User object is now directly from getUser()
 
   if (req.nextUrl.pathname.startsWith('/specialisten') && !req.nextUrl.pathname.startsWith('/specialisten/patienten')) { // Protect /specialisten root but not /specialisten/patienten for specialists
     const { data: profile } = await supabase

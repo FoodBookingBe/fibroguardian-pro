@@ -4,12 +4,37 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development', // Disable PWA in development for faster HMR
   register: true, // Register the service worker
   skipWaiting: true, // Skip waiting for service worker activation
-  // fallbacks: { // Optional: define fallbacks for offline
-    // document: '/_offline', // app/offline.tsx page
-    // image: '/static/images/fallback.png',
-    // font: '/static/fonts/fallback.woff2',
-  // },
-  // runtimeCaching: [ // Optional: example runtime caching
+  fallbacks: { 
+    document: '/offline', // Points to app/offline/page.tsx
+    // image: '/static/images/fallback-image.png', // Optional: provide a fallback image
+    // font: '/static/fonts/fallback-font.woff2',  // Optional: provide a fallback font
+  },
+  runtimeCaching: [ 
+    {
+      urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i, // Matches Supabase Auth, DB, and Storage
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'supabase-cache',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        },
+        networkTimeoutSeconds: 10, // Timeout for network request before falling back to cache
+      },
+    },
+    {
+      urlPattern: /\/api\//, // Matches internal API routes
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'internal-api-cache',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60, // 1 day
+        },
+        networkTimeoutSeconds: 10,
+      },
+    },
+    // Example for caching Google Fonts (if used, though we determined system fonts are used)
     // {
     //   urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
     //   handler: 'CacheFirst',
@@ -21,7 +46,7 @@ const withPWA = require('next-pwa')({
     //     },
     //   },
     // },
-  // ],
+  ], // Correctly close the runtimeCaching array
 });
 
 // Bundle Analyzer configuratie
@@ -32,7 +57,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // Combineer PWA en Bundle Analyzer met de hoofdconfiguratie
 const nextConfig = withPWA(withBundleAnalyzer({
   reactStrictMode: true,
-  swcMinify: false, // Disabled for testing. Overweeg true voor productie.
+  swcMinify: true, // Enabled for production.
   cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes
   
   images: {

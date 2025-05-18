@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 import { TaskLog } from '@/types';
 
@@ -37,18 +37,29 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // Specifically handle PGRST116 (0 rows from .single()) as a 404
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(formatApiError(404, 'Taaklog niet gevonden of geen toegang.'), { status: 404 });
+      }
+      throw error; // Re-throw other errors to be handled by generic catch
+    }
+    if (!data) { // Should not happen if .single() is used and no error, but as a safeguard
+        return NextResponse.json(formatApiError(404, 'Taaklog niet gevonden na update.'), { status: 404 });
+    }
 
     return NextResponse.json(data as TaskLog);
-  } catch (error) {
+  } catch (error: any) { // Ensure error is typed or cast to any for property access
     const errorInfo = handleSupabaseError(error, 'tasklog-bijwerken');
-    return NextResponse.json(formatApiError(500, errorInfo.userMessage), { status: 500 });
+    // Use the status code from errorInfo if available and makes sense, otherwise default
+    const statusCode = (errorInfo.errorCode === 'PGRST116') ? 404 : 500; // Example, could be more nuanced
+    return NextResponse.json(formatApiError(statusCode, errorInfo.userMessage), { status: statusCode });
   }
 }
 
 // DELETE a specific task log
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest, // Prefixed with underscore as it's unused
   { params }: { params: { id: string } }
 ) {
   const logIdToDelete = params.id;
