@@ -61,12 +61,35 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
+  // 1. Log de binnenkomende cookies (optioneel)
+  console.log('[API POST /api/tasks] Request cookies:', req.cookies.getAll()
+    .filter(c => c.name.startsWith('sb-'))
+    .map(c => ({ name: c.name, length: c.value.length })));
+
   try {
+    // Attempt to refresh session explicitly at the start of the API route
+    console.log('[API POST /api/tasks] Attempting explicit session refresh...');
+    const { error: refreshErrorInApi } = await supabase.auth.refreshSession();
+    if (refreshErrorInApi) {
+      console.error('[API POST /api/tasks] Explicit session refresh failed:', refreshErrorInApi.message);
+      // Decide if to proceed or return error immediately
+      // For now, let's proceed to getUser to see what it makes of the situation
+    } else {
+      console.log('[API POST /api/tasks] Explicit session refresh successful or no refresh needed.');
+    }
+
     // Auth check
-    const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+    // 2. Haal de gebruiker op en LOG HET RESULTAAT
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    console.log('[API POST /api/tasks] Auth Details:', { 
+      userId: user?.id, 
+      userEmail: user?.email,
+      authError: authError ? { message: authError.message, code: (authError as any).code } : null // Cast authError to any to access code
+    });
     
-    if (getUserError || !user) {
-      if (getUserError) console.error('[API Tasks POST] Error fetching user:', getUserError.message);
+    if (authError || !user) { // Changed getUserError to authError
+      if (authError) console.error('[API Tasks POST] Error fetching user:', authError.message); // Changed getUserError to authError
       return NextResponse.json(
         formatApiError(401, 'Niet geautoriseerd'),
         { status: 401 }

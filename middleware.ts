@@ -1,89 +1,121 @@
+// middleware.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({
     request: {
-      headers: new Headers(req.headers), // Ensure new headers instance for modification
+      headers: new Headers(req.headers),
     },
   });
 
+  // Expliciete initialisatie van Supabase met verbose logging
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
-          return req.cookies.get(name)?.value;
+          const cookie = req.cookies.get(name);
+          const value = cookie?.value;
+          console.log(`[Middleware] Getting cookie: ${name}, exists: ${!!value}, length: ${value?.length || 0}`);
+          return value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          // If the cookie is set, update the request and response cookies
-          // The Supabase client will handle refreshing session and updating cookies.
-          // We need to ensure the response object has these cookies set.
-          res.cookies.set({ name, value, ...options });
+          console.log(`[Middleware] Setting cookie: ${name}, length: ${value.length}, options:`, options);
+          res.cookies.set({
+            name,
+            value,
+            ...options,
+          });
         },
         remove(name: string, options: CookieOptions) {
-          // If the cookie is removed, update the response cookies
-          res.cookies.set({ name, value: '', ...options });
+          console.log(`[Middleware] Removing cookie: ${name}`);
+          res.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
         },
       },
     }
   );
 
-  const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+  // CRITICAL: Actief token refresh forceren voordat we verder gaan
+  try {
+    console.log("[Middleware] Attempting to refresh session...");
+    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession(); // Renamed 'session' to 'refreshData' to avoid conflict
+    
+    if (refreshError) {
+      console.error("[Middleware] Session refresh error:", refreshError.message, refreshError);
+      // Even if refresh fails, we might still have a valid (but soon to expire) session from cookies.
+      // Proceed to getUser to see what Supabase makes of the current state.
+    } else if (refreshData.session) { // Check refreshData.session
+      console.log("[Middleware] Session refreshed successfully for user:", refreshData.session.user.id);
+      // The refreshSession call itself should have updated the cookies via the 'set' handler.
+      // Calling getUser() afterwards ensures the Supabase client instance state is also updated.
+      // This also handles the case where refreshSession() might return a session but not trigger onAuthStateChange if the user object itself didn't change.
+      console.log("[Middleware] Calling getUser() after successful refresh to sync client state.");
+      await supabase.auth.getUser(); 
+    } else {
+      console.log("[Middleware] No session data returned from refreshSession, user likely not logged in or session invalid.");
+      // If refreshSession returns no session and no error, it usually means there was nothing to refresh (e.g. no refresh token).
+      // The subsequent getUser() will confirm this.
+    }
+  } catch (e) {
+    console.error("[Middleware] Unexpected error during supabase.auth.refreshSession():", e);
+  }
 
-  // If no user or an error occurred, redirect to login except for public paths
+  // Pas nu doen we de gebruikerscontrole
+  const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+  console.log(`[Middleware] getUser after refresh attempt: user ID: ${user?.id}, error: ${getUserError?.message}`);
+
+
+  // Bestaande redirect logica, etc.
   if (getUserError || !user) {
     const url = req.nextUrl.clone();
-    const publicPaths = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/api/auth/callback']; // Added /api/auth/callback
-    if (!publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+    // Define public paths that don't require authentication
+    const publicPaths = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/api/auth/callback', '/offline'];
+    
+    // Allow API routes to proceed for now, they should handle their own auth.
+    // This prevents redirect loops if an API route is called by a client that thinks it's auth'd but middleware disagrees.
+    const isApiRoute = req.nextUrl.pathname.startsWith('/api/');
+
+    if (!isApiRoute && !publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+      console.log(`[Middleware] No user or getUserError on protected path "${req.nextUrl.pathname}". Redirecting to login.`);
       url.pathname = '/auth/login';
-      url.searchParams.set('from', req.nextUrl.pathname); // Keep track of original path
+      url.searchParams.set('from', req.nextUrl.pathname);
       return NextResponse.redirect(url);
     }
     // Log error if it's not a simple "no user" case and it's a protected path attempt
-    if (getUserError && !publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
-      console.error('[Middleware] Error fetching user:', getUserError.message);
+    if (getUserError && !isApiRoute && !publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+      console.error('[Middleware] Error fetching user for protected path:', getUserError.message);
     }
-    return res; // Allow access to public paths or continue if error on public path
-  }
-
-  // At this point, user is authenticated.
-  // Perform role checks for specific routes.
-  // const user = session.user; // User object is now directly from getUser()
-
-  if (req.nextUrl.pathname.startsWith('/specialisten') && !req.nextUrl.pathname.startsWith('/specialisten/patienten')) { // Protect /specialisten root but not /specialisten/patienten for specialists
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('type')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile || profile.type !== 'specialist') {
-      const url = req.nextUrl.clone();
-      url.pathname = '/dashboard'; // Redirect to dashboard or an unauthorized page
-      url.searchParams.set('error', 'unauthorized_specialist_access');
-      return NextResponse.redirect(url);
+    // For public paths or API routes, or if there was an error but it's a public path, continue with current response.
+    // Security headers will be added below.
+  } else if (user) {
+    // User is authenticated. Perform role checks for specific routes if needed.
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('type')
+            .eq('id', user.id)
+            .single();
+        
+        if (!profile || profile.type !== 'admin') {
+            console.log(`[Middleware] Non-admin user ${user.id} (type: ${profile?.type}) attempting to access /admin. Redirecting.`);
+            const url = req.nextUrl.clone();
+            url.pathname = '/dashboard'; 
+            url.searchParams.set('error', 'unauthorized_admin_access');
+            return NextResponse.redirect(url);
+        }
+        console.log(`[Middleware] Admin user ${user.id} accessing /admin.`);
     }
-  }
-
-  if (req.nextUrl.pathname.startsWith('/mijn-specialisten')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('type')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile || profile.type !== 'patient') {
-      const url = req.nextUrl.clone();
-      url.pathname = '/dashboard'; // Redirect to dashboard or an unauthorized page
-      url.searchParams.set('error', 'unauthorized_patient_access');
-      return NextResponse.redirect(url);
-    }
+    // Add other role-specific route protections if necessary
   }
   
-  // CSP and other security headers (can be kept or adjusted)
-  // const nonce = Buffer.from(crypto.randomUUID()).toString('base64'); // Nonce not currently used in CSP
+  // Rest van je middleware logica (routes, headers, etc.)
+  // CSP and other security headers
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
@@ -113,15 +145,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all request paths except for the ones starting with:
-    // - _next/static (static files)
-    // - _next/image (image optimization files)
-    // - favicon.ico (favicon file)
-    // - manifest.json, robots.txt, sitemap.xml (public static files)
-    // - /icons/ (PWA icons)
-    // - /screenshots/ (PWA screenshots)
-    // - /api/auth/callback is handled by its route handler, but we might want to exclude it from general middleware logic if it causes issues.
-    //   However, the publicPaths check above should handle it.
     '/((?!_next/static|_next/image|favicon.ico|manifest.json|robots.txt|sitemap.xml|icons/|screenshots/).*)',
   ],
 };
