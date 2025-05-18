@@ -107,22 +107,33 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Voeg user_id toe
-    const taskWithUserId = {
-      ...taskData,
-      user_id: user.id,
-    };
+    // Voeg user_id toe (owner_user_id for the RPC)
+    // const taskWithUserId = { // Not needed directly for RPC if task_data contains all other fields
+    //   ...taskData,
+    //   user_id: user.id, 
+    // };
     
-    // Voeg taak toe
+    // Call the RPC function to create the task
+    console.log('[API POST /api/tasks] Calling RPC create_task_with_owner for user:', user.id);
     const { data, error } = await supabase
-      .from('tasks')
-      .insert([taskWithUserId]) // Supabase expects an array for insert
-      .select()
-      .single();
+      .rpc('create_task_with_owner', {
+        task_data: taskData, // Pass the original taskData (JSONB in SQL function)
+        owner_user_id: user.id
+      });
+
+    if (error) {
+      console.error('[API POST /api/tasks] Error calling RPC create_task_with_owner:', error);
+      throw error; // Let the generic error handler catch it
+    }
     
-    if (error) throw error;
-    
-    return NextResponse.json(data as Task); // Assert type for response
+    // rpc returns an array of rows, even if it's just one.
+    // If the function returns SETOF tasks and a single task is inserted, data will be an array with one item.
+    if (!data || data.length === 0) {
+      console.error('[API POST /api/tasks] RPC create_task_with_owner returned no data.');
+      throw new Error('Task creation via RPC returned no data.');
+    }
+
+    return NextResponse.json(data[0] as Task, { status: 201 }); // Return the first (and likely only) task from the array
   } catch (error) {
     const errorInfo = handleSupabaseError(error, 'taak-opslaan');
     

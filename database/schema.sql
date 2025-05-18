@@ -144,6 +144,64 @@ AS $$
   );
 $$;
 
+-- Function to create a task with explicit owner, bypassing RLS for the insert itself
+CREATE OR REPLACE FUNCTION public.create_task_with_owner(
+  task_data JSONB,
+  owner_user_id UUID
+)
+RETURNS SETOF tasks -- Returns the created task(s)
+SECURITY DEFINER
+-- Set a secure search_path for SECURITY DEFINER functions
+SET search_path = public
+AS $$
+BEGIN
+  -- Basic validation for required fields from JSONB
+  IF NOT (task_data ? 'type' AND task_data ? 'titel') THEN
+    RAISE EXCEPTION 'Task data must include "type" (text) and "titel" (text).';
+  END IF;
+
+  RETURN QUERY
+  INSERT INTO public.tasks (
+    user_id,
+    type,
+    titel,
+    beschrijving,
+    duur,
+    hartslag_doel,
+    herhaal_patroon,
+    dagen_van_week, -- Assuming client sends as JSON array of strings
+    metingen,       -- Assuming client sends as JSON array of strings
+    notities,
+    labels,         -- Assuming client sends as JSON array of strings
+    specialist_id
+    -- created_at and updated_at have defaults and will be set automatically
+    -- id has a default and will be set automatically
+  )
+  VALUES (
+    owner_user_id,
+    task_data->>'type',
+    task_data->>'titel',
+    task_data->>'beschrijving', -- Will be NULL if not present in JSONB
+    (task_data->>'duur')::integer, -- Will be NULL if not present or not a valid integer
+    (task_data->>'hartslag_doel')::integer,
+    task_data->>'herhaal_patroon',
+    CASE WHEN task_data->'dagen_van_week' IS NOT NULL AND jsonb_typeof(task_data->'dagen_van_week') = 'array'
+         THEN ARRAY(SELECT jsonb_array_elements_text(task_data->'dagen_van_week')) ELSE NULL END,
+    CASE WHEN task_data->'metingen' IS NOT NULL AND jsonb_typeof(task_data->'metingen') = 'array'
+         THEN ARRAY(SELECT jsonb_array_elements_text(task_data->'metingen')) ELSE NULL END,
+    task_data->>'notities',
+    CASE WHEN task_data->'labels' IS NOT NULL AND jsonb_typeof(task_data->'labels') = 'array'
+         THEN ARRAY(SELECT jsonb_array_elements_text(task_data->'labels')) ELSE NULL END,
+    (task_data->>'specialist_id')::uuid -- Will be NULL if not present or not a valid UUID
+  )
+  RETURNING *;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Grant execute permission to authenticated users so they can call this function
+GRANT EXECUTE ON FUNCTION public.create_task_with_owner(JSONB, UUID) TO authenticated;
+
+
 -- Row Level Security (RLS) policies
 alter table profiles enable row level security;
 alter table tasks enable row level security;
