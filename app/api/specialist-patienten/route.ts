@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Admin client no longer needed here for this specific task
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; 
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
-import { Profile, SpecialistPatient } from '@/types';
+import { SpecialistPatient } from '@/types'; // Corrected: Removed unused Profile import
 
 // POST to create a specialist-patient relationship
 export async function POST(request: NextRequest) {
