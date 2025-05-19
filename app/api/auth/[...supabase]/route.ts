@@ -1,7 +1,7 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// Imports for createServerClient, CookieOptions, cookies, NextResponse, NextRequest were here
+// but are unused since the GET handler is commented out.
+// If this route is to be used for other purposes, re-add necessary imports.
+
 // Assuming env-config.ts will export an object with appUrl
 // import { config } from '@/lib/env-config'; // We'll use process.env directly or requestUrl.origin
 
