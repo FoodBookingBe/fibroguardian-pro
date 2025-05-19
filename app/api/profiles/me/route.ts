@@ -3,7 +3,7 @@ import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Correc
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 import { Profile } from '@/types';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) { // Prefixed request with underscore
   const supabase = getSupabaseRouteHandlerClient();
 
   try {
