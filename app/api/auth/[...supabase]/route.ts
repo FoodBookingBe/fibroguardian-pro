@@ -54,3 +54,6 @@ export async function GET(req: NextRequest) {
 // If you need other specific handlers (e.g., POST for signout, GET for user) for /api/auth/*,
 // they can be defined here. For example:
 // export async function POST(req: NextRequest) { /* ... */ }
+
+// Add an empty export to ensure this file is treated as a module.
+export {};
