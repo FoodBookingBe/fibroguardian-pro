@@ -52,7 +52,7 @@ export async function PUT(
 
 // DELETE a specific reflectie
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest, // Prefixed request with underscore
   { params }: { params: { id: string } }
 ) {
   const reflectieIdToDelete = params.id;
