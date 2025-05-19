@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
-import { TaskLog, Task } from '@/types';
+import { TaskLog } from '@/types'; // Removed unused Task import
 import { logger } from '@/lib/monitoring/logger';
 import { validateAndSanitizeApiInput, apiSchemas } from '@/utils/api-validation';
 import { validateLogWithAI } from '@/utils/task-validation';
