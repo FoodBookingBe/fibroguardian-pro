@@ -1,0 +1,11 @@
+Fallback Image for Offline Use
+
+This file should be replaced with an actual PNG image file named "fallback-image.png" with dimensions of at least 200x200 pixels.
+
+The image should have:
+1. A light purple background (#f5f3ff)
+2. Text saying "Afbeelding niet beschikbaar" (Image not available)
+3. Subtitle saying "Controleer uw internetverbinding" (Check your internet connection)
+4. A simple icon indicating offline status
+
+This image will be used as a fallback when the application is offline and cannot load images from the network.

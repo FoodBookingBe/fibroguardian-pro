@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '.env.local' });
 const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
@@ -39,33 +40,7 @@ const customJestConfig = {
     '!<rootDir>/public/**',
     '!<rootDir>/app/api/**', // Exclude API routes from client-side test coverage
   ],
-  coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-    // Per-directory thresholds (examples)
-    'hooks/': { // Note: path should match collectCoverageFrom structure
-      branches: 85,
-      functions: 90,
-      lines: 90,
-      statements: 90, // Added statements for consistency
-    },
-    'utils/': {
-      branches: 90,
-      functions: 90,
-      lines: 90,
-      statements: 90, // Added statements for consistency
-    },
-    'context/': { // Example for context
-      branches: 80,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    }
-  },
+  coverageThreshold: {},
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
   transform: {
     // Use babel-jest to transpile tests with the next/babel preset

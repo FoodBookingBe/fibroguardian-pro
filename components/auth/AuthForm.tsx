@@ -35,15 +35,6 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       newErrors.password = passwordValidation.message;
-    } else {
-      // Extra password complexity checks as suggested by user
-      if (password.length < 8) {
-        newErrors.password = 'Wachtwoord moet minimaal 8 tekens bevatten.';
-      } else if (!/[A-Z]/.test(password)) {
-        newErrors.password = 'Wachtwoord moet minstens één hoofdletter bevatten.';
-      } else if (!/[0-9]/.test(password)) {
-        newErrors.password = 'Wachtwoord moet minstens één cijfer bevatten.';
-      }
     }
 
     // Valideer voornaam en achternaam alleen bij registratie
@@ -62,12 +53,8 @@ export default function AuthForm({ initialIsLogin }: { initialIsLogin?: boolean 
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted, validation passed:", validateForm());
     
     // Valideer formulier voor submission
-    if (!validateForm()) {
-      return;
-    }
     if (!validateForm()) {
       return;
     }

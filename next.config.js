@@ -6,8 +6,8 @@ const withPWA = require('next-pwa')({
   skipWaiting: true, // Skip waiting for service worker activation
   fallbacks: { 
     document: '/offline', // Points to app/offline/page.tsx
-    // image: '/static/images/fallback-image.png', // Optional: provide a fallback image
-    // font: '/static/fonts/fallback-font.woff2',  // Optional: provide a fallback font
+    image: '/icons/fallback-image.png', // Provide a fallback image for offline use
+    font: '/fonts/system-ui.woff2',  // Provide a fallback font for offline use
   },
   runtimeCaching: [ 
     {
@@ -34,18 +34,39 @@ const withPWA = require('next-pwa')({
         networkTimeoutSeconds: 10,
       },
     },
-    // Example for caching Google Fonts (if used, though we determined system fonts are used)
-    // {
-    //   urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
-    //   handler: 'CacheFirst',
-    //   options: {
-    //     cacheName: 'google-fonts',
-    //     expiration: {
-    //       maxEntries: 4,
-    //       maxAgeSeconds: 365 * 24 * 60 * 60, // 365 days
-    //     },
-    //   },
-    // },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i, // Match image files
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'image-cache',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:js|css)$/i, // Match JS and CSS files
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-resources',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        },
+      },
+    },
+    {
+      urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i, // For potential future use of Google Fonts
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'google-fonts',
+        expiration: {
+          maxEntries: 4,
+          maxAgeSeconds: 365 * 24 * 60 * 60, // 365 days
+        },
+      },
+    },
   ], // Correctly close the runtimeCaching array
 });
 
@@ -95,7 +116,7 @@ const nextConfig = withPWA(withBundleAnalyzer({
   },
   
   async headers() {
-    const { securityHeaders } = await import('./lib/security-headers.js'); // Import dynamisch
+    const { securityHeaders } = await import('./lib/security-headers.ts'); // Import from TypeScript file
     return [
       {
         source: '/(.*)', // Pas toe op alle routes

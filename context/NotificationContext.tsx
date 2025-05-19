@@ -1,6 +1,10 @@
 "use client";
-// context/NotificationContext.tsx
+/* Notification Context: Manages global notifications for success, error, warning, and info messages.
+   Provides addNotification and removeNotification functions.
+   Updated: 5/19/2025.
+*/
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { NotificationList } from '@/components/ui/NotificationList';
 
 // Definieer typen voor notificaties
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -78,9 +82,4 @@ export function useNotification() {
   return context;
 }
 
-// Notification List component (te implementeren in stap 1.2)
-// Deze import zal pas werken na creatie van het bestand.
-// Voor nu, om circular dependency issues te vermijden bij het direct aanmaken,
-// kan deze import tijdelijk gecommentarieerd worden of de NotificationList direct hier gedefinieerd worden.
-// Volgens het plan wordt het apart aangemaakt, dus we gaan ervan uit dat dit later werkt.
-import { NotificationList } from '@/components/ui/NotificationList';
+// NotificationList is now imported at the top of the file to avoid potential circular dependencies

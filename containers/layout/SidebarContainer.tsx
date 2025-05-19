@@ -17,7 +17,7 @@ export default function SidebarContainer() {
     enabled: !!user, // Only fetch if user is available
   });
 
-  const profileType = profile?.type as 'patient' | 'specialist' | null | undefined;
+  const profileType = profile?.type as 'patient' | 'specialist' | 'admin' | null | undefined;
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -70,7 +70,23 @@ export default function SidebarContainer() {
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
   ];
   
-  const menuItems = profileType === 'specialist' ? specialistMenuItems : patientMenuItems;
+  const adminMenuItems: MenuItemP[] = [
+    { href: '/dashboard', label: 'Dashboard', iconName: 'home' },
+    { href: '/admin/users', label: 'Gebruikersbeheer', iconName: 'users' },
+    { href: '/admin/subscriptions', label: 'Abonnementenbeheer', iconName: 'chart' },
+    { href: '/admin/statistics', label: 'Statistieken', iconName: 'chart' },
+    { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
+  ];
+  
+  // Select menu items based on user role
+  let menuItems: MenuItemP[];
+  if (profileType === 'specialist') {
+    menuItems = specialistMenuItems;
+  } else if (profileType === 'admin') {
+    menuItems = adminMenuItems;
+  } else {
+    menuItems = patientMenuItems;
+  }
   
   const renderIcon = (iconName: string): ReactElement => {
     switch (iconName) {

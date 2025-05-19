@@ -1,0 +1,15 @@
+Fallback Font for Offline Use
+
+This file should be replaced with an actual WOFF2 font file named "system-ui.woff2".
+
+The font should be:
+1. A system UI font that closely resembles the default font used in the application
+2. Optimized for web use (WOFF2 format)
+3. Include basic Latin characters, numbers, and common symbols
+
+This font will be used as a fallback when the application is offline and cannot load fonts from the network.
+
+Recommended approach:
+- Use a subset of a common system font like Arial, Helvetica, or Roboto
+- Convert it to WOFF2 format using a tool like FontSquirrel's Webfont Generator
+- Ensure the file size is small (ideally under 30KB) for efficient offline caching

@@ -1,30 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced by centralized helper
-// import { cookies } from 'next/headers'; // Handled by centralized helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
-import { formatApiError, handleSupabaseError } from '@/lib/error-handler'; // Corrected import path
-import { TaskLog, Task } from '@/types'; // Import types
-
-// Helper function for AI validation (can be moved to a separate utils/ai.ts file)
-async function validateLogWithAI(log: Partial<TaskLog> & { user_id: string }, task: Partial<Task>) {
-  try {
-    // This is a dummy implementation. Replace with actual AI logic.
-    // Example: Check if pain and fatigue are high for a demanding task.
-    if (task.type === 'opdracht' && (log.pijn_score ?? 0) > 15 && (log.vermoeidheid_score ?? 0) > 15) {
-      return `Opgelet: Hoge pijn (${log.pijn_score}/20) en vermoeidheid (${log.vermoeidheid_score}/20) na de opdracht "${task.titel}". Overweeg aanpassingen.`;
-    }
-    
-    if ((log.energie_voor ?? 0) - (log.energie_na ?? 0) > 8) {
-      return `Deze ${task.type || 'activiteit'} ("${task.titel}") lijkt veel energie te kosten (verschil: ${(log.energie_voor ?? 0) - (log.energie_na ?? 0)}). Overweeg de duur of intensiteit.`;
-    }
-    
-    // Default validation if no specific flags
-    return `Log voor "${task.titel}" succesvol verwerkt. Blijf uw symptomen monitoren.`;
-  } catch (error) {
-    console.error('Fout bij AI validatie van log:', error);
-    return null; // Return null or a generic message on error
-  }
-}
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
+import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { TaskLog, Task } from '@/types';
+import { logger } from '@/lib/monitoring/logger';
+import { validateAndSanitizeApiInput, apiSchemas } from '@/utils/api-validation';
+import { validateLogWithAI } from '@/utils/task-validation';
+import { rateLimit, RateLimitResult } from '@/lib/security/rateLimit';
 
 
 export async function GET(req: NextRequest) {
@@ -35,6 +16,28 @@ export async function GET(req: NextRequest) {
     if (getUserError || !user) {
       if (getUserError) console.error('[API TaskLogs GET] Error fetching user:', getUserError.message);
       return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
+    
+    // Apply rate limiting based on user ID
+    const limiterResult: RateLimitResult = await rateLimit(`task_logs_get_${user.id}`, {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 30      // 30 requests per minute per user (higher limit for GET)
+    });
+    
+    if (!limiterResult.success) {
+      logger.warn(`Rate limit exceeded for user ${user.id} on task-logs GET endpoint`);
+      return NextResponse.json(
+        formatApiError(429, limiterResult.message || 'Te veel verzoeken, probeer het later opnieuw.'),
+        { 
+          status: limiterResult.statusCode || 429, 
+          headers: { 
+            'Retry-After': String(limiterResult.reset),
+            'X-RateLimit-Limit': String(limiterResult.limit),
+            'X-RateLimit-Remaining': String(limiterResult.remaining),
+            'X-RateLimit-Reset': String(limiterResult.reset) 
+          } 
+        }
+      );
     }
     
     const { searchParams } = new URL(req.url);
@@ -76,11 +79,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
     }
     
-    const logData: Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string } = await req.json();
+    // Apply rate limiting based on user ID
+    const limiterResult: RateLimitResult = await rateLimit(`task_logs_post_${user.id}`, {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10      // 10 requests per minute per user
+    });
     
-    if (!logData.task_id || !logData.start_tijd) {
-      return NextResponse.json(formatApiError(400, 'Task ID en starttijd zijn verplicht'), { status: 400 });
+    if (!limiterResult.success) {
+      logger.warn(`Rate limit exceeded for user ${user.id} on task-logs POST endpoint`);
+      return NextResponse.json(
+        formatApiError(429, limiterResult.message || 'Te veel verzoeken, probeer het later opnieuw.'),
+        { 
+          status: limiterResult.statusCode || 429, 
+          headers: { 
+            'Retry-After': String(limiterResult.reset),
+            'X-RateLimit-Limit': String(limiterResult.limit),
+            'X-RateLimit-Remaining': String(limiterResult.remaining),
+            'X-RateLimit-Reset': String(limiterResult.reset) 
+          } 
+        }
+      );
     }
+    
+    const requestBody = await req.json();
+    
+    // Validate input data using Zod schema
+    const { data: validatedData, error: validationError } = validateAndSanitizeApiInput(
+      requestBody,
+      apiSchemas.taskLogCreate
+    );
+    
+    if (validationError || !validatedData) {
+      return NextResponse.json(formatApiError(400, validationError || 'Invalid input data'), { status: 400 });
+    }
+    
+    const logData = validatedData;
     
     const logWithUserId = { ...logData, user_id: user.id };
     
@@ -94,8 +127,13 @@ export async function POST(req: NextRequest) {
     if (!insertedLog) throw new Error("Failed to insert log or retrieve it.");
 
 
+    // Get the original request body for AI validation since it might contain fields not in the validation schema
+    const originalRequestBody = requestBody as Partial<TaskLog>;
+    
     // AI Validation (optional, can be intensive)
-    if (logData.pijn_score !== undefined || logData.vermoeidheid_score !== undefined || logData.energie_na !== undefined) {
+    if (originalRequestBody.pijn_score !== undefined || 
+        originalRequestBody.vermoeidheid_score !== undefined || 
+        originalRequestBody.energie_na !== undefined) {
       const { data: taskData, error: taskError } = await supabase
         .from('tasks')
         .select('titel, type, duur')
@@ -105,7 +143,14 @@ export async function POST(req: NextRequest) {
       if (taskError) {
          console.warn(`AI Validation: Could not fetch task details for task_id ${logData.task_id}. Skipping AI validation. Error: ${taskError.message}`);
       } else if (taskData) {
-        const aiValidationMessage = await validateLogWithAI(logWithUserId, taskData);
+        // Combine the validated data with the original request body for AI validation
+        const logDataForAI = {
+          ...originalRequestBody,
+          user_id: user.id,
+          task_id: logData.task_id
+        };
+        
+        const aiValidationMessage = await validateLogWithAI(logDataForAI, taskData);
         if (aiValidationMessage) {
           const { data: updatedLogWithAI, error: aiUpdateError } = await supabase
             .from('task_logs')

@@ -30,15 +30,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
     setIsClient(true);
   }, []);
   
-  // Debug logging
-  console.log('[MijnSpecialistenClient] Rendering with:', { 
-    hasServerUser: !!serverUser, 
-    hasContextUser: !!user,
-    authLoading,
-    isClient,
-    userProfile,
-    specialistsCount: specialists?.length
-  });
+  // Remove debug logging for production
   
   // If auth is loading or not yet client-side, show a generic loading state
   if (authLoading || !isClient) {

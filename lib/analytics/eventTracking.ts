@@ -1,4 +1,4 @@
-import { useEffect } from 'react'; // Import useEffect
+import React, { useEffect } from 'react';
 import { User, AuthError, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { AnalyticsEvent, EventCallback, EventProperties, EventSchema } from './types';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Voor user ID uit sessie
@@ -192,40 +192,12 @@ class AnalyticsService {
     this.eventCallbacks.push(callback);
   }
   
-  private async sendToBackend(_event: AnalyticsEvent) { // Prefixed event as it's unused in the current (commented-out) body
-    // In een echte app zou je hier een API endpoint aanroepen.
-    // Voorbeeld:
-    // try {
-    //   const response = await fetch('/api/analytics/track', { // Aangepast endpoint
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(event),
-    //     keepalive: true // Voor events die vlak voor page unload worden gestuurd
-    //   });
-    //   if (!response.ok && this.debugMode) {
-    //     console.error(`[Analytics] Failed to send event to backend: ${response.status}`);
-    //   }
-    // } catch (error) {
-    //   if (this.debugMode) console.error('[Analytics] Error sending event to backend:', error);
-    //   this.queueEventForLater(event); // Optioneel: queue als versturen faalt
-    // }
+  private async sendToBackend(event: AnalyticsEvent) {
+    // TODO: Implement actual backend sending in production
     if (this.debugMode) {
-        // Simuleer versturen in debug mode
-        // console.log('[Analytics] Mock sendToBackend:', event);
+      console.log('[Analytics] Debug mode: Event would be sent to backend:', event);
     }
   }
-  
-  // private queueEventForLater(event: AnalyticsEvent) { // This method was unused
-  //   if (typeof window === 'undefined' || !localStorage) return;
-  //   try {
-  //     const queueStr = localStorage.getItem('fibro_analytics_queue');
-  //     const queue = queueStr ? JSON.parse(queueStr) : [];
-  //     queue.push(event);
-  //     localStorage.setItem('fibro_analytics_queue', JSON.stringify(queue.slice(-50))); // Max 50 events
-  //   } catch (e) {
-  //     if (this.debugMode) console.error('[Analytics] Error queueing event:', e);
-  //   }
-  // }
   
   public flushQueue() {
     if (typeof window === 'undefined' || !localStorage) return;

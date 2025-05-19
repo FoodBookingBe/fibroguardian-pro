@@ -1,49 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced
-// import { cookies } from 'next/headers'; // Handled by helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
-import { formatApiError, handleSupabaseError } from '@/lib/error-handler'; // Corrected import path
-import { Reflectie } from '@/types'; // Import type
-
-// Helper functie voor AI validatie (kan in utils/ai.ts)
-async function validateReflectieWithAI(reflectie: Partial<Reflectie>) {
-  try {
-    // Dummy implementatie
-    const negatieveWoorden = ['slecht', 'moe', 'uitgeput', 'pijn', 'depressief', 'angstig', 'verdrietig', 'teleurgesteld'];
-    const positieveWoorden = ['goed', 'beter', 'gelukkig', 'tevreden', 'rustig', 'energiek', 'blij', 'dankbaar'];
-    
-    let validationMessage = 'Bedankt voor uw reflectie. Regelmatig reflecteren helpt om inzicht te krijgen in uw patronen.';
-    let issuesFound = 0;
-
-    if (reflectie.notitie) {
-      const notitie = reflectie.notitie.toLowerCase();
-      const negatiefAantal = negatieveWoorden.filter(woord => notitie.includes(woord)).length;
-      const positiefAantal = positieveWoorden.filter(woord => notitie.includes(woord)).length;
-      
-      if (negatiefAantal > positiefAantal + 1 && negatiefAantal >= 2) { // Adjusted threshold
-        validationMessage = 'Uw reflectie bevat meerdere negatieve woorden. Overweeg om contact op te nemen met uw zorgverlener als u zich regelmatig zo voelt.';
-        issuesFound++;
-      } else if (positiefAantal > negatiefAantal + 1 && positiefAantal >=2) {
-        validationMessage = 'Uw reflectie is overwegend positief! Dit is een goed teken voor uw welzijn. Blijf doen wat goed voor u werkt.';
-      }
-    }
-    
-    if (reflectie.stemming) {
-      const stemmingLower = reflectie.stemming.toLowerCase();
-      if (['slecht', 'zeer slecht', 'depressief', 'erg moe'].includes(stemmingLower)) {
-        validationMessage = issuesFound > 0 ? validationMessage + " Ook uw aangegeven stemming is negatief." : 'U geeft aan dat u zich niet goed voelt. Overweeg om contact op te nemen met uw zorgverlener als dit aanhoudt.';
-        issuesFound++;
-      } else if (['goed', 'zeer goed', 'uitstekend', 'energiek'].includes(stemmingLower)) {
-         if (issuesFound === 0) validationMessage = 'U geeft aan dat u zich goed voelt. Dat is positief! Probeer te onthouden wat u vandaag heeft gedaan, zodat u dit kunt herhalen.';
-      }
-    }
-    
-    return validationMessage;
-  } catch (error) {
-    console.error('Fout bij AI validatie van reflectie:', error);
-    return 'Reflectie opgeslagen. AI analyse kon niet worden voltooid.';
-  }
-}
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
+import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { Reflectie, ReflectieFormData } from '@/types';
+import { validateReflectieWithAI } from '@/utils/ai';
+import { validateAndSanitizeApiInput, apiSchemas } from '@/utils/api-validation';
+import { rateLimit, RateLimitResult } from '@/lib/security/rateLimit';
+import { logger } from '@/lib/monitoring/logger';
 
 export async function GET(req: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
@@ -53,6 +15,28 @@ export async function GET(req: NextRequest) {
     if (getUserError || !user) {
       if (getUserError) console.error('[API Reflecties GET] Error fetching user:', getUserError.message);
       return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
+    }
+    
+    // Apply rate limiting based on user ID
+    const limiterResult: RateLimitResult = await rateLimit(`reflecties_get_${user.id}`, {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 30      // 30 requests per minute per user (higher limit for GET)
+    });
+    
+    if (!limiterResult.success) {
+      logger.warn(`Rate limit exceeded for user ${user.id} on reflecties GET endpoint`);
+      return NextResponse.json(
+        formatApiError(429, limiterResult.message || 'Te veel verzoeken, probeer het later opnieuw.'),
+        { 
+          status: limiterResult.statusCode || 429, 
+          headers: { 
+            'Retry-After': String(limiterResult.reset),
+            'X-RateLimit-Limit': String(limiterResult.limit),
+            'X-RateLimit-Remaining': String(limiterResult.remaining),
+            'X-RateLimit-Reset': String(limiterResult.reset) 
+          } 
+        }
+      );
     }
     
     const { searchParams } = new URL(req.url);
@@ -92,11 +76,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(formatApiError(401, 'Niet geautoriseerd'), { status: 401 });
     }
     
-    const reflectieData: Partial<Omit<Reflectie, 'id' | 'created_at' | 'user_id' | 'ai_validatie'>> & { datum: string } = await req.json();
+    // Apply rate limiting based on user ID
+    const limiterResult: RateLimitResult = await rateLimit(`reflecties_post_${user.id}`, {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10      // 10 requests per minute per user
+    });
     
-    if (!reflectieData.datum) {
-      return NextResponse.json(formatApiError(400, 'Datum is verplicht'), { status: 400 });
+    if (!limiterResult.success) {
+      logger.warn(`Rate limit exceeded for user ${user.id} on reflecties POST endpoint`);
+      return NextResponse.json(
+        formatApiError(429, limiterResult.message || 'Te veel verzoeken, probeer het later opnieuw.'),
+        { 
+          status: limiterResult.statusCode || 429, 
+          headers: { 
+            'Retry-After': String(limiterResult.reset),
+            'X-RateLimit-Limit': String(limiterResult.limit),
+            'X-RateLimit-Remaining': String(limiterResult.remaining),
+            'X-RateLimit-Reset': String(limiterResult.reset) 
+          } 
+        }
+      );
     }
+    
+    const requestBody = await req.json();
+    
+    // Validate input data using Zod schema
+    const { data: validatedData, error: validationError } = validateAndSanitizeApiInput<ReflectieFormData>(
+      requestBody,
+      apiSchemas.reflectie
+    );
+    
+    if (validationError || !validatedData) {
+      return NextResponse.json(formatApiError(400, validationError || 'Invalid input data'), { status: 400 });
+    }
+    
+    // Create a properly typed reflectieData object
+    const reflectieData = {
+      datum: validatedData.datum, // Keep as string for database operations
+      stemming: validatedData.stemming,
+      notitie: validatedData.notitie,
+      pijn_score: validatedData.pijn_score,
+      vermoeidheid_score: validatedData.vermoeidheid_score
+    };
     
     const reflectieWithUserId = {
       ...reflectieData,
@@ -142,8 +163,14 @@ export async function POST(req: NextRequest) {
     if (!upsertedReflectie) throw new Error("Failed to upsert reflectie or retrieve it.");
 
     // AI Validation
-    if (reflectieData.notitie || reflectieData.stemming) {
-      const aiValidationMessage = await validateReflectieWithAI(reflectieWithUserId);
+    if (reflectieData.notitie || reflectieData.stemming || 
+        reflectieData.pijn_score !== undefined || reflectieData.vermoeidheid_score !== undefined) {
+      // Convert string datum to Date for AI validation
+      const reflectieForAI: Partial<Reflectie> = {
+        ...reflectieWithUserId,
+        datum: new Date(reflectieWithUserId.datum)
+      };
+      const aiValidationMessage = await validateReflectieWithAI(reflectieForAI);
       if (aiValidationMessage) {
         const { data: updatedReflectieWithAI, error: aiUpdateError } = await supabase
           .from('reflecties')

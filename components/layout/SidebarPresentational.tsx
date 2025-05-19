@@ -13,7 +13,7 @@ export interface MenuItemP {
 interface SidebarPresentationalProps {
   isOpen: boolean;
   user: User | null; // User object for potential display or conditional rendering
-  profileType: 'patient' | 'specialist' | null;
+  profileType: 'patient' | 'specialist' | 'admin' | null;
   menuItems: MenuItemP[];
   pathname: string;
   onToggleSidebar: () => void;

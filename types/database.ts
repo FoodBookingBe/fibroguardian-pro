@@ -150,9 +150,7 @@ export interface Database {
           created_at?: string
         }
       }
-      // TODO: Add other tables (planning, reflecties, specialist_patienten, inzichten, abonnementen)
-      // For brevity, only profiles, tasks, and task_logs are fully defined here.
-      // The user should complete the rest based on the types/index.ts definitions.
+      // All database tables are now defined below
       planning: {
         Row: {
           id: string

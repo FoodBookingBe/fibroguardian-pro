@@ -61,6 +61,8 @@ export interface Reflectie {
   datum: Date; // Stored as Date in the main type
   stemming?: string;
   notitie?: string;
+  pijn_score?: number; // Added to match database schema and for AI validation
+  vermoeidheid_score?: number; // Added to match database schema and for AI validation
   ai_validatie?: string;
   created_at: Date;
 }
@@ -70,6 +72,8 @@ export interface ReflectieFormData {
   datum: string; // ISO string format (YYYY-MM-DD)
   stemming?: string; // Optional as per Omit in hook
   notitie?: string;  // Optional as per Omit in hook
+  pijn_score?: number; // Added to match Reflectie interface
+  vermoeidheid_score?: number; // Added to match Reflectie interface
   // user_id is added by API, id/created_at/ai_validatie are not part of form input
 }
 

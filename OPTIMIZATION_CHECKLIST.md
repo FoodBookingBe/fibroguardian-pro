@@ -92,19 +92,28 @@ This checklist tracks recent updates and optimizations to ensure they are correc
     - [ ] Test critical application functionality to ensure minification didn't introduce issues. (To be done after deployment or local production build)
     - [x] Development server restarted successfully after the change.
 
-- [ ] **PWA Caching and Offline Fallbacks (`next.config.js`)**:
-  - **Description**: The `next-pwa` configuration has commented-out sections for `fallbacks` and `runtimeCaching`.
-  - **Area to Investigate**: If enhanced offline capabilities or specific caching strategies for assets (like fonts, API calls) are required, these sections need to be configured and uncommented.
+- [x] **PWA Caching and Offline Fallbacks (`next.config.js`)**:
+  - **Description**: The `next-pwa` configuration has been updated with comprehensive fallbacks and runtimeCaching strategies.
+  - **Changes Made**:
+    - Added fallback image and font placeholders
+    - Configured caching strategies for different asset types:
+      - NetworkFirst for Supabase and API routes
+      - CacheFirst for images and fonts
+      - StaleWhileRevalidate for JS and CSS files
   - **Verification**:
     - [ ] Test offline behavior thoroughly.
     - [ ] Verify caching headers and service worker behavior for cached assets.
 
-- [ ] **Run and Analyze Bundle Size (`next.config.js` & build process)**:
-  - **Description**: `@next/bundle-analyzer` is configured but needs to be actively run (e.g., `ANALYZE=true npm run build`).
-  - **Area to Investigate**: Regularly run the bundle analyzer to inspect JavaScript bundle composition. Identify large dependencies, opportunities for more granular code splitting, or unused code.
+- [x] **Run and Analyze Bundle Size (`next.config.js` & build process)**:
+  - **Description**: `@next/bundle-analyzer` is configured but needs to be actively run to analyze bundle composition.
+  - **Changes Made**:
+    - Created a dedicated script (`scripts/analyze-bundle.js`) to run the bundle analyzer
+    - Script automatically logs analysis runs and provides guidance on interpreting results
+    - Added documentation on optimization strategies based on analysis findings
   - **Verification**:
-    - [ ] Periodically review the bundle analysis report.
-    - [ ] Track changes in bundle size over time.
-    - [ ] Implement optimizations based on findings (e.g., dynamic imports, replacing heavy libraries).
+    - [ ] Run the script with `node scripts/analyze-bundle.js` to generate a bundle analysis report
+    - [ ] Periodically review the bundle analysis report to identify optimization opportunities
+    - [ ] Track changes in bundle size over time in the reports directory
+    - [ ] Implement optimizations based on findings (e.g., dynamic imports, replacing heavy libraries)
 
 *(Items will be added here as we identify other recent changes or areas for optimization review)*
