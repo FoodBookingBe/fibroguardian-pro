@@ -1,68 +1,67 @@
 # FibroGuardian Scripts
 
-This directory contains utility scripts for development, testing, and optimization of the FibroGuardian application.
+Deze map bevat scripts voor het ontwikkelen, testen en optimaliseren van de FibroGuardian applicatie.
 
-## Bundle Analysis Scripts
+## Beschikbare Scripts
 
-### For Windows Users
+### Bundle Analyse
 
-Run the bundle analyzer using:
+De volgende scripts helpen bij het analyseren van de bundlegrootte en het identificeren van optimalisatiemogelijkheden:
 
+- **analyze-bundle.js**: Hoofdscript voor bundleanalyse
+- **analyze-bundle.bat**: Windows batchbestand om het analyse script uit te voeren
+- **analyze-bundle.sh**: Unix/Linux shell script om het analyse script uit te voeren
+
+#### Gebruik
+
+Windows:
 ```
-scripts\analyze-bundle.bat
+.\scripts\analyze-bundle.bat
 ```
 
-### For Unix/Linux/Mac Users
-
-Make the script executable first:
-
+Unix/Linux/macOS:
 ```
-chmod +x scripts/analyze-bundle.sh
-```
-
-Then run it:
-
-```
+chmod +x ./scripts/analyze-bundle.sh
 ./scripts/analyze-bundle.sh
 ```
 
-### Using Node.js (Cross-platform)
-
+Of direct met Node.js:
 ```
 node scripts/analyze-bundle.js
 ```
 
-## What the Bundle Analyzer Does
+#### Wat doet het?
 
-The bundle analyzer generates visual reports of your JavaScript bundle composition. This helps you:
+Het bundle analyse script voert de volgende analyses uit:
 
-1. Identify large dependencies that could be optimized
-2. Find opportunities for code splitting and lazy loading
-3. Detect unused code that could be removed
-4. Track bundle size changes over time
+1. **Bundlegrootte analyse**: Genereert een visueel rapport van de bundlegrootte met behulp van Next.js Bundle Analyzer
+2. **Ongebruikte dependencies**: Identificeert dependencies die niet worden gebruikt in het project
+3. **Grote dependencies**: Identificeert grote dependencies die de bundlegrootte significant beïnvloeden
+4. **Dubbele packages**: Identificeert dubbele packages in node_modules
 
-## Optimization Strategies
+Na de analyse genereert het script aanbevelingen voor optimalisatie.
 
-Based on the bundle analysis, consider these optimization techniques:
+### Andere Scripts
 
-- **Replace large libraries** with smaller alternatives
-- **Use dynamic imports** for code splitting: `import('module').then(module => ...)`
-- **Lazy load components** that aren't needed immediately
-- **Remove unused dependencies** and code
-- **Configure webpack** to better tree-shake dependencies
+- **find-dead-code.js**: Identificeert ongebruikte code in het project
+- **generate-jsdoc.js**: Genereert documentatie op basis van JSDoc commentaar
+- **generate-refactoring-inventory.js**: Genereert een inventaris van refactoring mogelijkheden
+- **generate-test-templates.js**: Genereert testsjablonen voor componenten
+- **load-testing.js**: Voert load tests uit op de applicatie
+- **optimize-images.js**: Optimaliseert afbeeldingen voor betere performance
 
-## Other Scripts
+## Toevoegen van Nieuwe Scripts
 
-- `find-dead-code.js`: Identifies unused code in the codebase
-- `generate-test-templates.js`: Creates test templates for components
-- `optimize-images.js`: Compresses and optimizes images
-- `load-testing.js`: Performs load testing on the application
+Bij het toevoegen van nieuwe scripts, volg deze richtlijnen:
 
-## Adding New Scripts
+1. Voeg duidelijke documentatie toe aan het begin van het script
+2. Voeg een beschrijving toe aan dit README.md bestand
+3. Maak indien nodig bijbehorende .bat en .sh bestanden voor cross-platform ondersteuning
+4. Voeg een npm script toe aan package.json indien het script regelmatig gebruikt zal worden
 
-When adding new scripts to this directory:
+## Best Practices
 
-1. Use the appropriate file extension (.js, .bat, .sh) based on the target platform
-2. Include clear documentation at the top of the script
-3. Update this README with information about the new script
-4. Make shell scripts executable with `chmod +x` on Unix systems
+- Zorg ervoor dat scripts cross-platform compatibel zijn waar mogelijk
+- Gebruik duidelijke foutmeldingen en logging
+- Voeg een help optie toe aan complexe scripts
+- Documenteer de vereiste dependencies en installatie-instructies

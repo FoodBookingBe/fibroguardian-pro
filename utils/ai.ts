@@ -1,4 +1,5 @@
 import { Reflectie } from '@/types';
+import { memoize } from './memoize';
 
 /**
  * Validates a reflection using AI-based analysis of text and scores.
@@ -121,3 +122,18 @@ export async function validateReflectieWithAI(reflectie: Partial<Reflectie>): Pr
     return 'Reflectie opgeslagen. AI analyse kon niet worden voltooid.';
   }
 }
+
+// Memoized versie van de functie voor betere performance
+export const memoizedValidateReflectieWithAI = memoize(validateReflectieWithAI, {
+  // Gebruik een cache key generator die rekening houdt met alle relevante velden
+  cacheKeyFn: (reflectie: Partial<Reflectie>) => {
+    return JSON.stringify({
+      notitie: reflectie.notitie,
+      stemming: reflectie.stemming,
+      pijn_score: reflectie.pijn_score,
+      vermoeidheid_score: reflectie.vermoeidheid_score
+    });
+  },
+  // Cache resultaten voor 5 minuten (300000 ms)
+  maxAge: 300000
+});

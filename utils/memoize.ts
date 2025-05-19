@@ -67,3 +67,95 @@ export function memoWithKeys<P extends Record<string, any>>(
     (prev, next) => arePropsEqual<P>(prev, next, propKeys, deepEqualityProps)
   );
 }
+
+/**
+ * Options for the memoize function
+ */
+export interface MemoizeOptions<T> {
+  /** Function to generate a cache key from the arguments */
+  cacheKeyFn?: (arg: T) => string;
+  /** Maximum age of cache entries in milliseconds */
+  maxAge?: number;
+  /** Maximum size of the cache */
+  maxSize?: number;
+}
+
+/**
+ * Memoizes a function to improve performance by caching results
+ * 
+ * @param fn The function to memoize
+ * @param options Configuration options for memoization
+ * @returns A memoized version of the function
+ */
+export function memoize<T, R>(
+  fn: (arg: T) => Promise<R> | R,
+  options: MemoizeOptions<T> = {}
+): (arg: T) => Promise<R> | R {
+  const cache = new Map<string, { result: R; timestamp: number }>();
+  const {
+    cacheKeyFn = (arg: T) => JSON.stringify(arg),
+    maxAge = 60000, // Default: 1 minute
+    maxSize = 100
+  } = options;
+
+  return (arg: T): Promise<R> | R => {
+    const cacheKey = cacheKeyFn(arg);
+    const now = Date.now();
+    const cached = cache.get(cacheKey);
+
+    // Return cached result if valid
+    if (cached && (maxAge === 0 || now - cached.timestamp < maxAge)) {
+      return cached.result;
+    }
+
+    // Compute new result
+    const result = fn(arg);
+
+    // Handle both synchronous and Promise results
+    if (result instanceof Promise) {
+      return result.then(resolvedResult => {
+        // Manage cache size
+        if (cache.size >= maxSize) {
+          // ES5 compatible way to find the oldest entry
+          let oldestKey = '';
+          let oldestTime = Number.MAX_SAFE_INTEGER;
+          
+          cache.forEach((value, key) => {
+            if (value.timestamp < oldestTime) {
+              oldestTime = value.timestamp;
+              oldestKey = key;
+            }
+          });
+          
+          if (oldestKey) {
+            cache.delete(oldestKey);
+          }
+        }
+        
+        cache.set(cacheKey, { result: resolvedResult, timestamp: now });
+        return resolvedResult;
+      });
+    } else {
+      // Manage cache size
+      if (cache.size >= maxSize) {
+        // ES5 compatible way to find the oldest entry
+        let oldestKey = '';
+        let oldestTime = Number.MAX_SAFE_INTEGER;
+        
+        cache.forEach((value, key) => {
+          if (value.timestamp < oldestTime) {
+            oldestTime = value.timestamp;
+            oldestKey = key;
+          }
+        });
+        
+        if (oldestKey) {
+          cache.delete(oldestKey);
+        }
+      }
+      
+      cache.set(cacheKey, { result, timestamp: now });
+      return result;
+    }
+  };
+}
