@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
-import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer'; // Updated import
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Corrected import path
+import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer'; 
 import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton';
 import { Task } from '@/types';
 import Link from 'next/link';

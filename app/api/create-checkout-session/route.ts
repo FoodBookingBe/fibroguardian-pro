@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Gebruik de route handler client
-import { patientPlans, specialistPlans, SubscriptionPlan } from '@/types/subscription'; // Importeer types, SubscriptionTier was unused
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
+import { patientPlans, specialistPlans, SubscriptionPlan } from '@/types/subscription'; 
 
 // Instantieer Stripe met de secret key
 // Zorg dat STRIPE_SECRET_KEY is ingesteld in je environment variabelen
@@ -9,7 +9,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16', // Gebruik een recente, stabiele API versie
+  apiVersion: '2025-04-30.basil', // Updated to the version expected by the installed Stripe package
 });
 
 export async function POST(request: NextRequest) {
