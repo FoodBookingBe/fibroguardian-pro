@@ -52,7 +52,7 @@ export async function PUT(
 
 // GET a specific profile (less common, usually /me or through relations)
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest, // Prefixed with underscore as it's not used
   { params }: { params: { id: string } }
 ) {
   const profileIdToFetch = params.id;
