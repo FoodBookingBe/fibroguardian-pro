@@ -1,6 +1,9 @@
+/* stylelint-disable */
+/* These are Tailwind CSS directives - they are valid but may trigger CSS linting warnings */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* stylelint-enable */
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -14,33 +17,43 @@ body {
 
 @layer utilities {
   .text-balance {
+    /* Note: text-wrap is not supported in Chrome < 114, Safari on iOS < 17.4 */
     text-wrap: balance;
   }
 }
 
+/* stylelint-disable */
 @layer components {
+  /* Tailwind @apply directives below - they are valid but may trigger CSS linting warnings */
   .btn-primary {
     @apply px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors;
   }
-  
+
   .btn-secondary {
     @apply px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-md hover:bg-gray-300 transition-colors;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
   }
-  
+
   .form-input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500;
   }
-  
+
   .form-label {
     @apply block text-sm font-medium text-gray-700 mb-1;
   }
-  
+
   .form-error {
     @apply mt-1 text-sm text-red-500;
+  }
+/* stylelint-enable */
+  
+  .lazy-image-container {
+    position: relative;
+    width: var(--img-width);
+    height: var(--img-height);
   }
 }
 

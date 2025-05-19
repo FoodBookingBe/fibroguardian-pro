@@ -3,7 +3,7 @@ export interface Profile {
   voornaam: string;
   achternaam: string;
   avatar_url?: string;
-  type: 'patient' | 'specialist';
+  type: 'patient' | 'specialist' | 'admin'; // Added 'admin'
   postcode?: string;
   gemeente?: string;
   geboortedatum?: Date;

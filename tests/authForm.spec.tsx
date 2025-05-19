@@ -23,7 +23,7 @@ jest.mock('next/navigation', () => {
 
 // Mock the Supabase client
 jest.mock('@/lib/supabase-client', () => ({
-  supabase: {
+  getSupabaseBrowserClient: jest.fn().mockReturnValue({
     auth: {
       signInWithPassword: jest.fn().mockImplementation(({ email, password }) => {
         if (email === 'test@example.com' && password === 'password123') {
@@ -33,7 +33,7 @@ jest.mock('@/lib/supabase-client', () => ({
           });
         }
         return Promise.resolve({
-          data: null,
+          data: { user: null },
           error: { message: 'Invalid login credentials' }
         });
       }),
@@ -45,12 +45,12 @@ jest.mock('@/lib/supabase-client', () => ({
           });
         }
         return Promise.resolve({
-          data: null,
+          data: { user: null },
           error: { message: 'Registration failed' }
         });
       })
     }
-  }
+  })
 }));
 
 // Mock the notification context
@@ -175,7 +175,7 @@ describe('AuthForm Component', () => {
     );
     
     // Fill in the form
-    fireEvent.change(screen.getByLabelText(/E-mail/i), {
+    fireEvent.change(screen.getByLabelText(/E-mailadres/i), {
       target: { value: 'test@example.com' }
     });
     
@@ -187,8 +187,13 @@ describe('AuthForm Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Inloggen$/i }));
     
     // Check that the login function was called with the correct credentials
+    // Note: We're not checking for navigation since AuthProvider handles that now
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+      const mockSupabase = require('@/lib/supabase-client').getSupabaseBrowserClient();
+      expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123'
+      });
     });
   });
 
@@ -210,7 +215,7 @@ describe('AuthForm Component', () => {
       target: { value: 'User' }
     });
     
-    fireEvent.change(screen.getByLabelText(/E-mail/i), {
+    fireEvent.change(screen.getByLabelText(/E-mailadres/i), {
       target: { value: 'newuser@example.com' }
     });
     
@@ -218,17 +223,27 @@ describe('AuthForm Component', () => {
       target: { value: 'password123' }
     });
     
-    // Select user type
-    fireEvent.change(screen.getByLabelText(/Ik ben een/i), {
-      target: { value: 'patient' }
-    });
+    // Select user type (now using radio buttons)
+    fireEvent.click(screen.getByLabelText(/Patiënt/i));
     
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /^Registreren$/i }));
     
-    // Check that the registration function was called and redirected
+    // Check that the registration function was called with correct data
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+      const mockSupabase = require('@/lib/supabase-client').getSupabaseBrowserClient();
+      expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
+        email: 'newuser@example.com',
+        password: 'password123',
+        options: {
+          emailRedirectTo: expect.any(String),
+          data: {
+            voornaam: 'Test',
+            achternaam: 'User',
+            type: 'patient'
+          }
+        }
+      });
     });
   });
 });

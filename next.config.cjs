@@ -79,7 +79,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = withPWA(withBundleAnalyzer({
   reactStrictMode: true,
   swcMinify: true, // Enabled for production.
-  cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes
+  // cacheMaxMemorySize: 50 * 1024 * 1024, // 50MB in bytes - Removed due to Next.js warning
   
   images: {
     remotePatterns: [
@@ -116,7 +116,7 @@ const nextConfig = withPWA(withBundleAnalyzer({
   },
   
   async headers() {
-    const { securityHeaders } = await import('./lib/security-headers.ts'); // Import from TypeScript file
+    const { securityHeaders } = require('./lib/security-headers.ts'); // Gebruik TypeScript versie
     return [
       {
         source: '/(.*)', // Pas toe op alle routes

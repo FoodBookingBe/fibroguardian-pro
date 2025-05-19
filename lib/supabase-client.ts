@@ -7,9 +7,22 @@ import { logger } from '@/lib/monitoring/logger';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// Log the values being used by the client for debugging
+console.log("[SupabaseClient] Attempting to initialize with URL:", supabaseUrl);
+console.log("[SupabaseClient] Attempting to initialize with Anon Key:", supabaseAnonKey);
+
 // Check environment variables at initialization time
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables in lib/supabase-client.ts");
+  // Log an error to the server console as well if possible (though this is client-side)
+  // and more importantly, to the browser console.
+  const errorMessage = "CRITICAL: Missing Supabase environment variables in lib/supabase-client.ts. NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is undefined or empty when the client is being initialized.";
+  console.error(errorMessage, {
+    url: supabaseUrl, // Will show undefined if that's the issue
+    anonKey: supabaseAnonKey // Will show undefined if that's the issue
+  });
+  // Throwing an error here will likely break client-side rendering,
+  // which is good for visibility of this critical configuration issue.
+  throw new Error(errorMessage);
 }
 
 // Singleton instance for the browser
@@ -40,19 +53,22 @@ export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
         persistSession: true,
         detectSessionInUrl: true
       },
-      global: {
-        // Add fetch options for better performance
-        fetch: (url, options) => {
-          return fetch(url, {
-            ...options,
-            // Add cache control headers for better caching
-            headers: {
-              ...options?.headers,
-              'Cache-Control': 'no-cache'
-            }
-          });
-        }
+    global: {
+      fetch: (url, options) => {
+        // Simplified fetch override: Pass through options directly.
+        // This lets Supabase client fully control its headers.
+        // We are temporarily removing the custom 'Cache-Control' header.
+        console.log("[SupabaseClient] Global fetch override called. Options received:", options);
+        const response = fetch(url, options);
+        response.then(res => {
+          // Log headers of the actual request made, if possible (difficult without intercepting)
+          // For now, just confirm the override is hit.
+        }).catch(err => {
+          console.error("[SupabaseClient] Error in global fetch override:", err);
+        });
+        return response;
       }
+    }
     });
     
     return browserClientInstance;

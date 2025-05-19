@@ -44,25 +44,45 @@ export function useProfile(
     async () => {
       if (!userId) return null;
       const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .rpc('get_profile_for_owner', { owner_user_id: userId });
-        // .single(); // .single() is not typically used with RPC calls that return SETOF like this.
-                      // The result of SETOF is an array of rows.
-
-      if (error) {
-        // Check for PGRST116 specifically, which means "0 rows" for a .single() like call,
-        // or if the function itself returned no rows.
-        if (error.code === 'PGRST116') { // PGRST116: "The result contains 0 rows"
-          return null; // No profile found, not necessarily an "error" to throw
-        }
-        throw handleSupabaseError(error, 'profile-fetch');
-      }
       
-      // Data from RPC returning SETOF is an array.
-      // Data from RPC returning SETOF is an array.
-      // If a profile is found, it will be the first (and only) element.
-      const profile = (data && data.length > 0 ? data[0] : null);
-      return profile as Profile | null; // Ensure the final cast is to Profile | null
+      try {
+        // First try to get the profile directly from the profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+          
+        if (profileData) {
+          return profileData as Profile;
+        }
+        
+        // If that fails, try the RPC method as fallback
+        if (profileError) {
+          console.log(`Direct profile fetch failed for user ${userId}, trying RPC fallback`);
+          const { data, error } = await supabase
+            .rpc('get_profile_for_owner', { owner_user_id: userId });
+
+          if (error) {
+            // Check for PGRST116 specifically, which means "0 rows"
+            if (error.code === 'PGRST116') {
+              console.log(`No profile found for user ${userId}`);
+              return null; // No profile found, not necessarily an "error" to throw
+            }
+            throw handleSupabaseError(error, 'profile-fetch');
+          }
+          
+          // Data from RPC returning SETOF is an array.
+          // If a profile is found, it will be the first (and only) element.
+          const profile = (data && data.length > 0 ? data[0] : null);
+          return profile as Profile | null;
+        }
+        
+        return null; // Should not reach here, but added for completeness
+      } catch (err) {
+        console.error(`Error in useProfile hook for user ${userId}:`, err);
+        throw handleSupabaseError(err as any, 'profile-fetch');
+      }
     },
     {
       enabled: !!userId,
