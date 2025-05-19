@@ -4,7 +4,7 @@ import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 
 // DELETE a specialist-patient relationship by its ID
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest, // Prefixed request with underscore
   { params }: { params: { id: string } }
 ) {
   const relationshipId = params.id;
