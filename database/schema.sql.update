@@ -1,7 +1,0 @@
--- Update reflecties table to add pijn_score and vermoeidheid_score fields
-ALTER TABLE reflecties 
-ADD COLUMN pijn_score integer CHECK (pijn_score BETWEEN 1 AND 20),
-ADD COLUMN vermoeidheid_score integer CHECK (vermoeidheid_score BETWEEN 1 AND 20);
-
--- Update any existing RLS policies for reflecties if needed
--- (No changes needed for RLS policies as they are based on user_id, not specific columns)
