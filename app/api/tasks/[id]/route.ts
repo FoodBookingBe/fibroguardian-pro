@@ -1,7 +1,7 @@
 // import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'; // Replaced by centralized helper
 // import { cookies } from 'next/headers'; // Handled by centralized helper
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase'; // Import centralized helper
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 import { Task } from '@/types'; // Assuming Task type
 

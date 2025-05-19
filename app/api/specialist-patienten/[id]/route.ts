@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
 
 // DELETE a specialist-patient relationship by its ID
