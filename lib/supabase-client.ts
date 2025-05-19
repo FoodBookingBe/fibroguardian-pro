@@ -60,7 +60,7 @@ export const getSupabaseBrowserClient = (): SupabaseClient<Database> => {
         // We are temporarily removing the custom 'Cache-Control' header.
         console.log("[SupabaseClient] Global fetch override called. Options received:", options);
         const response = fetch(url, options);
-        response.then(res => {
+        response.then(_res => { // Prefixed 'res' with an underscore
           // Log headers of the actual request made, if possible (difficult without intercepting)
           // For now, just confirm the override is hit.
         }).catch(err => {
