@@ -1,12 +1,16 @@
+'use client'; // Mark as a Client Component
+
 // components/admin/AdminUsersList.tsx
 import React from 'react';
-import { Profile } from '@/types'; // Assuming Profile type includes id, email, type/role
+import { Profile } from '@/types';
 
 interface AdminUsersListProps {
   users: Profile[];
+  onEditUser: (user: Profile) => void;
+  onDeleteUser: (userId: string) => void;
 }
 
-const AdminUsersList: React.FC<AdminUsersListProps> = ({ users }) => {
+const AdminUsersList: React.FC<AdminUsersListProps> = ({ users, onEditUser, onDeleteUser }) => {
   if (!users || users.length === 0) {
     return <p className="text-gray-500 dark:text-gray-400">Geen gebruikers gevonden.</p>;
   }
@@ -52,9 +56,18 @@ const AdminUsersList: React.FC<AdminUsersListProps> = ({ users }) => {
                 {user.created_at ? new Date(user.created_at).toLocaleDateString('nl-NL') : 'N/A'}
               </td>
               <td className="py-3 px-6">
-                {/* Placeholder for action buttons */}
-                <button className="text-blue-500 hover:text-blue-700 mr-2">Bewerken</button>
-                <button className="text-red-500 hover:text-red-700">Verwijderen</button>
+                <button 
+                  onClick={() => onEditUser(user)}
+                  className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200 mr-3"
+                >
+                  Bewerken
+                </button>
+                <button 
+                  onClick={() => onDeleteUser(user.id)}
+                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                >
+                  Verwijderen
+                </button>
               </td>
             </tr>
           ))}

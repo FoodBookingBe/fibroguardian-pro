@@ -71,7 +71,7 @@ export default function SidebarContainer() {
   ];
   
   const adminMenuItems: MenuItemP[] = [
-    { href: '/dashboard', label: 'Dashboard', iconName: 'home' },
+    { href: '/admin', label: 'Admin Dashboard', iconName: 'home' }, // Changed href to /admin and label
     { href: '/admin/users', label: 'Gebruikersbeheer', iconName: 'users' },
     { href: '/admin/subscriptions', label: 'Abonnementenbeheer', iconName: 'chart' },
     { href: '/admin/statistics', label: 'Statistieken', iconName: 'chart' },
