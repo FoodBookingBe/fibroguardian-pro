@@ -13,7 +13,7 @@ export const metadata: Metadata = {
  * This page is displayed when the user is offline and tries to access a page
  * that is not cached by the service worker.
  */
-export default function OfflinePage() {
+export default function OfflinePage(): JSX.Element {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md overflow-hidden">

@@ -1,7 +1,9 @@
+import React from 'react';
+
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function Home() {
+export default function Home(): JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">

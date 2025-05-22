@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { ReactNode } from 'react';
 import { SkeletonLoader } from './SkeletonLoader'; // Assumes SkeletonLoader is in the same ui directory
 import { AlertMessage } from '@/components/common/AlertMessage'; // Path to existing AlertMessage

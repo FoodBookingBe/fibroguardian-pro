@@ -1,9 +1,15 @@
+import React from 'react';
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-export default async function OpdrachtenPage() {
+import TaskList from '@/components/tasks/TaskList';
+import { ErrorMessage, handleSupabaseError } from '@/lib/error-handler';
+import { Task } from '@/types';
+
+export default async function OpdrachtenPage(): Promise<JSX.Element> {
   const cookieStore = cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +35,29 @@ export default async function OpdrachtenPage() {
     redirect('/auth/login');
   }
 
+  let tasks: Task[] | null = null;
+  let isLoading = true;
+  let isError = false;
+  let error: ErrorMessage | null = null;
+
+  try {
+    const { data, error: fetchError } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (fetchError) {
+      throw handleSupabaseError(fetchError, 'opdrachten-pagina-fetch');
+    }
+    tasks = data;
+  } catch (err: unknown) {
+    isError = true;
+    error = handleSupabaseError(err, 'opdrachten-pagina-catch');
+  } finally {
+    isLoading = false;
+  }
+
   return (
     <div className="container mx-auto px-4 py-6">
       <header className="flex items-center justify-between mb-6">
@@ -37,7 +66,7 @@ export default async function OpdrachtenPage() {
           Nieuwe Opdracht
         </Link>
       </header>
-      <p>Hier komt de lijst met opdrachten.</p>
+      <TaskList tasks={tasks} isLoading={isLoading} isError={isError} error={error} />
     </div>
   );
 }

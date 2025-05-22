@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -28,16 +30,23 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
   }, [searchParams, onFilterChange]);
 
   const handleApplyFilters = () => {
-    // Create a new URLSearchParams object
-    const params = new URLSearchParams();
+    const currentPathname = window.location.pathname; // Gebruik huidige pathname
+    const params = new URLSearchParams(searchParams.toString()); // Start met bestaande params
+
+    if (typeFilter) {
+      params.set('type', typeFilter);
+    } else {
+      params.delete('type'); // Verwijder als leeg
+    }
+
+    if (patternFilter) {
+      params.set('pattern', patternFilter);
+    } else {
+      params.delete('pattern'); // Verwijder als leeg
+    }
     
-    // Add filters to URL parameters if they have values
-    if (typeFilter) params.set('type', typeFilter);
-    if (patternFilter) params.set('pattern', patternFilter);
-    
-    // Update the URL with the new parameters
-    const newUrl = `/taken${params.toString() ? `?${params.toString()}` : ''}`;
-    router.push(newUrl);
+    const queryString = params.toString();
+    router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
     
     // Call the callback if provided
     if (onFilterChange) {

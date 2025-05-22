@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 
 import { useReflecties } from '@/hooks/useSupabaseQuery';

@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -21,7 +23,7 @@ window.IntersectionObserver = mockIntersectionObserver;
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: unknown) => {
     // eslint-disable-next-line jsx-a11y/alt-text
     return <img {...props} />;
   },

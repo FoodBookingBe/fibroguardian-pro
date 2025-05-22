@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,7 +15,7 @@ import { Profile as Specialist } from '@/types'; // Use Profile and alias as Spe
 interface MijnSpecialistenClientProps {
   user: User;
   specialists: Specialist[]; // This will now refer to Profile aliased as Specialist
-  userProfile: any;
+  userProfile: unknown;
 }
 
 export default function MijnSpecialistenClient({ user: serverUser, specialists, userProfile }: MijnSpecialistenClientProps) {
@@ -73,7 +75,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
       if (deleteError) throw deleteError;
 
       setLocalSpecialists(prev => prev.filter(s => s.id !== specialistId));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error removing specialist:', err);
       setError(err.message || 'Er is een fout opgetreden bij het verwijderen.');
     } finally {

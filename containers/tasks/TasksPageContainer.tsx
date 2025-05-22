@@ -1,37 +1,159 @@
+import React from 'react';
+
 'use client';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Task } from '@/types';
-import TaskList from '@/components/tasks/TaskList'; // Adjusted path
-import TaskFilters from '@/components/tasks/TaskFilters'; // Adjusted path
-import AddTaskButton from '@/components/tasks/AddTaskButton'; // Adjusted path
+import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
+import TaskList from '@/components/tasks/TaskList'; 
+import TaskFilters from '@/components/tasks/TaskFilters'; 
+import AddTaskButton from '@/components/tasks/AddTaskButton'; 
 import { useTasks } from '@/hooks/useSupabaseQuery';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
+import { useState, useEffect, useMemo } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { useDeleteTask } from '@/hooks/useMutations'; // Importeer useDeleteTask
+import { useNotification } from '@/context/NotificationContext'; // Importeer useNotification
+import { ErrorMessage } from '@/lib/error-handler'; // Voor typing error
 
-interface TasksPageContainerProps {
-  initialTasks?: Task[]; // Make initialTasks optional, container might not always get SSR data
+// Hergebruik EnrichedTask interface
+export interface EnrichedTask extends Task {
+  status: 'voltooid' | 'openstaand';
+  voltooid_op?: string | Date | null;
 }
 
-export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProps) { // Default to empty array
+export interface GroupedTasks {
+  pattern: Task['herhaal_patroon']; // 'eenmalig', 'dagelijks', etc.
+  title: string; // Bijv. "Eenmalige Taken"
+  tasks: EnrichedTask[];
+}
+
+interface TasksPageContainerProps {
+  initialTasks?: Task[]; 
+}
+
+export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProps) { 
   const searchParams = useSearchParams();
   const typeFilter = searchParams.get('type');
   const patternFilter = searchParams.get('pattern');
   
   const { user } = useAuth();
   const userId = user?.id;
+  const supabase = getSupabaseBrowserClient();
+  const { addNotification } = useNotification(); // Hook bovenaan
+  const { 
+    mutate: deleteTaskMutate, 
+    isPending: isDeletingTask, 
+  } = useDeleteTask(); // Hook bovenaan
 
-  const { data: tasks, isLoading, error, isError } = useTasks(
+  const handleDeleteTask = async (taskId: string) => { // Functie bovenaan
+    deleteTaskMutate(taskId, {
+      onSuccess: () => {
+        addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
+      },
+      onError: (error: ErrorMessage) => { 
+        addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
+      }
+    });
+  };
+
+  // useTasks haalt de basis taken op
+  const { data: baseTasks, isLoading, error, isError } = useTasks(
     userId, 
     { 
       type: typeFilter || undefined, 
       pattern: patternFilter || undefined 
     },
     { 
-      initialData: initialTasks.length > 0 ? initialTasks : undefined, // Pass initialData only if it exists
-      // enabled: !!userId, // useTasks already has this
+      initialData: initialTasks.length > 0 ? initialTasks : undefined,
     }
   );
+
+  const [enrichedTasks, setEnrichedTasks] = useState<EnrichedTask[]>([]);
+
+  useEffect(() => {
+    const processTasks = async () => {
+      if (!baseTasks || baseTasks.length === 0) {
+        setEnrichedTasks([]);
+        return;
+      }
+
+      const taskIds = baseTasks.map(t => t.id);
+      let completedTaskIds: Set<string> = new Set();
+      let taskLogsMap: Map<string, TaskLog> = new Map();
+
+      if (taskIds.length > 0 && userId) { // userId check toegevoegd
+        const { data: logsData, error: logsError } = await supabase
+          .from('task_logs')
+          .select('*')
+          .in('task_id', taskIds)
+          .eq('user_id', userId);
+
+        if (logsError) {
+          console.warn('Error fetching logs for TasksPageContainer:', logsError.message);
+        } else if (logsData) {
+          logsData.forEach(log => {
+            if (!taskLogsMap.has(log.task_id) || (log.eind_tijd && !taskLogsMap.get(log.task_id)?.eind_tijd)) {
+              taskLogsMap.set(log.task_id, log as TaskLog);
+            }
+            if (log.eind_tijd) {
+              completedTaskIds.add(log.task_id);
+            }
+          });
+        }
+      }
+      
+      const processed = baseTasks.map(task => {
+        const status: 'voltooid' | 'openstaand' = completedTaskIds.has(task.id) ? 'voltooid' : 'openstaand';
+        const relevantLog = taskLogsMap.get(task.id);
+        return {
+          ...task,
+          status,
+          voltooid_op: status === 'voltooid' ? relevantLog?.eind_tijd : null,
+        };
+      });
+      setEnrichedTasks(processed as EnrichedTask[]);
+    };
+
+    processTasks();
+  }, [baseTasks, userId, supabase]); // userId en supabase toegevoegd als dependencies
+  
+  // De data prop voor ConditionalRender moet de originele data zijn die loading state bepaalt
+  // De data voor TaskList zijn de enrichedTasks
+  const groupedAndFilteredTasks = useMemo(() => {
+    if (!enrichedTasks) return [];
+
+    const groups: Record<Task['herhaal_patroon'], EnrichedTask[]> = {
+      eenmalig: [],
+      dagelijks: [],
+      wekelijks: [],
+      maandelijks: [],
+      aangepast: [],
+    };
+
+    enrichedTasks.forEach(task => {
+      groups[task.herhaal_patroon].push(task);
+    });
+
+    const patternOrder: Task['herhaal_patroon'][] = ['dagelijks', 'wekelijks', 'maandelijks', 'eenmalig', 'aangepast'];
+    
+    const result: GroupedTasks[] = patternOrder
+      .map(pattern => ({
+        pattern,
+        title: `${pattern.charAt(0).toUpperCase() + pattern.slice(1)}e Taken`, // Maak titel (bv. Dagelijkse Taken)
+        tasks: groups[pattern],
+      }))
+      .filter(group => group.tasks.length > 0); // Toon alleen groepen met taken
+
+      if (typeFilter) {
+        return result.map(group => ({
+          ...group,
+          tasks: group.tasks.filter(task => task.type === typeFilter)
+        })).filter(group => group.tasks.length > 0);
+      }
+      return result;
+
+  }, [enrichedTasks, typeFilter]); // typeFilter is al in de useTasks hook, maar we filteren hier de gegroepeerde lijst
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -40,13 +162,13 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
         <AddTaskButton />
       </header>
       
-      <TaskFilters />
+      <TaskFilters /> {/* TaskFilters beïnvloedt 'typeFilter' en 'patternFilter' die door useTasks worden gebruikt */}
       
       <ConditionalRender
         isLoading={isLoading}
         isError={isError}
-        error={error}
-        data={tasks}
+        error={isError ? error as ErrorMessage : null} 
+        data={baseTasks} 
         skeletonType="tasks"
         emptyFallback={
           <div className="text-center p-8 bg-white rounded-lg shadow-md">
@@ -61,7 +183,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
           </div>
         }
       >
-        {(tasksData) => <TaskList tasks={tasksData} />}
+        {() => <TaskList groupedTasks={groupedAndFilteredTasks} onDeleteTask={handleDeleteTask} isDeletingTask={isDeletingTask} />} 
       </ConditionalRender>
     </div>
   );

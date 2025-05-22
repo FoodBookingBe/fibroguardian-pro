@@ -28,7 +28,7 @@ interface ApiCacheOptions {
 
 // In-memory cache store
 const apiCache = new Map<string, {
-  data: any;
+  data: unknown;
   timestamp: number;
 }>();
 
@@ -153,7 +153,7 @@ async function revalidateCache(
   // Create a mock response object to capture the new data
   const mockRes = {
     status: () => mockRes,
-    json: (data: any) => {
+    json: (data: unknown) => {
       apiCache.set(cacheKey, {
         data,
         timestamp: Date.now()

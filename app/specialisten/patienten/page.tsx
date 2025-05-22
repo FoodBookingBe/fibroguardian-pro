@@ -1,9 +1,12 @@
+import React from 'react';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PatientList from '@/components/specialisten/PatientList';
 import AddPatientButtonContainer from '@/containers/specialisten/AddPatientButtonContainer'; // Updated import
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old import
 // import { cookies } from 'next/headers'; // Handled by centralized client
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Corrected import path
+import { Profile } from '@/types'; // Import Profile type
 
 export default async function PatientenPage() {
   const supabase = getSupabaseServerComponentClient(); // Use centralized server client
@@ -17,24 +20,35 @@ export default async function PatientenPage() {
   }
   
   // Haal patiënten op voor deze specialist
-  const { data: specialistPatients } = await supabase
+  const { data: specialistPatients, error: spError } = await supabase
     .from('specialist_patienten')
     .select('patient_id')
     .eq('specialist_id', user.id); // Use user.id
   
-  let patients = [];
+  console.log('[PatientenPage] Specialist ID:', user.id);
+  if (spError) console.error('[PatientenPage] Error fetching specialist_patienten:', spError);
+  console.log('[PatientenPage] Fetched specialistPatients links:', specialistPatients);
+
+  let patients: Profile[] = []; // Explicitly type patients
   
   if (specialistPatients && specialistPatients.length > 0) {
     const patientIds = specialistPatients.map((sp: { patient_id: string }) => sp.patient_id);
+    console.log('[PatientenPage] Patient IDs to fetch profiles for:', patientIds);
     
     // Haal patiëntprofielen op
-    const { data: patientsData } = await supabase
+    const { data: patientsData, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
       .in('id', patientIds);
     
+    if (profilesError) console.error('[PatientenPage] Error fetching patient profiles:', profilesError);
+    console.log('[PatientenPage] Fetched patientsData:', patientsData);
+    
     patients = patientsData || [];
+  } else {
+    console.log('[PatientenPage] No specialistPatients links found or specialistPatients is null/empty.');
   }
+  console.log('[PatientenPage] Final patients array for PatientList:', patients);
   
   return (
     <DashboardLayout>
@@ -49,3 +63,4 @@ export default async function PatientenPage() {
     </DashboardLayout>
   );
 }
+// Removed accidental 'div' text if any was present

@@ -1,3 +1,5 @@
+import React from 'react';
+
 // containers/dashboard/AIInsightsContainer.tsx
 'use client';
 import { useState, useMemo } from 'react'; // Added useMemo

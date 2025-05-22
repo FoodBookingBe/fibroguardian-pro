@@ -30,13 +30,29 @@ export async function DELETE(
         console.warn(`Warning deleting logs for task ${taskId}: ${logDeleteError.message}`);
     }
 
+    // Een specialist mag een taak verwijderen die hij/zij heeft aangemaakt.
+    // Een patiënt mag een taak verwijderen die aan hem/haar is toegewezen (user_id match).
+    // De RLS policy zal de uiteindelijke permissie bepalen.
+    // We proberen te verwijderen op basis van task ID. De RLS checkt of de user.id
+    // ofwel de user_id van de taak is, of de specialist_id van de taak.
+
     const { error: taskDeleteError } = await supabase
       .from('tasks')
       .delete()
-      .eq('id', taskId)
-      .eq('user_id', user.id); 
-    
-    if (taskDeleteError) throw taskDeleteError;
+      .eq('id', taskId); 
+      // De RLS policy moet nu de permissie afdwingen.
+      // De .eq('user_id', user.id) of .eq('specialist_id', user.id) is niet strikt nodig hier
+      // als de RLS policies correct zijn, maar kan als extra veiligheidslaag.
+      // Voor nu vertrouwen we op RLS.
+
+    if (taskDeleteError) {
+      // Specifieke check voor RLS violation (kan als 403 of 404 komen afhankelijk van Supabase versie/config)
+      if (taskDeleteError.code === 'PGRST000' || taskDeleteError.code === 'PGRST116' || taskDeleteError.details?.toLowerCase().includes('rls')) {
+         console.warn(`RLS violation or task not found for delete: ${taskId}, user: ${user.id}`);
+         return NextResponse.json(formatApiError(403, 'Geen permissie om deze taak te verwijderen of taak niet gevonden.'), { status: 403 });
+      }
+      throw taskDeleteError;
+    }
     
     return NextResponse.json({ message: 'Taak succesvol verwijderd' }); // Return 200 OK with success message
   } catch (error) {
@@ -65,21 +81,43 @@ export async function PUT(
         return NextResponse.json(formatApiError(400, 'Geen data om bij te werken'), { status: 400 });
     }
     
-    // Ensure user_id is not changed by client, enforce it to be the current user's ID
-    const updatePayload = { ...taskData, user_id: user.id };
-    // Remove id from payload if present, as it's used in eq()
-    if ('id' in updatePayload) delete (updatePayload as any).id;
+    // Verwijder user_id en specialist_id uit de taskData om te voorkomen dat deze per ongeluk worden gewijzigd.
+    // De eigenaar (user_id) van een taak zou normaal gesproken niet moeten veranderen.
+    // De specialist_id (aanmaker) zou ook niet moeten veranderen.
+    const { user_id: taskUserId, specialist_id: taskSpecialistId, ...editableTaskData } = taskData;
 
+    const updatePayload = { ...editableTaskData }; // Alleen de bewerkbare velden
 
+    // De RLS policy moet afdwingen dat alleen de toegewezen specialist (of admin) kan updaten.
+    // De query hieronder voegt een extra check toe dat de ingelogde gebruiker de specialist_id is.
+    // De RLS policy (USING auth.uid() = user_id WITH CHECK auth.uid() = user_id) 
+    // zou moeten afdwingen dat alleen de eigenaar (patiënt) de taak kan updaten.
+    // Als een specialist een taak moet kunnen updaten die hij heeft aangemaakt voor een patiënt,
+    // dan moet de RLS UPDATE policy worden uitgebreid, bijv.:
+    // USING (auth.uid() = user_id OR auth.uid() = specialist_id)
+    // WITH CHECK (auth.uid() = user_id OR auth.uid() = specialist_id)
+    // Voor nu gaan we ervan uit dat alleen de patiënt (user_id) zijn/haar taken mag bijwerken.
     const { data, error } = await supabase
       .from('tasks')
       .update(updatePayload)
       .eq('id', taskId)
-      .eq('user_id', user.id) // User can only update their own tasks
+      // .eq('user_id', user.id) // Deze check wordt door RLS afgehandeld.
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // error.code 'PGRST204' (No Content) betekent dat de WHERE clause (id + RLS) geen rij vond.
+      if (error.code === 'PGRST204') { 
+         console.warn(`Task not found or RLS prevented update for task ${taskId}, user: ${user.id}`);
+         return NextResponse.json(formatApiError(404, 'Taak niet gevonden of geen permissie om bij te werken.'), { status: 404 });
+      }
+      // Andere errors (PGRST000, PGRST116 kunnen ook wijzen op RLS/niet gevonden)
+      if (error.details?.toLowerCase().includes('rls') || error.code === 'PGRST116') {
+         console.warn(`RLS violation or task not found for update: ${taskId}, user: ${user.id}. Error: ${error.message}`);
+         return NextResponse.json(formatApiError(403, 'Geen permissie om deze taak bij te werken of taak niet gevonden.'), { status: 403 });
+      }
+      throw error;
+    }
 
     return NextResponse.json(data as Task);
   } catch (error) {

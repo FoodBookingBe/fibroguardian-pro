@@ -15,7 +15,7 @@ const getTodayYYYYMMDD = () => {
   return `${year}-${month}-${day}`;
 };
 
-export default function RapportGeneratorContainer() {
+export default function RapportGeneratorContainer(): JSX.Element {
   const { addNotification } = useNotification();
   const vandaag = getTodayYYYYMMDD();
 
@@ -111,7 +111,7 @@ export default function RapportGeneratorContainer() {
       // window.URL.revokeObjectURL(url);
 
       addNotification({ type: 'success', message: 'Rapport succesvol gegenereerd (simulatie)!' });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'Fout bij genereren rapport.');
       addNotification({ type: 'error', message: err.message || 'Fout bij genereren rapport.' });
     } finally {

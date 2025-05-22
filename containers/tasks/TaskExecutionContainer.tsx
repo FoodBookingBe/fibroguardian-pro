@@ -42,10 +42,11 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
   
   // Initialize feedback with more reasonable default values
   const [feedback, setFeedback] = React.useState<FeedbackState>({
-    pijn_score: 5, // Middle value is more neutral
-    energie_voor: 7, // Slightly above middle for starting energy
-    energie_na: 5, // Middle value as default
-    vermoeidheid_score: 5, // Middle value as default
+    pijn_score: 5, 
+    energie_voor: 7, 
+    energie_na: 5, 
+    vermoeidheid_score: 5, 
+    hartslag: undefined, // Voeg hartslag toe (optioneel)
     stemming: 'neutraal',
     notitie: '',
   });
@@ -116,13 +117,17 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
     }
 
     const logDataToUpdate: Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id' | 'task_id' | 'start_tijd'>> & { eind_tijd: string } = {
-      eind_tijd: new Date().toISOString(), // API expects ISO string
-      pijn_score: feedback.pijn_score,
-      energie_na: feedback.energie_na,
-      vermoeidheid_score: feedback.vermoeidheid_score,
-      stemming: feedback.stemming,
-      notitie: feedback.notitie,
+      eind_tijd: new Date().toISOString(),
+      // Alleen velden toevoegen die relevant zijn op basis van task.metingen
     };
+
+    if (task.metingen?.includes('pijn')) logDataToUpdate.pijn_score = feedback.pijn_score;
+    if (task.metingen?.includes('energie')) logDataToUpdate.energie_na = feedback.energie_na;
+    // energie_voor wordt bij start gelogd, niet hier bijwerken tenzij expliciet gevraagd in feedback
+    if (task.metingen?.includes('vermoeidheid')) logDataToUpdate.vermoeidheid_score = feedback.vermoeidheid_score;
+    if (task.metingen?.includes('hartslag') && feedback.hartslag !== undefined) logDataToUpdate.hartslag = feedback.hartslag;
+    if (task.metingen?.includes('stemming')) logDataToUpdate.stemming = feedback.stemming;
+    logDataToUpdate.notitie = feedback.notitie; // Notitie altijd meesturen
 
     updateTaskLog({ id: currentLogId, data: logDataToUpdate }, {
       onSuccess: () => {
@@ -156,7 +161,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
   }, [isRunning, startTime]);
 
   // Fix TypeScript error by using a more generic event type
-  const handleFeedbackChange = (e: any) => {
+  const handleFeedbackChange = (e: unknown) => {
     const { name, value } = e.target;
     const numValue = (name === 'pijn_score' || name === 'energie_voor' || name === 'energie_na' || name === 'vermoeidheid_score') 
                      ? parseInt(value, 10) 

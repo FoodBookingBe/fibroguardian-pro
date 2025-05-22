@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Specialist } from '@/types'; // Assuming Specialist type is defined in types/index.ts or similar
 
 interface SpecialistsListProps {

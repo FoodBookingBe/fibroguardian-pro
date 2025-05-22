@@ -25,7 +25,7 @@ const useFocusTrap = (ref: React.RefObject<HTMLElement>, active: boolean) => {
 };
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props }: any) => (
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props }: unknown) => (
   <button 
     onClick={onClick} 
     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-60 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}

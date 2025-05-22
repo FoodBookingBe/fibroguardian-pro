@@ -1,30 +1,33 @@
+import React from 'react';
+
 'use client';
 
-import AuthForm from "@/components/auth/AuthForm";
+import Image from 'next/image'; // Import Next.js Image component
 import Link from 'next/link';
 
-export default function RegisterPage() {
+import AuthFormContainer from "@/containers/auth/AuthFormContainer"; // Updated import
+
+export default function RegisterPage(): JSX.Element {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-xl shadow-2xl">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-2xl rounded-xl sm:p-10">
         <div>
           <Link href="/" className="inline-block mb-6 transition-transform hover:scale-105">
-            <img
-              className="mx-auto h-12 w-auto sm:h-14"
+            <Image
+              className="mx-auto"
               src="/logo.png" // Ensure this logo exists in /public
               alt="FibroGuardian Pro"
+              width={56} // Example width, adjust as needed (sm:h-14 is 56px)
+              height={56} // Example height, adjust to maintain aspect ratio
+              priority // If it's LCP
             />
           </Link>
-          <h2 className="text-center text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-2xl font-bold tracking-tight text-center text-gray-900 sm:text-3xl">
             Maak een nieuw account aan
           </h2>
         </div>
-        {/* AuthForm will be in 'register' mode if isLogin is false (default for a separate register page) */}
-        {/* We might need to pass a prop to AuthForm if it doesn't auto-detect based on route, or have separate Login/Register forms */}
-        {/* For now, assuming AuthForm handles its state or we adjust it later. */}
-        {/* To explicitly set it to register mode, we would need to modify AuthForm or pass a prop. */}
         {/* Explicitly set to register mode */}
-        <AuthForm initialIsLogin={false} />
+        <AuthFormContainer initialIsLoginMode={false} />
       </div>
     </div>
   );

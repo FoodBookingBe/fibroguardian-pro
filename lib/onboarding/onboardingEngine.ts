@@ -112,7 +112,7 @@ export class OnboardingEngine {
   //   // TODO: Implementeer logica om volgende actie te bepalen en in te plannen
   // }
 
-  public async completeOnboardingStep(user: User, step: OnboardingStepName, data?: any) {
+  public async completeOnboardingStep(user: User, step: OnboardingStepName, data?: unknown) {
     if (!user) return;
     trackOnboardingStep(step, { userId: user.id, ...data });
     

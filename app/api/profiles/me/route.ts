@@ -1,9 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
+
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
 import { Profile } from '@/types';
 
-export async function GET(_request: NextRequest) { // Prefixed request with underscore
+export async function GET(_request: NextRequest): Promise<NextResponse> { // Prefixed request with underscore
   const supabase = getSupabaseRouteHandlerClient();
 
   try {
@@ -24,10 +25,6 @@ export async function GET(_request: NextRequest) { // Prefixed request with unde
         return NextResponse.json(formatApiError(404, 'Profiel niet gevonden.'), { status: 404 });
       }
       throw error; // Other Supabase errors
-    }
-
-    if (!data) { // Should be caught by single() error if not found
-      return NextResponse.json(formatApiError(404, 'Profiel niet gevonden'), { status: 404 });
     }
 
     return NextResponse.json(data as Profile);

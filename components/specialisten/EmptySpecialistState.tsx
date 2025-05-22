@@ -1,4 +1,6 @@
-export default function EmptySpecialistState() {
+import React from 'react';
+
+export default function EmptySpecialistState(): JSX.Element {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 text-center">
       <p className="text-gray-600 mb-4">U heeft nog geen specialisten toegevoegd.</p>

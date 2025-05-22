@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect, useRef, ImgHTMLAttributes, CSSProperties } from 'react'; // Added CSSProperties
 import Image, { ImageProps } from 'next/image'; // Import ImageProps

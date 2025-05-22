@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface SkeletonLoaderProps {
   type: 'tasks' | 'profile' | 'logs' | 'reflecties' | 'card' | 'list' | 'form';
   count?: number;

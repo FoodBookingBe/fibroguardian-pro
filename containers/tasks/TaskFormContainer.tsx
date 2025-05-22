@@ -156,14 +156,33 @@ export default function TaskFormContainer({
   }
 
   const typedFetchTaskError = fetchTaskError as ErrorMessage | null;
-  if (isFetchTaskError && typedFetchTaskError) {
-     return (
+  if (isFetchTaskError) { 
+    console.error("[TaskFormContainer] Fetch task error object:", fetchTaskError); 
+    // Probeer eerst userMessage, dan de standaard message van het Error object (als het een Error is), dan een fallback.
+    let errorMessage = "Kon taakdetails niet laden. De taak bestaat mogelijk niet of u heeft geen toegang.";
+    if (typedFetchTaskError?.userMessage) {
+      errorMessage = typedFetchTaskError.userMessage;
+    } else if (fetchTaskError instanceof Error && fetchTaskError.message) {
+      errorMessage = fetchTaskError.message;
+    }
+    return (
       <section id="task-form" className="bg-white rounded-lg shadow-md p-6">
-        <AlertMessage type="error" title="Fout bij laden" message={typedFetchTaskError.userMessage || "Kon taakdetails niet laden."} />
+        <AlertMessage type="error" title="Fout bij laden van taak" message={errorMessage} />
       </section>
-     );
+    );
   }
   
+  // Extra check: als we in edit mode zijn maar geen fetchedTaskData hebben (en ook geen initialDataProp)
+  // nadat isLoadingTask false is, dan is er iets mis (taak niet gevonden).
+  if (isEditing && !isLoadingTask && !fetchedTaskData && !initialDataProp) {
+    console.warn(`[TaskFormContainer] In edit mode, but no task data found for taskId: ${taskId}`);
+    return (
+      <section id="task-form" className="bg-white rounded-lg shadow-md p-6">
+        <AlertMessage type="error" title="Taak niet gevonden" message="De opgevraagde taak kon niet worden gevonden of is niet toegankelijk." />
+      </section>
+    );
+  }
+
   return (
     <TaskFormPresentational
       formState={formState}

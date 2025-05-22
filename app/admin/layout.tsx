@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { redirect } from 'next/navigation';
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 import { ReactNode } from 'react';

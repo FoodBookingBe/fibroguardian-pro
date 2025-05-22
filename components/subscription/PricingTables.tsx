@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation'; // useRouter voor navigatie
@@ -13,7 +15,7 @@ import { Check } from 'lucide-react'; // X is not used
 import { useNotification } from '@/context/NotificationContext';
 
 // Basis Button component als ds/atoms/Button niet bestaat
-const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', loading, disabled, fullWidth, size = 'md', ...props }: any) => (
+const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', loading, disabled, fullWidth, size = 'md', ...props }: unknown) => (
   <button 
     onClick={onClick} 
     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${fullWidth ? 'w-full' : ''} ${size === 'sm' ? 'text-xs px-3 py-1.5' : ''} ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'danger' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
@@ -27,7 +29,7 @@ const Button = ({ onClick, children, variant = 'primary', className: btnClassNam
   </button>
 );
 // Basis Card component
-const Card = ({ children, className: cardClassName = '', ...props }: any) => (
+const Card = ({ children, className: cardClassName = '', ...props }: unknown) => (
   <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props}>
     {children}
   </div>
@@ -54,7 +56,7 @@ const Toggle = ({ checked, onChange }: { checked: boolean, onChange: () => void,
 );
 
 
-export function PricingTables() {
+export function PricingTables(): JSX.Element {
   const searchParams = useSearchParams();
   const router = useRouter();
   const userTypeParam = searchParams.get('userType');
@@ -101,7 +103,7 @@ export function PricingTables() {
         yearlyBilling ? 'yearly' : 'monthly',
         user.email // Gebruik user.email van useAuth()
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating checkout session:', error);
       addNotification({type: 'error', message: error.message || 'Kon checkout sessie niet starten.'});
     } finally {

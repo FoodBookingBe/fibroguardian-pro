@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -42,7 +44,7 @@ interface ComponentTaskLog extends GlobalTaskLog {
 
 interface OverzichtClientProps {
   user: User;
-  userProfile: any; 
+  userProfile: unknown; 
   tasks: Task[];
   taskLogs: ComponentTaskLog[]; 
   reflecties: Reflectie[]; 

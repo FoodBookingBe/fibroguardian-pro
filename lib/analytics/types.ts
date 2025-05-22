@@ -1,7 +1,7 @@
 // lib/analytics/types.ts
 
 export interface EventProperties {
-  [key: string]: any; // Flexibele properties
+  [key: string]: unknown; // Flexibele properties
 }
 
 export interface AnalyticsEvent {

@@ -7,6 +7,7 @@ export interface Profile {
   postcode?: string;
   gemeente?: string;
   geboortedatum?: Date;
+  email?: string; // E-mailadres van de gebruiker, gesynchroniseerd vanuit auth.users
   created_at: Date;
   updated_at: Date;
 }
@@ -46,14 +47,7 @@ export interface TaskLog {
   created_at: Date;
 }
 
-export interface Planning {
-  id: string;
-  user_id: string;
-  datum: Date;
-  task_ids: string[];
-  created_at: Date;
-  updated_at: Date;
-}
+export type RecentLogWithTaskTitle = TaskLog & { tasks: { titel: string; type: string } | null };
 
 export interface Reflectie {
   id: string;

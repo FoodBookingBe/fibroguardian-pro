@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; 
@@ -98,7 +100,7 @@ if (typeof formatCurrency !== 'function') {
 }
 
 
-export function SubscriptionManagement() {
+export function SubscriptionManagement(): JSX.Element {
   const { user } = useAuth();
   const { subscription, isLoading, error, cancelSubscription, updateSubscription } = useSubscription(user?.id);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -120,7 +122,7 @@ export function SubscriptionManagement() {
       setIsProcessing(true);
       await cancelSubscription();
       // router.refresh(); // Kan nuttig zijn, of laat React Query invalidation het werk doen
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error cancelling subscription:', err);
       // Notificatie wordt al afgehandeld in de mock hook
     } finally {
@@ -140,7 +142,7 @@ export function SubscriptionManagement() {
       setIsProcessing(true);
       await updateSubscription({ billingCycle: newCycle });
       // router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating billing cycle:', err);
     } finally {
       setIsProcessing(false);

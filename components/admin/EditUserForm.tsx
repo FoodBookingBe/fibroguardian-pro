@@ -87,7 +87,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
       alert('Gebruiker (simulatie) bijgewerkt! Implementeer de daadwerkelijke API call.');
       onClose();
 
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
       setError(apiError.message || 'Er is een fout opgetreden bij het bijwerken van de gebruiker.');
       console.error("Error updating user:", apiError);
     } finally {

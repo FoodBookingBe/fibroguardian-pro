@@ -1,5 +1,6 @@
+import React from 'react';
 // utils/accessibility.ts
-import React, { useRef, useEffect } from 'react'; // Expliciet React importeren, ReactNode and useCallback were unused
+import { useRef, useEffect } from 'react'; // React import verwijderd
 
 // Helper voor correcte ARIA attributen
 export const ariaProps = {
@@ -66,7 +67,7 @@ export const ariaProps = {
   
   alert: () => ({ 
     'role': 'alert',
-    'aria-live': 'assertive' as 'assertive',
+    'aria-live': 'assertive', // Type assertion verwijderd, 'assertive' is een geldige waarde
     'aria-atomic': 'true',
   }),
 };
@@ -107,77 +108,6 @@ export function useFocusManagement<T extends HTMLElement>(shouldFocus: boolean) 
   }, [shouldFocus]);
   
   return elementRef;
-}
-
-// Focus Trap hook (from plan)
-export function useFocusTrap(
-  containerRef: React.RefObject<HTMLElement>, 
-  isActive: boolean, 
-  onEscape?: () => void
-) {
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!isActive || !containerRef.current) {
-      // If trap becomes inactive, try to restore focus if previousFocusRef.current is still valid
-      if (!isActive && previousFocusRef.current && document.body.contains(previousFocusRef.current)) {
-         // Check if previousFocusRef.current is still in the DOM and focusable
-        if (typeof previousFocusRef.current.focus === 'function') {
-            // previousFocusRef.current.focus(); // Commented out as per original, might be handled by component managing trap
-        }
-      }
-      return;
-    }
-
-    previousFocusRef.current = document.activeElement as HTMLElement;
-    
-    const focusableElements = Array.from(
-      containerRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null); // Check if visible and enabled
-
-    if (focusableElements.length > 0) {
-      focusableElements[0].focus();
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && onEscape) {
-        onEscape();
-        return;
-      }
-
-      if (e.key === 'Tab') {
-        if (focusableElements.length === 0) {
-          e.preventDefault();
-          return;
-        }
-        const firstFocusable = focusableElements[0];
-        const lastFocusable = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === firstFocusable) {
-            lastFocusable.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === lastFocusable) {
-            firstFocusable.focus();
-            e.preventDefault();
-          }
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      // Restore focus when trap is deactivated or component unmounts while active
-      if (previousFocusRef.current && document.body.contains(previousFocusRef.current) && typeof previousFocusRef.current.focus === 'function') {
-        previousFocusRef.current.focus();
-      }
-    };
-  }, [isActive, containerRef, onEscape]);
 }
 
 // Example FocusTrap component (optional, hook can be used directly)

@@ -1,3 +1,5 @@
+import React from 'react';
+
 // import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // Old way
 // import { cookies } from 'next/headers'; // Handled by getSupabaseServerComponentClient
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // New way

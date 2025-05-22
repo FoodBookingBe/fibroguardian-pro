@@ -1,12 +1,18 @@
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; 
-import { DailyPlannerContainer } from '@/containers/dashboard/DailyPlannerContainer';
-import HealthMetrics from '@/components/dashboard/HealthMetrics';
-import { AIInsightsContainer } from '@/containers/dashboard/AIInsightsContainer';
-import QuickActions from '@/components/dashboard/QuickActions';
-import SessionStatus from '@/components/debug/SessionStatus';
+import React from 'react';
+
+import { TaskLog, Inzicht, Profile } from '@/types';
+
 import AdminStatsCards from '@/components/admin/AdminStatsCards';
 import RecentUsersTable from '@/components/admin/RecentUsersTable';
+import HealthMetrics from '@/components/dashboard/HealthMetrics';
+import QuickActions from '@/components/dashboard/QuickActions';
+import SessionStatus from '@/components/debug/SessionStatus';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { AIInsightsContainer } from '@/containers/dashboard/AIInsightsContainer';
+import { DailyPlannerContainer } from '@/containers/dashboard/DailyPlannerContainer';
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
+
+import DashboardClient from './dashboard-client';
 
 export default async function Dashboard() {
   const supabase = getSupabaseServerComponentClient();
@@ -33,11 +39,17 @@ export default async function Dashboard() {
   
   const userRole = profile?.type || 'patient';
   
+  console.log('[Dashboard Page Server Component] User ID:', user?.id, 'Profile Data:', profile, 'Determined Role:', userRole);
+
   // Fetch data based on user role
-  let logsData = [];
-  let insightsData = [];
-  let recentUsersData = [];
-  let statsData = {};
+  let logsData: TaskLog[] = []; // Specifieke type voor task logs
+  let insightsData: Inzicht[] = []; // Specifieke type voor inzichten
+  let recentUsersData: Profile[] = []; // Specifieke type voor gebruikersprofielen
+  let statsData: { totalUsers: number; totalTasks: number; totalLogs: number } = { // Voldoet aan AdminStats
+    totalUsers: 0,
+    totalTasks: 0,
+    totalLogs: 0,
+  };
   
   if (userRole === 'patient') {
     // Fetch task logs for health metrics
@@ -83,16 +95,16 @@ export default async function Dashboard() {
     
     // Fetch stats for admin dashboard
     // This is a placeholder - in a real app, you would fetch actual stats
+    // Ensure this matches the AdminStats interface from AdminStatsCards.tsx
     statsData = {
       totalUsers: recentUsersData.length,
-      activeUsers: Math.floor(recentUsersData.length * 0.8),
-      totalTasks: 120,
-      completedTasks: 85
+      totalTasks: 120, // Placeholder
+      totalLogs: 0,    // Placeholder - Add actual logic to fetch this
     };
   } else if (userRole === 'specialist') {
     // Fetch patient insights for specialist dashboard
     const { data: patientConnections, error: connectionsError } = await supabase
-      .from('specialist_patient_connections')
+      .from('specialist_patienten') // Corrected table name
       .select('patient_id')
       .eq('specialist_id', user.id);
     
@@ -154,6 +166,8 @@ export default async function Dashboard() {
             <section id="quick-actions" className="mt-8">
               <QuickActions />
             </section>
+
+            <DashboardClient userRole={userRole} />
           </>
         )}
 
@@ -167,9 +181,9 @@ export default async function Dashboard() {
                     <div className="space-y-4">
                       {insightsData.map((insight, index) => (
                         <div key={index} className="border-l-4 border-purple-500 pl-4 py-2">
-                          <p className="text-gray-700">{insight.content}</p>
+                          <p className="text-gray-700">{insight.beschrijving}</p>
                           <p className="text-sm text-gray-500 mt-1">
-                            {new Date(insight.created_at).toLocaleDateString('nl-NL')}
+                            {new Date(String(insight.created_at)).toLocaleDateString('nl-NL')}
                           </p>
                         </div>
                       ))}

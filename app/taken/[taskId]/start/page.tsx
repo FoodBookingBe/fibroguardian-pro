@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 // import { useState, useEffect } from 'react'; // Unused imports
 import { useParams } from 'next/navigation'; // useRouter removed as it's unused
@@ -15,10 +17,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout'; // Assuming t
 // import { redirect } from 'next/navigation'; // Server-side redirect
 
 
-export default function TaskStartPage() { // Removed async
+export default function TaskStartPage(): JSX.Element { 
   const params = useParams();
-  // const router = useRouter(); // router is unused
-  const taskId = params.id as string;
+  const taskId = params.taskId as string; // Moet overeenkomen met de mapnaam [taskId]
 
   // Client-side auth check can be added here using useAuth() if needed,
   // but middleware should have already redirected unauthenticated users.

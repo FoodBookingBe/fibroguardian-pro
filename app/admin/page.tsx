@@ -1,12 +1,14 @@
-import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Corrected path
-import AdminStatsCards from '@/components/admin/AdminStatsCards'; // Corrected path
-import RecentUsersTable from '@/components/admin/RecentUsersTable'; // Corrected path
-import { Profile } from '@/types'; // Import Profile type
+import React from 'react';
+
+import { AdminStatsCards, RecentUsersTable } from '@/components/admin/DynamicAdminComponents';
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
+import { Profile } from '@/types';
 
 // Ensure consistent casing for Supabase table/column names if needed
 // For example, if your tables are 'Tasks' not 'tasks', adjust accordingly.
 // Based on schema.sql, names are lowercase.
 
+// Next.js config option for dynamic data
 export const dynamic = 'force-dynamic'; // Ensure fresh data on each request
 
 export default async function AdminDashboardPage() {
@@ -45,8 +47,9 @@ export default async function AdminDashboardPage() {
     if (recentUsersError) throw recentUsersError;
     recentUsers = (usersData as Profile[]) || [];
 
-  } catch (error: any) {
-    console.error("[AdminDashboardPage] Error fetching dashboard data:", error.message);
+  } catch (error: unknown) {
+    console.error("[AdminDashboardPage] Error fetching dashboard data:", 
+      error instanceof Error ? error.message : 'Unknown error');
     // Optionally, render an error state or pass error to components
   }
    

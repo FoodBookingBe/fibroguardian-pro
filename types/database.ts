@@ -9,6 +9,73 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      expert_knowledge: {
+        Row: {
+          id: string
+          specialist_id: string
+          content_type: string
+          title: string
+          content: string
+          tags: string[] | null
+          metadata: Json | null
+          is_approved: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          specialist_id: string
+          content_type: string
+          title: string
+          content: string
+          tags?: string[] | null
+          metadata?: Json | null
+          is_approved?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          specialist_id?: string
+          content_type?: string
+          title?: string
+          content?: string
+          tags?: string[] | null
+          metadata?: Json | null
+          is_approved?: boolean
+          created_at?: string
+        }
+      }
+      ai_recommendations: {
+        Row: {
+          id: string
+          user_id: string
+          context_type: string
+          recommendation_text: string
+          confidence_score: number | null
+          source_knowledge_ids: string[] | null
+          is_dismissed: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          context_type: string
+          recommendation_text: string
+          confidence_score?: number | null
+          source_knowledge_ids?: string[] | null
+          is_dismissed?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          context_type?: string
+          recommendation_text?: string
+          confidence_score?: number | null
+          source_knowledge_ids?: string[] | null
+          is_dismissed?: boolean
+          created_at?: string
+        }
+      }
       profiles: {
         Row: {
           id: string

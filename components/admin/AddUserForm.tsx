@@ -85,7 +85,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
       alert('Gebruiker (simulatie) aangemaakt! Implementeer de daadwerkelijke API call.');
       onClose();
 
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
       setError(apiError.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker.');
       console.error("Error creating user:", apiError);
     } finally {

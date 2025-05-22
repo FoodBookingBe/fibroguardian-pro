@@ -1,3 +1,5 @@
+import React from 'react';
+
 // app/admin/statistics/page.tsx
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; 
 import Link from 'next/link'; 
@@ -62,7 +64,7 @@ async function getStats(): Promise<StatData> {
     if (abonnementenError) throw new Error(`Error fetching subscription data: ${abonnementenError.message}`);
 
     const planCounts: { [key: string]: number } = {};
-    (abonnementenRawData || []).forEach((item: any) => {
+    (abonnementenRawData || []).forEach((item: unknown) => {
         const plan = item.plan_type || 'onbekend';
         planCounts[plan] = (planCounts[plan] || 0) + 1;
     });

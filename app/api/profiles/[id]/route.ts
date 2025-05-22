@@ -1,13 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
+
 import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
 import { Profile } from '@/types';
 
 // PUT to update a profile
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const profileIdToUpdate = params.id;
   const supabase = getSupabaseRouteHandlerClient();
 
@@ -54,7 +55,7 @@ export async function PUT(
 export async function GET(
   _request: NextRequest, // Prefixed with underscore as it's not used
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const profileIdToFetch = params.id;
   const supabase = getSupabaseRouteHandlerClient();
 
@@ -83,10 +84,6 @@ export async function GET(
       throw error;
     }
     
-    if (!data) {
-      return NextResponse.json(formatApiError(404, 'Profiel niet gevonden'), { status: 404 });
-    }
-
     // Add an explicit check if the fetched profile's user_id matches the authenticated user,
     // or if other access rules apply (e.g. specialist viewing patient).
     // This depends on application logic beyond basic RLS.

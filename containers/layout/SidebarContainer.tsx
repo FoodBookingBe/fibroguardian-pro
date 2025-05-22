@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect, ReactElement } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -7,7 +9,7 @@ import { useProfile } from '@/hooks/useSupabaseQuery'; // To get profile type
 import SidebarPresentational, { MenuItemP } from '@/components/layout/SidebarPresentational';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
 
-export default function SidebarContainer() {
+export default function SidebarContainer(): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { createServerClient, type CookieOptions } from '@supabase/ssr'; // Replaced by centralized helper
-// import { cookies } from 'next/headers'; // Handled by centralized helper
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
-import { formatApiError } from '@/lib/error-handler'; // Corrected import path
-import { handleSupabaseError } from '@/lib/error-handler';
-import { Task } from '@/types'; // Import Task type for better type safety
+import { fromZodError } from 'zod-validation-error'; // Import fromZodError for friendly error messages
 
-export async function GET(req: NextRequest) {
+import { formatApiError, handleSupabaseError } from '@/lib/error-handler';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Import centralized helper
+import { Task } from '@/types'; // Import Task type for better type safety
+import { createTaskSchema } from '@/utils/schemas/taskSchema'; // Import the Zod schema
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
   try {
@@ -58,38 +58,15 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const supabase = getSupabaseRouteHandlerClient(); // Use centralized helper
   
-  // 1. Log de binnenkomende cookies (optioneel)
-  console.log('[API POST /api/tasks] Request cookies:', req.cookies.getAll()
-    .filter(c => c.name.startsWith('sb-'))
-    .map(c => ({ name: c.name, length: c.value.length })));
-
   try {
-    // Attempt to refresh session explicitly at the start of the API route
-    console.log('[API POST /api/tasks] Attempting explicit session refresh...');
-    const { error: refreshErrorInApi } = await supabase.auth.refreshSession();
-    if (refreshErrorInApi) {
-      console.error('[API POST /api/tasks] Explicit session refresh failed:', refreshErrorInApi.message);
-      // Decide if to proceed or return error immediately
-      // For now, let's proceed to getUser to see what it makes of the situation
-    } else {
-      console.log('[API POST /api/tasks] Explicit session refresh successful or no refresh needed.');
-    }
-
     // Auth check
-    // 2. Haal de gebruiker op en LOG HET RESULTAAT
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    console.log('[API POST /api/tasks] Auth Details:', { 
-      userId: user?.id, 
-      userEmail: user?.email,
-      authError: authError ? { message: authError.message, code: (authError as any).code } : null // Cast authError to any to access code
-    });
     
-    if (authError || !user) { // Changed getUserError to authError
-      if (authError) console.error('[API Tasks POST] Error fetching user:', authError.message); // Changed getUserError to authError
+    if (authError || !user) {
+      if (authError) console.error('[API Tasks POST] Error fetching user:', authError.message);
       return NextResponse.json(
         formatApiError(401, 'Niet geautoriseerd'),
         { status: 401 }
@@ -97,33 +74,66 @@ export async function POST(req: NextRequest) {
     }
     
     // Parse body
-    const taskData: Partial<Task> = await req.json(); // Use Partial<Task> for incoming data
+    const rawTaskData = await req.json();
     
-    // Valideer verplichte velden
-    if (!taskData.titel || !taskData.type) {
+    // Validate incoming data with Zod
+    const validationResult = createTaskSchema.safeParse(rawTaskData);
+
+    if (!validationResult.success) {
+      const validationError = fromZodError(validationResult.error);
       return NextResponse.json(
-        formatApiError(400, 'Titel en type zijn verplicht'),
+        formatApiError(400, `Validatiefout: ${validationError.message}`),
         { status: 400 }
       );
     }
+
+    const taskData = validationResult.data; // Use validated data
     
-    // Voeg user_id toe (owner_user_id for the RPC)
-    // const taskWithUserId = { // Not needed directly for RPC if task_data contains all other fields
-    //   ...taskData,
-    //   user_id: user.id, 
-    // };
-    
-    // Call the RPC function to create the task
-    console.log('[API POST /api/tasks] Calling RPC create_task_with_owner for user:', user.id);
+    // Zorg ervoor dat de essentiële IDs aanwezig zijn in taskData voor de RPC
+    let determinedSpecialistId: string | undefined | null = taskData.specialist_id;
+
+    // Scenario 1: Ingelogde gebruiker is een patiënt (of admin die voor een patiënt handelt)
+    // en de taak wordt aangemaakt voor deze ingelogde gebruiker (user.id === taskData.user_id).
+    // In dit geval moet specialist_id NULL zijn, tenzij expliciet anders meegegeven (wat ongebruikelijk zou zijn).
+    if (user.id === taskData.user_id) {
+        if (taskData.specialist_id && taskData.specialist_id !== '' && taskData.specialist_id !== user.id) {
+            // Een patiënt maakt een taak voor zichzelf maar specificeert een ANDERE specialist? Onwaarschijnlijk.
+            // Behoud voor nu, maar dit is een edge case.
+            determinedSpecialistId = taskData.specialist_id;
+        } else {
+            // Standaard voor patiënt die zelf taak maakt: geen specialist.
+            determinedSpecialistId = undefined; 
+        }
+    } 
+    // Scenario 2: Ingelogde gebruiker (specialist) maakt een taak voor een ANDERE gebruiker (patiënt: taskData.user_id).
+    else if (user.id !== taskData.user_id) {
+        // De ingelogde gebruiker (specialist) wordt de specialist_id.
+        determinedSpecialistId = user.id;
+    }
+    // Als taskData.specialist_id al correct was (bijv. specialist maakt taak voor patiënt en stuurt eigen ID mee als specialist_id),
+    // dan wordt die waarde behouden door de initialisatie van determinedSpecialistId, tenzij overschreven door bovenstaande logica.
+
+    const rpcTaskData = {
+      ...taskData,
+      user_id: taskData.user_id, 
+      specialist_id: determinedSpecialistId 
+    };
+
     const { data, error } = await supabase
       .rpc('create_task_with_owner', {
-        task_data: taskData, // Pass the original taskData (JSONB in SQL function)
-        owner_user_id: user.id
+        task_data: rpcTaskData, // Gebruik de verrijkte/gevalideerde rpcTaskData
+        owner_user_id: user.id // ID van de ingelogde specialist (aanroeper)
       });
 
     if (error) {
       console.error('[API POST /api/tasks] Error calling RPC create_task_with_owner:', error);
       throw error; // Let the generic error handler catch it
+    }
+    
+    // rpc returns an array of rows, even if it's just one.
+    // If the function returns SETOF tasks and a single task is inserted, data will be an array with one item.
+    if (!data || data.length === 0) {
+      throw new Error('Task creation via RPC returned no data.');
     }
     
     // rpc returns an array of rows, even if it's just one.

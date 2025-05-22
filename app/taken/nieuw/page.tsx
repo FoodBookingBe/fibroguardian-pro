@@ -1,7 +1,9 @@
+import React from 'react';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import TaskFormContainer from '@/containers/tasks/TaskFormContainer';
 
-export default function NieuweTaakPage() {
+export default function NieuweTaakPage(): JSX.Element {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">

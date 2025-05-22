@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 // This page can be a Server Component if auth is handled by layout/middleware
 // or a simple client component that just renders the container.
@@ -8,7 +10,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer';
 import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton';
 
-export default function TaskLogsPage() {
+export default function TaskLogsPage(): JSX.Element {
   // The TaskLogsContainer will use useAuth() to get the current user's ID
   // and fetch the appropriate logs.
   return (

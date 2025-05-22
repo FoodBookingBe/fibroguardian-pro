@@ -2,12 +2,7 @@
 export interface ErrorResponse {
   message: string;
   code?: string | number; // Optional error code (e.g., HTTP status or custom code)
-  details?: any; // Optional additional details
-}
-
-export interface SuccessResponse<T> {
-  data: T;
-  message?: string; // Optional success message
+  details?: unknown; // Optional additional details, changed any to unknown
 }
  
 // export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse; // Union type (Removed as unused)
@@ -30,7 +25,6 @@ export interface SuccessResponse<T> {
  
 // Null handling utility types
 // export type Nullable<T> = T | null; // (Removed as unused)
-export type Optional<T> = T | undefined;
  
 // Type guards (removed unused isErrorResponse, isSuccessResponse, isNonNullable)
  

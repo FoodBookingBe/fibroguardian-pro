@@ -1,3 +1,5 @@
+import React from 'react';
+
 // components/ui/NotificationList.tsx
 import { Notification, NotificationAction } from '@/context/NotificationContext'; // Import NotificationAction
 import { useEffect, useState, ReactNode } from 'react'; // Import ReactNode

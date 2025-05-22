@@ -1,9 +1,10 @@
 // lib/supabase-server.ts
-import { createServerClient as createSSRServerClient, type CookieOptions } from '@supabase/ssr';
-import { createClient as createGenericClient, SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '@/types/database';
+import { type CookieOptions, createServerClient as createSSRServerClient } from '@supabase/ssr'; // createGenericClient removed as it's unused
+import { SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+
 import { logger } from '@/lib/monitoring/logger';
+import { Database } from '@/types/database';
 
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -117,45 +118,4 @@ export const getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
     logger.error('Failed to initialize Supabase route handler client', { error });
     throw error;
   }
-};
-
-/**
- * Create a Supabase admin client that bypasses Row Level Security
- * This should only be used for admin operations that require elevated privileges
- * 
- * @returns A Supabase client with admin privileges
- */
-export const createSupabaseAdminClient = (): SupabaseClient<Database> => {
-  if (!supabaseServiceRoleKey) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY environment variable (required for admin operations)");
-  }
-  
-  try {
-    return createGenericClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        // Add request timeout for better reliability
-        fetch: (url, options) => {
-          return fetch(url, {
-            ...options,
-            signal: AbortSignal.timeout(10000), // 10 second timeout
-          });
-        }
-      }
-    });
-  } catch (error) {
-    logger.error('Failed to initialize Supabase admin client', { error });
-    throw error;
-  }
-};
-
-/**
- * Clear the server client cache
- * Useful for testing or when you need to force new instances
- */
-export const clearSupabaseServerClientCache = (): void => {
-  serverClientCache.clear();
 };

@@ -1,3 +1,5 @@
+import React from 'react';
+
 "use client";
 /* Notification Context: Manages global notifications for success, error, warning, and info messages.
    Provides addNotification and removeNotification functions.
@@ -74,7 +76,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 }
 
 // Hook voor gebruik in componenten
-export function useNotification() {
+export function useNotification(): JSX.Element {
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error('useNotification moet binnen een NotificationProvider gebruikt worden');

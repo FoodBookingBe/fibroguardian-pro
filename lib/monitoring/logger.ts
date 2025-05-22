@@ -2,7 +2,7 @@
 // In a real app, this would integrate with a proper logging service (Sentry, Logtail, etc.)
 
 interface LogData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const formatLog = (level: string, message: string, data?: LogData) => {

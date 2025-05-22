@@ -4,73 +4,264 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Offline - FibroGuardian Pro</title>
+  <link rel="icon" href="/favicon-16x16.png" type="image/png">
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    :root {
+      --color-purple-50: #f5f3ff;
+      --color-purple-100: #ede9fe;
+      --color-purple-200: #ddd6fe;
+      --color-purple-300: #c4b5fd;
+      --color-purple-400: #a78bfa;
+      --color-purple-500: #8b5cf6;
+      --color-purple-600: #7c3aed;
+      --color-purple-700: #6d28d9;
+      --color-purple-800: #5b21b6;
+      --color-purple-900: #4c1d95;
+      --color-gray-50: #f9fafb;
+      --color-gray-100: #f3f4f6;
+      --color-gray-200: #e5e7eb;
+      --color-gray-300: #d1d5db;
+      --color-gray-400: #9ca3af;
+      --color-gray-500: #6b7280;
+      --color-gray-600: #4b5563;
+      --color-gray-700: #374151;
+      --color-gray-800: #1f2937;
+      --color-gray-900: #111827;
+    }
+    
+    * {
       margin: 0;
-      padding: 20px; /* Added padding for smaller screens */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background-color: #f9f7ff; /* Light purple background */
-      color: #1f2937; /* Darker gray for better contrast */
+      padding: 0;
       box-sizing: border-box;
     }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom, var(--color-purple-50), white);
+      color: var(--color-gray-800);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
     .container {
-      max-width: 500px;
+      max-width: 32rem;
+      width: 100%;
+      background-color: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       padding: 2rem;
       text-align: center;
-      background-color: white;
-      border-radius: 0.75rem; /* Slightly larger radius */
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Softer shadow */
     }
-    h1 {
-      color: #7c3aed; /* Brand purple */
-      margin-bottom: 1rem;
-      font-size: 1.75rem; /* Slightly larger heading */
-    }
-    p {
-      margin-bottom: 1.5rem;
-      line-height: 1.6; /* Improved line height */
-      color: #4b5563; /* Medium gray for text */
-    }
+    
     .logo {
-      width: 72px; /* Adjusted size */
-      height: 72px;
+      width: 8rem;
+      height: 8rem;
       margin-bottom: 1.5rem;
-      border-radius: 0.5rem; /* Match app icon style */
     }
-    .btn {
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-purple-800);
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: var(--color-gray-600);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    
+    .card {
+      background-color: var(--color-purple-50);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--color-purple-500);
+    }
+    
+    .card h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-purple-700);
+      margin-bottom: 0.5rem;
+    }
+    
+    .card p {
+      color: var(--color-gray-600);
+      font-size: 0.875rem;
+      margin-bottom: 0;
+    }
+    
+    .button {
       display: inline-block;
-      background-color: #7c3aed;
+      background-color: var(--color-purple-600);
       color: white;
+      font-weight: 500;
       padding: 0.75rem 1.5rem;
       border-radius: 0.375rem;
       text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s ease-in-out;
-      border: none; /* Remove default border */
-      cursor: pointer;
+      transition: background-color 0.2s;
     }
-    .btn:hover {
-      background-color: #6d28d9; /* Darker purple on hover */
+    
+    .button:hover {
+      background-color: var(--color-purple-700);
     }
-    /* Ensure images are responsive */
-    img {
-      max-width: 100%;
-      height: auto;
+    
+    .button-secondary {
+      background-color: white;
+      color: var(--color-purple-600);
+      border: 1px solid var(--color-purple-200);
+      margin-left: 0.5rem;
+    }
+    
+    .button-secondary:hover {
+      background-color: var(--color-purple-50);
+    }
+    
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature {
+      flex: 1 1 calc(50% - 0.5rem);
+      min-width: 8rem;
+      background-color: white;
+      border: 1px solid var(--color-gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .feature-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      background-color: var(--color-purple-100);
+      color: var(--color-purple-600);
+      border-radius: 0.375rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .feature h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.25rem;
+    }
+    
+    .feature p {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+      margin-bottom: 0;
+    }
+    
+    footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      .logo {
+        width: 6rem;
+        height: 6rem;
+      }
+      
+      .feature {
+        flex: 1 1 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="/icons/icon-192x192.png" alt="FibroGuardian Logo" class="logo">
+    <img src="/logo.png" alt="FibroGuardian Pro Logo" class="logo">
     <h1>U bent momenteel offline</h1>
-    <p>Het lijkt erop dat er geen actieve internetverbinding is. FibroGuardian Pro heeft beperkte functionaliteit offline, maar u kunt mogelijk nog steeds eerder geladen gegevens bekijken.</p>
-    <p>Controleer uw verbinding en probeer de pagina te vernieuwen.</p>
-    <button onclick="window.location.reload()" class="btn">Pagina Vernieuwen</button>
-    <p style="margin-top: 1.5rem; font-size: 0.875rem;"><a href="/" style="color: #7c3aed; text-decoration: underline;">Terug naar startpagina</a></p>
+    <p>Het lijkt erop dat u geen internetverbinding heeft. Sommige functies van FibroGuardian Pro zijn nog steeds beschikbaar in offline modus.</p>
+    
+    <div class="card">
+      <h2>Wat kunt u doen in offline modus?</h2>
+      <p>U kunt nog steeds uw dagelijkse reflecties en taaklogboeken invullen. Deze worden automatisch gesynchroniseerd zodra u weer online bent.</p>
+    </div>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3>Reflecties</h3>
+        <p>Vul uw dagelijkse reflecties in, ook zonder internet</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <h3>Taken</h3>
+        <p>Bekijk en voltooi uw taken in offline modus</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3>Synchronisatie</h3>
+        <p>Automatische synchronisatie zodra u weer online bent</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3>Hulp</h3>
+        <p>Toegang tot basis hulpinformatie</p>
+      </div>
+    </div>
+    
+    <div>
+      <a href="/" class="button">Vernieuwen</a>
+      <a href="/offline/help" class="button button-secondary">Offline Hulp</a>
+    </div>
   </div>
+  
+  <footer>
+    &copy; 2025 FibroGuardian Pro - Alle rechten voorbehouden
+  </footer>
+  
+  <script>
+    // Check if the user is back online
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+    
+    // Add current date/time to the page
+    document.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const footer = document.querySelector('footer');
+      const timeElement = document.createElement('p');
+      timeElement.textContent = `Laatst bijgewerkt: ${now.toLocaleString()}`;
+      timeElement.style.marginTop = '0.5rem';
+      footer.appendChild(timeElement);
+    });
+  </script>
 </body>
 </html>

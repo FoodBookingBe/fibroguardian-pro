@@ -1,7 +1,9 @@
+import React from 'react';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ProfileFormContainer from '@/containers/settings/ProfileFormContainer';
 
-export default function InstellingenPage() {
+export default function InstellingenPage(): JSX.Element {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">

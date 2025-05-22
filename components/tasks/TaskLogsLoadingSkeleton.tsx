@@ -1,4 +1,6 @@
-export default function TaskLogsLoadingSkeleton() {
+import React from 'react';
+
+export default function TaskLogsLoadingSkeleton(): JSX.Element {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-lg font-semibold mb-4">Activiteiten Logs</h2>

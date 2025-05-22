@@ -1,11 +1,14 @@
+import React from 'react';
+
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Corrected path
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useRouter, usePathname } from 'next/navigation';
-import { Profile } from '@/types'; // Corrected path
-import { useProfile } from '@/hooks/useSupabaseQuery'; // Corrected path
-import { logger } from '@/lib/monitoring/logger'; // Corrected path, will create this file
+import { Profile } from '@/types';
+import { logger } from '@/lib/monitoring/logger';
+import { ErrorMessage } from '@/hooks/useSupabaseQuery'; // Importeer ErrorMessage
+import { useProfile } from '@/hooks/useProfile'; // Importeer useProfile
 
 // Schema voor auth events voor diagnostiek
 type AuthEventType = 
@@ -93,8 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const newEvent: AuthEvent = {
       type: eventType,
       timestamp: Date.now(),
-      // sessionId: session?.id, // Property 'id' does not exist on type 'Session'. Using null or another identifier if needed.
-      sessionId: null, // Or derive from token if absolutely necessary and available.
+      sessionId: session?.user?.id || null, // Gebruik user.id voor sessie-identificatie
       userId: user?.id,
       error: error ? (error.message || 'Unknown error') : null,
       metadata
@@ -118,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         timestamp: new Date(newEvent.timestamp).toISOString() 
       });
     }
-  }, [session?.id, user?.id]); // Removed 'session' and 'user' from deps as they are accessed via session?.id and user?.id
+  }, [session?.user?.id, user?.id]); // Gebruik session?.user?.id in deps
 
   // Functie om sessie handmatig te vernieuwen
   const refreshSession = useCallback(async () => {
@@ -165,7 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logAuthEvent('TOKEN_REFRESHED', { 
           duration_ms: duration,
           expires_at: data.session.expires_at,
-          refresh_token_present: !!data.session.refresh_token
+          access_token_length: data.session.access_token?.length || 0,
+          has_refresh_token: !!data.session.refresh_token
         });
       } else {
         setSession(null);
@@ -254,11 +257,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (sessionError) {
         console.error("[AuthProvider] Error getting initial session:", sessionError.message);
-        setLastError(sessionError);
+        setLastError(sessionError as Error); // Cast error to Error
         logAuthEvent('SESSION_ERROR', { 
           duration_ms: duration,
           error_code: (sessionError as any).code || 'unknown'
-        }, sessionError);
+        }, sessionError as Error); // Cast error to Error
         handleAuthStateChange('INITIAL_SESSION_ERROR', null);
       } else if (initialSession) {
         logAuthEvent('SESSION_LOADED', { 
@@ -339,6 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [logAuthEvent]);
 
+  // Importeer useProfile hook
   const {
     data: profile,
     isLoading: loadingProfile,
@@ -346,7 +350,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useProfile(user?.id, {
     enabled: !!user,
   });
-  
+
   useEffect(() => {
     if (profileError) {
       console.error('[AuthProvider] Error fetching profile:', profileError);

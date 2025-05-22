@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useMemo } from 'react'; // Import useMemo
 import Link from 'next/link';

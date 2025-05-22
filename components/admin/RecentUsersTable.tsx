@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 
 import { Profile } from '@/types'; // Assuming Profile type is in @/types

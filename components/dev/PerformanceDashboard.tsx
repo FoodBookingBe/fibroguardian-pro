@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
@@ -129,7 +131,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
   return metrics;
 }
 
-export default function PerformanceDashboard() {
+export default function PerformanceDashboard(): JSX.Element {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [view, setView] = useState<'overview' | 'resources' | 'javascript' | 'rendering'>('overview');
   

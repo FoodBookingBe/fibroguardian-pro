@@ -47,7 +47,7 @@ const faqs: FAQItem[] = [
 ];
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props }: any) => (
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props }: unknown) => (
   <button 
     type={type}
     onClick={onClick} 
@@ -59,7 +59,7 @@ const Button = ({ onClick, children, variant = 'primary', size = 'md', className
   </button>
 );
 
-export function SupportWidget() {
+export function SupportWidget(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

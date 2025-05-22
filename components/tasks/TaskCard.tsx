@@ -1,28 +1,37 @@
+import React from 'react';
+
 'use client';
-import { useState, ReactElement } from 'react'; // Added ReactElement
+import { useState, ReactElement } from 'react';
 import Link from 'next/link';
-import { Task } from '@/types';
+// Task wordt nu EnrichedTask uit de container
+// import { Task } from '@/types'; 
+import { EnrichedTask } from '@/containers/dashboard/DailyPlannerContainer'; // Importeer EnrichedTask
 
 interface TaskCardProps {
-  task: Task;
-  onDelete?: (taskId: string) => void | Promise<void>; // Allow async delete
-  onUpdateStatus?: (taskId: string, newStatus: string) => void | Promise<void>; // For future status updates
-  isDeleting?: boolean; // Add isDeleting prop
+  task: EnrichedTask; // Gebruik EnrichedTask
+  onDelete?: (taskId: string) => void | Promise<void>; 
+  onUpdateStatus?: (taskId: string, newStatus: string) => void | Promise<void>; 
+  isDeleting?: boolean; 
 }
 
 export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }: TaskCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // DEBUG LOG
+  console.log(`[TaskCard] Rendering task "${task.titel}", specialist_id:`, task.specialist_id, "Full task object:", task);
   
   // Helper voor het formatteren van datum
-  const formatDate = (dateString: Date | string | undefined) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('nl-BE', {
-      day: '2-digit',
-      month: 'short', // Using short month name
-      year: 'numeric'
-    });
-  };
+const formatDate = (dateString: Date | string | undefined) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleString('nl-BE', {
+    day: '2-digit',
+    month: 'short', // Using short month name
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
   
   // Helper voor het bepalen van het taakicoon
   const getTaskIcon = (): ReactElement => {
@@ -82,12 +91,20 @@ export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }:
                 {task.duur} min
               </span>
             )}
+            {/* Toon status badge */}
+            {task.status && (
+              <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-full ${
+                task.status === 'voltooid' ? 'bg-green-200 text-green-800' : 'bg-orange-200 text-orange-800'
+              }`}>
+                {task.status}
+              </span>
+            )}
           </div>
         </div>
       </div>
       
       {task.beschrijving && (
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{task.beschrijving}</p> // Added line-clamp
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{task.beschrijving}</p>
       )}
       
       {task.labels && task.labels.length > 0 && (
@@ -103,7 +120,10 @@ export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }:
       )}
       
       <div className="flex flex-wrap text-xs text-gray-500 mb-4 items-center">
-        <span className="mr-3">Gemaakt: {formatDate(task.created_at)}</span>
+        <span className="mr-3">Aangemaakt: {formatDate(task.created_at)}</span>
+        {task.status === 'voltooid' && task.voltooid_op && (
+          <span className="mr-3">Voltooid: {formatDate(task.voltooid_op)}</span>
+        )}
         {task.specialist_id && (
           <span className="flex items-center text-indigo-500">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -128,7 +148,7 @@ export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }:
           </Link>
           
           <Link 
-            href={`/taken/${task.id}/bewerken`} // Assuming this is the edit page
+            href={`/taken/${task.id}/edit`} // Aangepast naar /edit
             className="text-gray-500 hover:text-blue-600 transition-colors"
             aria-label={`Bewerk taak ${task.titel}`}
           >

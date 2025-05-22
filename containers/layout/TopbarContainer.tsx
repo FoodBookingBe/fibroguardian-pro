@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import TopbarPresentational, { TopbarProfileData } from '@/components/layout/TopbarPresentational';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
 
-export default function TopbarContainer() {
+export default function TopbarContainer(): JSX.Element {
   const { user } = useAuth();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);

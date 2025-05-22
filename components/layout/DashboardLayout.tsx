@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import SidebarContainer from '@/containers/layout/SidebarContainer';
 import TopbarContainer from '@/containers/layout/TopbarContainer'; // Updated import

@@ -1,0 +1,32 @@
+{
+  "cline.apiKey": "your_claude_api_key",
+  "cline.model": "claude-3-7-sonnet-20250219",
+  "cline.maxTokens": 8192,
+  "cline.temperature": 0.1,
+  "cline.systemPrompt": "You are an expert FibroGuardian Pro developer with deep knowledge of Supabase, Next.js, TypeScript, and healthcare applications. Always consider database schema, type safety, and clinical best practices.",
+  "cline.customInstructions": [
+    "Always use the typed Supabase client from 'hooks/useTypedSupabase'",
+    "Generate Zod schemas for any new database tables",
+    "Consider clinical safety and GDPR compliance in all recommendations",
+    "Optimize for fibromyalgia patient experience (low energy, pain management)",
+    "Use the established container/presentational pattern",
+    "Include proper error handling and loading states",
+    "Generate appropriate RLS policies for new tables"
+  ],
+  "cline.contextFiles": [
+    "types/database.ts",
+    "types/zod-schemas.ts",
+    "hooks/useTypedSupabase.ts",
+    "utils/supabase/client.ts",
+    "README.md"
+  ],
+  "cline.watchFiles": [
+    "supabase/migrations/*.sql",
+    "types/database.ts",
+    "types/zod-schemas.ts"
+  ],
+  "cline.autoRunCommands": [
+    "npm run db:types",
+    "npm run db:validate"
+  ]
+}

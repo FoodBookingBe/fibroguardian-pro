@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useMySpecialists, SpecialistWithRelation } from '@/hooks/useSupabaseQuery'; // Import SpecialistWithRelation
@@ -21,7 +23,7 @@ const EmptySpecialistsState = () => (
 );
 
 // This container is for a PATIENT viewing THEIR specialists.
-export function SpecialistsListContainer() {
+export function SpecialistsListContainer(): JSX.Element {
   const { user } = useAuth();
   const patientId = user?.id;
 

@@ -8,7 +8,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function AddSpecialistButtonContainer() {
+export default function AddSpecialistButtonContainer(): JSX.Element {
   const { user } = useAuth();
   const { addNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -97,7 +97,7 @@ export default function AddSpecialistButtonContainer() {
         }
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error in AddSpecialistButton handleSubmit:', err);
       const userMessage = err.message || 'Er is een onverwachte fout opgetreden.';
       setFormError(userMessage);

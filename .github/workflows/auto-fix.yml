@@ -1,0 +1,120 @@
+name: Auto-Fix System
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight
+
+jobs:
+  auto-fix:
+    name: Auto-Fix Code Quality Issues
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Auto-Fix System
+        run: node scripts/auto-fix-system.js
+      
+      - name: Run TypeScript Fixer
+        run: node scripts/fix-typescript.js
+      
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code || echo "changes=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit changes
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "🤖 Auto-Fix: Code quality improvements [skip ci]"
+      
+      - name: Push changes
+        if: steps.git-check.outputs.changes == 'true' && github.event_name != 'pull_request'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+      
+      - name: Create PR for changes
+        if: steps.git-check.outputs.changes == 'true' && github.event_name == 'pull_request'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "🤖 Auto-Fix: Code quality improvements"
+          title: "🤖 Auto-Fix: Code quality improvements"
+          body: |
+            This PR contains automated fixes for code quality issues.
+            
+            Changes include:
+            - ESLint auto-fixes
+            - TypeScript improvements
+            - Import organization
+            - Unused code removal
+            
+            Please review these changes carefully before merging.
+          branch: auto-fix-${{ github.run_id }}
+          base: ${{ github.head_ref }}
+      
+      - name: Generate quality report
+        run: |
+          mkdir -p reports
+          npm run quality:report || true
+      
+      - name: Upload quality report
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-reports
+          path: reports/
+          retention-days: 7
+
+  quality-gate:
+    name: Quality Gate
+    needs: auto-fix
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+      
+      - name: Check ESLint
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings=0
+      
+      - name: Create issue for remaining problems
+        if: failure()
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filename: .github/ISSUE_TEMPLATE/quality-issues.md
+          update_existing: true

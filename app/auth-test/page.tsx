@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Updated import
 
 export const dynamic = 'force-dynamic';

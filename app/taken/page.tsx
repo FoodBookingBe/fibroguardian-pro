@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { redirect } from 'next/navigation';
 import { Task } from '@/types';
 import DashboardLayout from '@/components/layout/DashboardLayout';

@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import Link from 'next/link';
 import { ReactElement } from 'react'; // Import ReactElement for icon type
@@ -10,7 +12,7 @@ interface ActionItem {
   color: string; // Tailwind background color class
 }
 
-export default function QuickActions() {
+export default function QuickActions(): JSX.Element {
   const actions: ActionItem[] = [
     {
       title: 'Nieuwe Taak',

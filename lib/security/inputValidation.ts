@@ -156,7 +156,7 @@ export const sanitize = {
 // Validates a complete form and returns all errors
 export function validateForm<T extends Record<string, any>>(
   formData: T,
-  validationRules: Partial<Record<keyof T, (value: any, formData?: T) => ValidationResult>> // formData optional for cross-field validation
+  validationRules: Partial<Record<keyof T, (value: unknown, formData?: T) => ValidationResult>> // formData optional for cross-field validation
 ): Record<string, string | undefined> { // Simpler return type
   const errors: Record<string, string | undefined> = {};
   

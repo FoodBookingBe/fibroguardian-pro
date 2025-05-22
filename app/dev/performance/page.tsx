@@ -1,3 +1,5 @@
+import React from 'react';
+
 import dynamic from 'next/dynamic';
 import DashboardLayout from '@/components/layout/DashboardLayout'; // Assuming a layout
 
@@ -11,7 +13,7 @@ const PerformanceDashboard = dynamic(
   }
 );
 
-export default function PerformanceMonitoringPage() { // Renamed for clarity
+export default function PerformanceMonitoringPage(): JSX.Element { // Renamed for clarity
   // Voeg hier eventueel authenticatie of autorisatie toe als dit een beschermde pagina moet zijn
   // Voor nu, openbaar toegankelijk onder /dev/performance
 

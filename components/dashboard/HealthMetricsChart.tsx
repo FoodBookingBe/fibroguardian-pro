@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TaskLog } from '@/types';

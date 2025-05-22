@@ -6,9 +6,10 @@ import { ErrorMessage } from '@/lib/error-handler';
 
 export interface FeedbackState {
   pijn_score: number;
-  energie_voor: number;
+  energie_voor: number; // Behoud voor consistentie, ook al wordt het niet altijd gevraagd in modal
   energie_na: number;
   vermoeidheid_score: number;
+  hartslag?: number; // Hartslag toegevoegd, optioneel
   stemming: string;
   notitie: string;
 }
@@ -97,33 +98,68 @@ export default function TaskExecutionPresentational({
               )}
               
               <div className="space-y-4">
-                <div>
-                  <label htmlFor="pijn_score" className="block text-sm font-medium text-gray-700 mb-1">
-                    Pijnniveau (1-20): {feedback.pijn_score}
-                  </label>
-                  <input type="range" id="pijn_score" name="pijn_score" min="1" max="20" value={feedback.pijn_score} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Geen pijn</span><span>Extreme pijn</span></div>
-                </div>
-                <div>
-                  <label htmlFor="energie_na" className="block text-sm font-medium text-gray-700 mb-1">
-                    Energieniveau na (1-20): {feedback.energie_na}
-                  </label>
-                  <input type="range" id="energie_na" name="energie_na" min="1" max="20" value={feedback.energie_na} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Geen energie</span><span>Vol energie</span></div>
-                </div>
-                <div>
-                  <label htmlFor="vermoeidheid_score" className="block text-sm font-medium text-gray-700 mb-1">
-                    Vermoeidheidsniveau (1-20): {feedback.vermoeidheid_score}
-                  </label>
-                  <input type="range" id="vermoeidheid_score" name="vermoeidheid_score" min="1" max="20" value={feedback.vermoeidheid_score} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Niet vermoeid</span><span>Extreem vermoeid</span></div>
-                </div>
-                <div>
-                  <label htmlFor="stemming" className="block text-sm font-medium text-gray-700 mb-1">Algemeen gevoel</label>
-                  <select id="stemming" name="stemming" value={feedback.stemming} onChange={onFeedbackChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <option value="zeer goed">Zeer goed</option><option value="goed">Goed</option><option value="redelijk">Redelijk</option><option value="neutraal">Neutraal</option><option value="matig">Matig</option><option value="slecht">Slecht</option><option value="zeer slecht">Zeer slecht</option>
-                  </select>
-                </div>
+                {/* Energie Voor - Alleen tonen als gespecificeerd in task.metingen */}
+                {/* Dit veld wordt momenteel niet expliciet gelogd bij start, maar kan hier alsnog gevraagd worden */}
+                {/* Voor nu laten we het weg uit de feedback modaal, tenzij het expliciet in metingen staat */}
+
+                {task.metingen?.includes('pijn') && (
+                  <div>
+                    <label htmlFor="pijn_score" className="block text-sm font-medium text-gray-700 mb-1">
+                      Pijnniveau (1-20): {feedback.pijn_score}
+                    </label>
+                    <input type="range" id="pijn_score" name="pijn_score" min="1" max="20" value={feedback.pijn_score} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Geen pijn</span><span>Extreme pijn</span></div>
+                  </div>
+                )}
+
+                {task.metingen?.includes('energie') && ( // Gaat over energie_na
+                  <div>
+                    <label htmlFor="energie_na" className="block text-sm font-medium text-gray-700 mb-1">
+                      Energieniveau na (1-20): {feedback.energie_na}
+                    </label>
+                    <input type="range" id="energie_na" name="energie_na" min="1" max="20" value={feedback.energie_na} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Geen energie</span><span>Vol energie</span></div>
+                  </div>
+                )}
+
+                {task.metingen?.includes('vermoeidheid') && (
+                  <div>
+                    <label htmlFor="vermoeidheid_score" className="block text-sm font-medium text-gray-700 mb-1">
+                      Vermoeidheidsniveau (1-20): {feedback.vermoeidheid_score}
+                    </label>
+                    <input type="range" id="vermoeidheid_score" name="vermoeidheid_score" min="1" max="20" value={feedback.vermoeidheid_score} onChange={onFeedbackChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Niet vermoeid</span><span>Extreem vermoeid</span></div>
+                  </div>
+                )}
+                
+                {/* Hartslag - Nieuw veld, alleen tonen als gespecificeerd */}
+                {task.metingen?.includes('hartslag') && (
+                  <div>
+                    <label htmlFor="hartslag" className="block text-sm font-medium text-gray-700 mb-1">
+                      Hartslag (bpm, optioneel):
+                    </label>
+                    <input 
+                      type="number" 
+                      id="hartslag" 
+                      name="hartslag" 
+                      value={feedback.hartslag || ''} // Gebruik feedback.hartslag
+                      onChange={onFeedbackChange} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="bv. 70"
+                    />
+                  </div>
+                )}
+
+                {task.metingen?.includes('stemming') && (
+                  <div>
+                    <label htmlFor="stemming" className="block text-sm font-medium text-gray-700 mb-1">Algemeen gevoel</label>
+                    <select id="stemming" name="stemming" value={feedback.stemming} onChange={onFeedbackChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                      <option value="zeer goed">Zeer goed</option><option value="goed">Goed</option><option value="redelijk">Redelijk</option><option value="neutraal">Neutraal</option><option value="matig">Matig</option><option value="slecht">Slecht</option><option value="zeer slecht">Zeer slecht</option>
+                    </select>
+                  </div>
+                )}
+                
+                {/* Notitie is altijd beschikbaar, tenzij anders gespecificeerd */}
                 <div>
                   <label htmlFor="notitie" className="block text-sm font-medium text-gray-700 mb-1">Opmerkingen (optioneel)</label>
                   <textarea id="notitie" name="notitie" value={feedback.notitie} onChange={onFeedbackChange} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Eventuele opmerkingen over deze taak..."></textarea>

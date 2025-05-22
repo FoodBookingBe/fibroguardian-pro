@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -7,7 +9,7 @@ import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton'
 import { Task } from '@/types';
 import Link from 'next/link';
 
-export default function TaskSpecificLogsPage() {
+export default function TaskSpecificLogsPage(): JSX.Element {
   const params = useParams();
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -45,7 +47,7 @@ export default function TaskSpecificLogsPage() {
         }
         
         setTask(data as Task);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Fout bij ophalen taak:', error);
         setError(error.message || 'Er is een fout opgetreden bij het ophalen van de taak');
       } finally {

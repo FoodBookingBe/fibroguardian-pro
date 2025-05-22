@@ -1,15 +1,17 @@
-import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
-import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useMutation, useQueryClient, UseMutationOptions, UseMutationResult } from '@tanstack/react-query'; // Added UseMutationResult
+
+import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 import { ErrorMessage } from '@/lib/error-handler';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Added import
-import { useNotification } from '@/context/NotificationContext'; // Import useNotification
+import { Task, Profile, TaskLog, Reflectie, SpecialistPatient, ReflectieFormData } from '@/types'; // Added ReflectieFormData
 
 // Taak toevoegen/bijwerken
 // TData is the type of data returned by the mutationFn on success (e.g., the updated/created task)
 // TVariables is the type of variables passed to the mutationFn (e.g., Partial<Task>)
 export function useUpsertTask(
   options?: Omit<UseMutationOptions<Task, ErrorMessage, Partial<Task>>, 'mutationFn'>
-) {
+): UseMutationResult<Task, ErrorMessage, Partial<Task>> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -61,7 +63,7 @@ export function useUpsertTask(
 // Taak verwijderen
 export function useDeleteTask(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, string>, 'mutationFn'>
-) {
+): UseMutationResult<{ message: string }, ErrorMessage, string> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -102,7 +104,7 @@ export function useDeleteTask(
 // Profiel bijwerken
 export function useUpdateProfile(
   options?: Omit<UseMutationOptions<Profile, ErrorMessage, { id: string; data: Partial<Profile> }>, 'mutationFn'>
-) {
+): UseMutationResult<Profile, ErrorMessage, { id: string; data: Partial<Profile> }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -148,7 +150,7 @@ export function useUpdateProfile(
 // Task Log toevoegen
 export function useAddTaskLog(
   options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>, 'mutationFn'>
-) {
+): UseMutationResult<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -188,7 +190,7 @@ export function useAddTaskLog(
 // Task Log bijwerken
 export function useUpdateTaskLog(
   options?: Omit<UseMutationOptions<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }>, 'mutationFn'>
-) {
+): UseMutationResult<TaskLog, ErrorMessage, { id: string; data: Partial<TaskLog> }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -226,51 +228,12 @@ export function useUpdateTaskLog(
     ...options,
   });
 }
-// Task Log verwijderen
-// export function useDeleteTaskLog(
-//   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>, 'mutationFn'>
-// ) {
-//   const queryClient = useQueryClient();
-  
-//   return useMutation<{ message: string }, ErrorMessage, { id: string; taskId?: string; userId?: string }>({
-//     mutationFn: async ({ id }) => {
-//       const response = await fetch(`/api/task-logs/${id}`, {
-//         method: 'DELETE',
-//       });
-      
-//       const responseData = await response.json();
-//       if (!response.ok) {
-//         const err: ErrorMessage = {
-//             userMessage: responseData.error?.message || responseData.message || 'Er is een fout opgetreden bij het verwijderen van de log',
-//             technicalMessage: `Status: ${response.status}, Response: ${JSON.stringify(responseData)}`,
-//         };
-//         throw err;
-//       }
-//       return responseData;
-//     },
-//     onSuccess: (data, variables) => {
-//       if (variables.taskId) {
-//         queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.taskId] });
-//       }
-//       if (variables.userId) {
-//         queryClient.invalidateQueries({ queryKey: ['recentLogs', variables.userId] });
-//       } else {
-//          queryClient.invalidateQueries({ queryKey: ['recentLogs'] });
-//       }
-//       queryClient.removeQueries({ queryKey: ['taskLog', variables.id] });
-//     },
-//     onError: (error: ErrorMessage, variables) => {
-//       console.error(`Fout bij verwijderen taaklog (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
-//     },
-//     ...options,
-//   });
-// }
  
 // Reflectie Mutations
  
 export function useUpsertReflectie(
   options?: Omit<UseMutationOptions<Reflectie, ErrorMessage, ReflectieFormData>, 'mutationFn'>
-) {
+): UseMutationResult<Reflectie, ErrorMessage, ReflectieFormData> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -310,7 +273,7 @@ export function useUpsertReflectie(
 // Reflectie verwijderen
 export function useDeleteReflectie(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { id: string; userId?: string }>, 'mutationFn'>
-) {
+): UseMutationResult<{ message: string }, ErrorMessage, { id: string; userId?: string }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   
@@ -351,7 +314,7 @@ export function useDeleteReflectie(
 // Add Specialist-Patient Relationship
 export function useAddSpecialistPatientRelation(
   options?: Omit<UseMutationOptions<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>, 'mutationFn'>
-) {
+): UseMutationResult<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   return useMutation<SpecialistPatient, ErrorMessage, { patient_email?: string; specialist_id_to_add?: string }>({
@@ -390,7 +353,7 @@ export function useAddSpecialistPatientRelation(
 // Delete Specialist-Patient Relationship
 export function useDeleteSpecialistPatientRelation(
   options?: Omit<UseMutationOptions<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>, 'mutationFn'>
-) {
+): UseMutationResult<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }> {
   const queryClient = useQueryClient();
   const { addNotification } = useNotification();
   return useMutation<{ message: string }, ErrorMessage, { relationshipId: string; currentUserId?: string }>({
@@ -438,11 +401,10 @@ interface SignInVariables {
 // For simplicity, we'll type the success data (TData) as the user object, session handling is often implicit.
 // Or more explicitly: interface SignInSuccessData { user: SupabaseUser; session: Session | null }
 // Sticking to User for now, as session is managed by Supabase client.
-import { User as SupabaseUser } from '@supabase/supabase-js'; // Removed unused AuthError, Session
 
 export function useSignInEmailPassword(
   options?: Omit<UseMutationOptions<SupabaseUser, ErrorMessage, SignInVariables>, 'mutationFn'>
-) {
+): UseMutationResult<SupabaseUser, ErrorMessage, SignInVariables> {
   const queryClient = useQueryClient();
   // const { addNotification } = useNotification(); // Notifications can be handled by the component or here
 
@@ -484,7 +446,7 @@ interface SignUpOptionsData {
   voornaam: string;
   achternaam: string;
   type: 'patient' | 'specialist';
-  [key: string]: any;
+  [key: string]: unknown; // Replaced any with unknown
 }
 
 interface SignUpVariables {
@@ -505,7 +467,7 @@ interface SignUpSuccessData {
 
 export function useSignUpWithEmailPassword(
   options?: Omit<UseMutationOptions<SignUpSuccessData, ErrorMessage, SignUpVariables>, 'mutationFn'>
-) {
+): UseMutationResult<SignUpSuccessData, ErrorMessage, SignUpVariables> {
   // const { addNotification } = useNotification();
 
   return useMutation<SignUpSuccessData, ErrorMessage, SignUpVariables>({

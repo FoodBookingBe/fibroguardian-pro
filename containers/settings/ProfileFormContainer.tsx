@@ -23,7 +23,7 @@ const profileToFormState = (profile?: Profile | null): ProfileFormData => {
   };
 };
 
-export default function ProfileFormContainer() {
+export default function ProfileFormContainer(): JSX.Element {
   const router = useRouter();
   const { user } = useAuth();
   const userId = user?.id;
@@ -97,7 +97,7 @@ export default function ProfileFormContainer() {
         }
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading avatar:', error);
       addNotification({ type: 'error', message: error.message || 'Fout bij uploaden van profielfoto.' });
     } finally {

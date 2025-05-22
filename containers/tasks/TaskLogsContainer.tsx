@@ -1,9 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useTaskLogs, useRecentLogs, RecentLogWithTaskTitle } from '@/hooks/useSupabaseQuery';
 import TaskLogsPresentational from '@/components/tasks/TaskLogsPresentational';
+import { useTaskLogs, useRecentLogs } from '@/hooks/useSupabaseQuery';
 import { ErrorMessage } from '@/lib/error-handler';
+import { RecentLogWithTaskTitle } from '@/types';
 
 interface TaskLogsContainerProps {
   userId?: string; 
@@ -19,7 +21,7 @@ export default function TaskLogsContainer({
   limit = 10, 
   className = '',
   title 
-}: TaskLogsContainerProps) {
+}: TaskLogsContainerProps): JSX.Element { // Added return type
   const { user: authUser } = useAuth();
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
@@ -44,29 +46,12 @@ export default function TaskLogsContainer({
   const error = taskId ? taskLogsError : recentLogsError;
   const logsToDisplay: RecentLogWithTaskTitle[] = (taskId ? taskSpecificLogs : recentUserLogs) || [];
   
-  const formatDate = (dateString: Date | string | undefined): string => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('nl-BE', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-  };
+  // memoizedFormatDate is no longer needed here as formatDate is imported directly in Presentational
+  // memoizedCalculateDuration is moved to Presentational
   
-  const calculateDuration = (startTime?: Date | string, endTime?: Date | string): string => {
-    if (!startTime || !endTime) return 'Onbekend';
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const durationMs = end.getTime() - start.getTime();
-    if (durationMs < 0) return 'Ongeldig'; // Should not happen
-    const hours = Math.floor(durationMs / (1000 * 60 * 60));
-    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-  
-  const toggleExpand = (id: string) => {
+  const memoizedToggleExpand = useCallback((id: string) => {
     setExpandedLogId(prevId => (prevId === id ? null : id));
-  };
+  }, []);
   
   return (
     <TaskLogsPresentational
@@ -75,9 +60,9 @@ export default function TaskLogsContainer({
       isError={isError}
       error={error as ErrorMessage | null}
       expandedLogId={expandedLogId}
-      onToggleExpand={toggleExpand}
-      formatDate={formatDate}
-      calculateDuration={calculateDuration}
+      onToggleExpand={memoizedToggleExpand}
+      // formatDate prop removed
+      // calculateDuration prop removed
       limit={limit}
       taskId={taskId}
       className={className}

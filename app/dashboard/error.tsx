@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useEffect } from 'react';
 

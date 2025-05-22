@@ -38,7 +38,7 @@ export interface EmailContent {
  */
 export function getEmailContent(
   template: EmailTemplate,
-  data: any // Gebruik 'any' voor nu, of een union type van alle specifieke data interfaces
+  data: unknown // Gebruik 'any' voor nu, of een union type van alle specifieke data interfaces
 ): EmailContent {
   switch (template) {
     case EmailTemplate.WELCOME:
@@ -57,7 +57,7 @@ export function getEmailContent(
 }
 
 // Type guard voor WelcomeEmailData
-function isWelcomeEmailData(data: any): data is WelcomeEmailData {
+function isWelcomeEmailData(data: unknown): data is WelcomeEmailData {
   return (
     typeof data.firstName === 'string' &&
     (data.userType === 'patient' || data.userType === 'specialist') &&

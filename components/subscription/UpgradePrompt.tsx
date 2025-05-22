@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState } from 'react'; // useEffect was unused
 import { useRouter } from 'next/navigation';
@@ -62,7 +64,7 @@ export function UpgradePrompt({
   };
   
   // Basis Button component als ds/atoms/Button niet bestaat
-  const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', icon, iconPosition, ...props }: any) => (
+  const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', icon, iconPosition, ...props }: unknown) => (
     <button 
       onClick={onClick} 
       className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
@@ -74,7 +76,7 @@ export function UpgradePrompt({
     </button>
   );
   // Basis Card component
-  const Card = ({ children, className: cardClassName = '', ...props }: any) => (
+  const Card = ({ children, className: cardClassName = '', ...props }: unknown) => (
     <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props}>
       {children}
     </div>

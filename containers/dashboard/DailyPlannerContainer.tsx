@@ -1,11 +1,20 @@
+import React from 'react';
+
 // containers/dashboard/DailyPlannerContainer.tsx
 'use client';
-import { useState, useMemo } from 'react'; // Added useMemo
+import { useState, useMemo, useEffect } from 'react'; // Added useEffect
 import { useTasks } from '@/hooks/useSupabaseQuery';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
-import DailyPlanner from '@/components/dashboard/DailyPlanner'; // Path to existing or new presentational component
-import { Task } from '@/types'; // Assuming Task type is in @/types
+import DailyPlanner from '@/components/dashboard/DailyPlanner';
+import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Voor logs
+
+// Definieer een interface voor de verrijkte taak
+export interface EnrichedTask extends Task {
+  status: 'voltooid' | 'openstaand';
+  voltooid_op?: string | Date | null;
+}
 
 // Define an EmptyState component or use inline JSX for emptyFallback
 const EmptyTasksState = () => (
@@ -20,7 +29,7 @@ const EmptyTasksState = () => (
 );
 
 
-export function DailyPlannerContainer() {
+export function DailyPlannerContainer(): JSX.Element {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState<string>('all'); // 'all', 'taak', 'opdracht'
   
@@ -35,22 +44,132 @@ export function DailyPlannerContainer() {
   };
   
   // Gefilterde taken berekenen
-  // This example filters by type. DailyPlanner might also need to filter by date (e.g., for "today").
-  // That logic would also go here.
-  const filteredTasks = useMemo(() => {
-    if (!allTasks) return [];
-    // Example: Filter for tasks due today (assuming a 'due_date' or similar field on Task)
-    // const today = new Date().toISOString().split('T')[0];
-    // const tasksForToday = allTasks.filter(task => task.due_date === today);
+  const [enrichedTasks, setEnrichedTasks] = useState<EnrichedTask[]>([]);
+  const supabase = getSupabaseBrowserClient(); // Client voor logs
 
-    // Then apply the type filter
-    return allTasks.filter(task => { // Replace allTasks with tasksForToday if date filtering is added
+  useEffect(() => {
+    const processTasks = async () => {
+      if (!allTasks || allTasks.length === 0) {
+        setEnrichedTasks([]);
+        return;
+      }
+
+      const taskIds = allTasks.map(t => t.id);
+      let completedTaskIds: Set<string> = new Set();
+      let taskLogsMap: Map<string, TaskLog> = new Map();
+
+      if (taskIds.length > 0) {
+        const { data: logsData, error: logsError } = await supabase
+          .from('task_logs')
+          .select('*')
+          .in('task_id', taskIds)
+          .eq('user_id', user?.id || ''); // Zorg voor user context
+
+        if (logsError) {
+          console.warn('Error fetching logs for DailyPlannerContainer:', logsError.message);
+        } else if (logsData) {
+          logsData.forEach(log => {
+            // Bewaar de meest recente log voor elke taak, omdat deze de meest recente feedback bevat.
+            // Als er meerdere logs zijn, willen we de log met de meest recente 'created_at' of 'eind_tijd'.
+            // Aangezien de logs al gesorteerd zijn op 'created_at' (als dat de default is),
+            // de laatste log in de array voor een bepaalde task_id is de meest recente.
+            // Echter, de query in useTasks haalt logs op met order('created_at', { ascending: false }),
+            // dus de eerste log in logsData voor een task_id is de meest recente.
+            // We moeten ervoor zorgen dat taskLogsMap de meest recente log opslaat.
+            // De huidige logica: `if (!taskLogsMap.has(log.task_id) || (log.eind_tijd && !taskLogsMap.get(log.task_id)?.eind_tijd))`
+            // is bedoeld om de log met een eind_tijd te prioriteren, maar niet per se de meest recente feedback.
+            // Laten we de meest recente log (op basis van created_at) opslaan, die ook de feedback bevat.
+            // De logsData is al gesorteerd op created_at DESC, dus de eerste log voor een task_id is de meest recente.
+            if (!taskLogsMap.has(log.task_id)) {
+              taskLogsMap.set(log.task_id, log as TaskLog);
+            }
+            // Als er een eind_tijd is, markeer de taak als voltooid
+            if (log.eind_tijd) {
+              completedTaskIds.add(log.task_id);
+            }
+          });
+        }
+      }
+      
+      const processed = allTasks.map(task => {
+        const status: 'voltooid' | 'openstaand' = completedTaskIds.has(task.id) ? 'voltooid' : 'openstaand';
+        const relevantLog = taskLogsMap.get(task.id);
+        return {
+          ...task,
+          status,
+          voltooid_op: status === 'voltooid' ? relevantLog?.eind_tijd : null,
+          // Voeg feedback toe aan de verrijkte taak
+          feedback: relevantLog ? {
+            pijn_score: relevantLog.pijn_score,
+            vermoeidheid_score: relevantLog.vermoeidheid_score,
+            energie_voor: relevantLog.energie_voor,
+            energie_na: relevantLog.energie_na,
+            stemming: relevantLog.stemming,
+            hartslag: relevantLog.hartslag,
+            notitie: relevantLog.notitie,
+          } : undefined,
+        };
+      });
+      setEnrichedTasks(processed as EnrichedTask[]);
+    };
+
+    processTasks();
+  }, [allTasks, user?.id, supabase]);
+  
+  const filteredTasks = useMemo(() => {
+    if (!enrichedTasks) return [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Begin van de dag
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // Begin van de volgende dag
+
+    return enrichedTasks.filter(task => {
+      // Een taak is relevant voor vandaag als:
+      // 1. Het een openstaande taak is (status 'openstaand').
+      // 2. Het een voltooide taak is die vandaag is voltooid.
+      // 3. Het een herhalende taak is die vandaag actief is (op basis van dagen_van_week en herhaal_patroon).
+      // 4. Het een eenmalige taak is die vandaag is aangemaakt.
+
+      const currentDayOfWeek = today.getDay().toString(); // 0 = Zondag, 1 = Maandag, etc.
+
+      let isRelevant = false;
+
+      // Conditie 1: Openstaande taken
+      if (task.status === 'openstaand') {
+        isRelevant = true;
+      }
+
+      // Conditie 2: Voltooide taken die vandaag zijn voltooid
+      if (task.status === 'voltooid' && task.voltooid_op) {
+        const voltooidOpDate = new Date(task.voltooid_op);
+        if (voltooidOpDate >= today && voltooidOpDate < tomorrow) {
+          isRelevant = true;
+        }
+      }
+
+      // Conditie 3: Herhalende taken die vandaag actief zijn
+      if (task.herhaal_patroon !== 'eenmalig' && task.dagen_van_week && task.dagen_van_week.includes(currentDayOfWeek)) {
+        // Voor herhalende taken, als ze vandaag actief zijn, zijn ze relevant
+        isRelevant = true;
+      }
+
+      // Conditie 4: Eenmalige taken die vandaag zijn aangemaakt (als ze nog niet voltooid zijn)
+      if (task.herhaal_patroon === 'eenmalig' && task.status === 'openstaand') {
+        const createdAtDate = new Date(task.created_at);
+        if (createdAtDate >= today && createdAtDate < tomorrow) {
+          isRelevant = true;
+        }
+      }
+
+      if (!isRelevant) return false;
+
+      // Filteren op type (taak/opdracht)
       if (activeFilter === 'all') return true;
-      if (activeFilter === 'taak') return task.type === 'taak';
-      if (activeFilter === 'opdracht') return task.type === 'opdracht';
-      return true; // Should not happen if activeFilter is one of the above
+      return task.type === activeFilter;
     });
-  }, [allTasks, activeFilter]);
+  }, [enrichedTasks, activeFilter]);
   
   return (
     <ConditionalRender
@@ -61,13 +180,12 @@ export function DailyPlannerContainer() {
       skeletonType="tasks" // Or a more specific "planner" skeleton
       emptyFallback={<EmptyTasksState />} // This shows if allTasks is empty
     >
-      {() => ( // Data from ConditionalRender (allTasks) is implicitly available if needed, but we use filteredTasks
+      {() => ( 
         <DailyPlanner 
-          tasks={filteredTasks} // Pass the memoized filtered tasks
+          tasks={filteredTasks} // Pass the enriched and filtered tasks
           activeFilter={activeFilter}
           onFilterChange={handleFilterChange}
-          userId={user?.id || ''} // Pass userId for potential actions within DailyPlanner
-          // isLoading prop might be useful for DailyPlanner if it has internal loading states for actions
+          userId={user?.id || ''} 
         />
       )}
     </ConditionalRender>

@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useMemo } from 'react'; // Changed useEffect to useMemo
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -58,6 +60,14 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
   // Vind de huidige metriek
   const currentMetric = metrics.find(m => m.key === activeMetric);
 
+  const recentMoods = useMemo(() => {
+    // Filter logs die een stemming hebben en sorteer op datum
+    return logs
+      .filter(log => log.stemming !== undefined && log.stemming !== null)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5); // Toon de 5 meest recente stemmingen
+  }, [logs]);
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6" aria-labelledby="health-metrics-title">
       <h2 id="health-metrics-title" className="text-lg font-semibold mb-4 text-gray-800">Gezondheidsmetrieken</h2>
@@ -74,14 +84,14 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
             <button
               key={metric.key}
               type="button"
-              onClick={() => setActiveMetric(metric.key)} // metric.key is now MetricKey
+              onClick={() => setActiveMetric(metric.key)} 
               className={`px-3 py-1 text-sm rounded-md transition-colors ${
                 activeMetric === metric.key
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
               role="radio"
-              aria-checked={activeMetric === metric.key ? 'true' : 'false'} // Ensure this is exactly "true" or "false"
+              aria-checked={activeMetric === metric.key ? 'true' : 'false'} 
               aria-label={`Bekijk ${metric.label} data`}
             >
               {metric.label}
@@ -147,6 +157,22 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
               Nog geen gegevens beschikbaar. Voer taken uit om metrieken te verzamelen.
             </p>
           </div>
+        )}
+      </div>
+
+      {/* Recente Stemmingen sectie */}
+      <div className="mt-6 border-t pt-4">
+        <h3 className="font-medium text-gray-700 mb-2">Recente Stemmingen:</h3>
+        {recentMoods.length > 0 ? (
+          <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+            {recentMoods.map((log, index) => (
+              <li key={log.id || index}>
+                {new Date(log.created_at).toLocaleDateString('nl-BE')}: {log.stemming}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-500">Geen recente stemmingen gelogd.</p>
         )}
       </div>
 

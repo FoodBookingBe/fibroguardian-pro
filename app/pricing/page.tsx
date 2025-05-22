@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Metadata } from 'next';
 // import { Container } from '@/components/ds/layout/Container'; // Placeholder
 // import { PricingTables } from '@/components/subscription/PricingTables'; // Placeholder
@@ -51,7 +53,7 @@ const FAQ = ({ className = '' }: { className?: string }) => (
 );
 
 
-export default function PricingPage() {
+export default function PricingPage(): JSX.Element {
   return (
     <DashboardLayout> {/* Of een meer generieke 'AppLayout' als die bestaat */}
       <main>

@@ -6,11 +6,13 @@ import { ErrorMessage } from '@/lib/error-handler';
 import AddPatientButtonPresentational from '@/components/specialisten/AddPatientButtonPresentational';
 import { useNotification } from '@/context/NotificationContext'; // Import useNotification
 import { useQueryClient } from '@tanstack/react-query'; // To invalidate queries
+import { useRouter } from 'next/navigation'; // Import useRouter
 
-export default function AddPatientButtonContainer() {
+export default function AddPatientButtonContainer(): JSX.Element {
   const { user } = useAuth();
   const { addNotification } = useNotification();
   const queryClient = useQueryClient(); // Get query client instance
+  const router = useRouter(); // Get router instance
 
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -49,9 +51,13 @@ export default function AddPatientButtonContainer() {
     addRelation({ patient_email: email }, {
       onSuccess: () => {
         addNotification({ type: 'success', message: 'Patiënt succesvol toegevoegd!' });
-        // Invalidate queries related to the specialist's patient list
-        queryClient.invalidateQueries({ queryKey: ['specialistPatients', user.id] });
-        queryClient.invalidateQueries({ queryKey: ['profiles'] }); // Broader invalidation if needed
+        
+        // Invalidate client-side React Query cache if used elsewhere for this data
+        queryClient.invalidateQueries({ queryKey: ['specialistPatients', user?.id] }); 
+        // queryClient.invalidateQueries({ queryKey: ['profiles'] }); // Might be too broad
+
+        // Refresh Server Component data
+        router.refresh();
 
         setTimeout(() => {
           handleCloseModal(); 

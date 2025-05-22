@@ -1,3 +1,5 @@
+import React from 'react';
+
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,7 +8,7 @@ import { Inzicht, TaskLog } from '@/types';
 import AIInsightVisualization from '@/components/ai/AIInsightVisualization';
 import Link from 'next/link';
 
-export default function InzichtenPage() {
+export default function InzichtenPage(): JSX.Element {
   const router = useRouter();
   const [insights, setInsights] = useState<Inzicht[]>([]);
   const [logs, setLogs] = useState<Record<string, TaskLog[]>>({});
@@ -42,7 +44,7 @@ export default function InzichtenPage() {
       if (fetchError) throw fetchError;
       
       setInsights(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Fout bij ophalen inzichten:', error);
       setError(error.message || 'Er is een fout opgetreden bij het ophalen van de inzichten');
     } finally {
@@ -95,7 +97,7 @@ export default function InzichtenPage() {
           ...prevLogs,
           [insightId]: data || []
         }));
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Fout bij ophalen logs voor inzicht:', error);
       }
     };

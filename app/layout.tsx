@@ -1,11 +1,26 @@
+import React from 'react';
+
 import './globals.css'; // Keep this at the top
-import { ReactQueryProvider } from '@/lib/react-query-provider';
-import { AuthProvider } from '@/components/auth/AuthProvider';
-import { NotificationProvider } from '@/context/NotificationContext';
-// import NotificationSystem from '@/components/common/NotificationSystem'; // Removed unused import
+
+import { ReactNode } from 'react';
+
+import dynamic from 'next/dynamic';
+
 import SkipLink from '@/components/common/SkipLink';
-import { ReactNode } from 'react'; // Import ReactNode
-import type { Viewport } from 'next'; // Import Viewport type
+import { NotificationProvider } from '@/context/NotificationContext';
+import { ReactQueryProvider } from '@/lib/react-query-provider';
+
+import type { Viewport } from 'next';
+
+const DynamicAuthProvider = dynamic(() => import('@/components/auth/AuthProvider').then(mod => mod.AuthProvider), {
+  ssr: false,
+});
+const DynamicServiceWorkerInitializer = dynamic(() => import('@/components/common/ServiceWorkerInitializer'), {
+  ssr: false,
+});
+const DynamicOfflineIndicator = dynamic(() => import('@/components/common/OfflineIndicator'), {
+  ssr: false,
+});
 
 // It's generally better to put PWA related tags directly in the <head>
 // The 'metadata' object is more for SEO and OpenGraph, though Next.js tries to map some.
@@ -73,14 +88,18 @@ export default function RootLayout({
 <body>
         <SkipLink />
         <ReactQueryProvider>
-          <AuthProvider>
+          <DynamicAuthProvider>
             <NotificationProvider>
+              {/* Service Worker Initializer */}
+              <DynamicServiceWorkerInitializer />
+              {/* Offline Indicator */}
+              <DynamicOfflineIndicator />
               {/* NotificationList is rendered inside NotificationProvider */}
               <main id="main-content" className="flex-grow"> {/* Ensure main can grow */}
                 {children}
               </main>
             </NotificationProvider>
-          </AuthProvider>
+          </DynamicAuthProvider>
         </ReactQueryProvider>
 </body>
 </html>);

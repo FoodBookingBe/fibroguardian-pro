@@ -1,7 +1,9 @@
+import React from 'react';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import RapportGeneratorContainer from '@/containers/rapporten/RapportGeneratorContainer';
 
-export default function NieuwRapportPage() {
+export default function NieuwRapportPage(): JSX.Element {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">

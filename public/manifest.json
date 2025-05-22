@@ -2,11 +2,24 @@
   "name": "FibroGuardian Pro",
   "short_name": "FibroGuardian",
   "description": "Een app voor fibromyalgiepatiënten om dagelijkse activiteiten en gezondheidsmetrieken te beheren.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#f5f3ff",
   "theme_color": "#7c3aed",
   "orientation": "portrait-primary",
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "nl-NL",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "fibroguardian-pro-v1",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -74,5 +87,22 @@
     }
   ],
   "related_applications": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Dagelijkse Reflectie",
+      "short_name": "Reflectie",
+      "description": "Voeg een nieuwe reflectie toe",
+      "url": "/reflecties/nieuw",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Taken",
+      "short_name": "Taken",
+      "description": "Bekijk uw taken",
+      "url": "/taken",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "offline_enabled": true
 }

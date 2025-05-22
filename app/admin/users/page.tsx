@@ -1,3 +1,5 @@
+import React from 'react';
+
 // app/admin/users/page.tsx
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 // AdminUsersList and UserManagementControls are now part of UsersPageClientView
@@ -23,7 +25,7 @@ export default async function AdminUsersPage() {
     } else {
       users = data || [];
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("Unexpected error fetching users:", e);
     fetchError = e.message || "An unexpected error occurred.";
   }

@@ -1,3 +1,5 @@
+import React from 'react';
+
 // app/admin/subscriptions/page.tsx
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 import AdminSubscriptionsList, { SubscriptionWithUserProfile } from '@/components/admin/AdminSubscriptionsList';
@@ -52,7 +54,7 @@ export default async function AdminSubscriptionsPage() {
       }) as SubscriptionWithUserProfile[]; // Cast needed as 'profiles' is added
     }
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("Error in data fetching for subscriptions page:", e);
     fetchError = e.message || "An unexpected error occurred.";
   }
