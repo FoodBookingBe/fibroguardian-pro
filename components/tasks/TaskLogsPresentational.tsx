@@ -92,7 +92,7 @@ export default function TaskLogsPresentational({
           <div key={log.id} className="overflow-hidden rounded-lg border transition-all duration-200">
             <button
               type="button"
-              onClick={() => onToggleExpand(log.id)}
+              onClick={() => onToggleExpandAction(log.id)}
               className="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset hover:bg-gray-50"
               aria-expanded={expandedLogId === log.id} // Pass boolean directly
               aria-controls={`log-details-${log.id}`}

@@ -112,7 +112,7 @@ export default function AIAssistant({
     
     try {
       setIsLoading(true);
-      const targetUserId = userId || user?.id;
+      const _targetUserId = userId || user?.id;
       
       // If context is provided, use it, otherwise fetch from API
       if (currentContext && Object.keys(currentContext).length > 0) {
@@ -122,7 +122,7 @@ export default function AIAssistant({
           completedTasksToday: 0,
           pendingTasksToday: 0,
           ...currentContext} // Type assertion fixed
-const _typedCurrentContext = currentContext as Record<string, unknown>
+const __typedCurrentContext = currentContext as Record<string, unknown>
         ; as UserContext;
       }
       
@@ -305,7 +305,7 @@ const _typedCurrentContext = currentContext as Record<string, unknown>
         
         if (context) {
           // Analyze user behavior
-          const targetUserId = userId || user?.id as string;
+          const _targetUserId = userId || user?.id as string;
           const patterns = await analyzeUserBehavior(targetUserId);
           setBehaviorPatterns(patterns);
           

@@ -220,7 +220,7 @@ export function useUpdateTaskLog(
       }
       return responseData as TaskLog;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data, variables: unknown) => {
       queryClient.invalidateQueries({ queryKey: ['taskLogs', data.task_id] }); 
       queryClient.invalidateQueries({ queryKey: ['recentLogs', data.user_id] });
       queryClient.setQueryData(['taskLog', variables.id], data); 

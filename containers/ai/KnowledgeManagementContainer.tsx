@@ -129,7 +129,7 @@ export default function KnowledgeManagementContainer({
 
   // Format date
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString).toISOString();
     return date.toLocaleDateString('nl-NL', {
       year: 'numeric',
       month: 'long',

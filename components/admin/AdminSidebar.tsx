@@ -1,11 +1,11 @@
+"use client";
+
 import React from 'react';
-
-'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, UsersIcon, CreditCardIcon, ChartBarIcon, ArrowUturnLeftIcon, ClockIcon } from '@heroicons/react/24/outline'; // Using Heroicons
 
+// Navigation items
 const navigation = [
   { name: 'Admin Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Gebruikersbeheer', href: '/admin/users', icon: UsersIcon },
@@ -15,11 +15,11 @@ const navigation = [
 ];
 
 const secondaryNavigation = [
-    { name: 'Terug naar App', href: '/dashboard', icon: ArrowUturnLeftIcon },
+  { name: 'Terug naar App', href: '/dashboard', icon: ArrowUturnLeftIcon },
 ];
 
-function classNames(...classes} // Type assertion fixed
-const _typedClasses = classes as Record<string, unknown>; string[]) {
+// Helper function to combine class names
+function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
@@ -36,7 +36,7 @@ export default function AdminSidebar(): JSX.Element {
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item: unknown) => (
+              {navigation.map((item: { name: string; href: string; icon: any; current?: boolean }) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
@@ -56,7 +56,7 @@ export default function AdminSidebar(): JSX.Element {
           </li>
           <li className="mt-auto">
              <ul role="list" className="-mx-2 space-y-1">
-                {secondaryNavigation.map((item: unknown) => (
+                {secondaryNavigation.map((item: { name: string; href: string; icon: any; current?: boolean }) => (
                     <li key={item.name}>
                     <Link
                         href={item.href}

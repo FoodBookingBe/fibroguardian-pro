@@ -7,7 +7,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import TaskList from '@/components/tasks/TaskList';
 
 export default function OpdrachtenPage(): JSX.Element {
-  const router = useRouter();
+  const _router = useRouter();
   const supabase = createClientComponentClient();
 
   // Function to handle cookie operations
@@ -24,7 +24,7 @@ export default function OpdrachtenPage(): JSX.Element {
   };
 
   // Fetch tasks data
-  const fetchTasks = async () => {
+  const _fetchTasks = async () => {
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
@@ -70,7 +70,7 @@ export default function OpdrachtenPage(): JSX.Element {
       ) : tasks.length === 0 ? (
         <p>Geen opdrachten gevonden.</p>
       ) : (
-        <TaskList tasks={tasks} />
+        <TaskList tasks={tasks} isLoading={false} isError={false} error={null} />
       )}
     </div>
   );

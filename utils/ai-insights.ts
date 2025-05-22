@@ -443,7 +443,7 @@ function generateActivityCorrelationInsights(
     return time.getHours() >= 12 && time.getHours() < 18;
   });
   
-  const _eveningTasks = taskLogs.filter(log => {
+  const __eveningTasks = taskLogs.filter(log => {
     const time = new Date(log.start_tijd);
     return time.getHours() >= 18;
   });

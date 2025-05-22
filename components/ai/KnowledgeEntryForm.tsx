@@ -41,7 +41,7 @@ export default function KnowledgeEntryForm({
   const [tagInput, setTagInput] = useState('');
   
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement><HTMLFormElement><HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement><HTMLFormElement>) => {
     e.preventDefault();
     
     if (!user?.id) {
@@ -112,7 +112,7 @@ export default function KnowledgeEntryForm({
   };
   
   // Handle adding a tag
-  const handleAddTag = () => {
+  const handleAddTag = (): void => {
     const trimmedTag = tagInput.trim().toLowerCase();
     if (trimmedTag && !tags.includes(trimmedTag)) {
       setTags([...tags, trimmedTag]);
@@ -121,12 +121,12 @@ export default function KnowledgeEntryForm({
   };
   
   // Handle removing a tag
-  const handleRemoveTag = (tagToRemove: string) => {
+  const handleRemoveTag = (tagToRemove: string): void => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
   // Handle tag input keydown
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement><HTMLInputElement><HTMLInputElement>) => {
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement><HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       handleAddTag();
@@ -198,7 +198,7 @@ export default function KnowledgeEntryForm({
             type="text"
             id="title"
             value={title}
-            onChange={(e: unknown) => setTitle(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTitle(e.target.value)}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
             placeholder="Voer een titel in"
             required
@@ -213,7 +213,7 @@ export default function KnowledgeEntryForm({
           <textarea
             id="content"
             value={content}
-            onChange={(e: unknown) => setContent(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setContent(e.target.value)}
             rows={6}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
             placeholder="Voer de inhoud in"
@@ -231,7 +231,7 @@ export default function KnowledgeEntryForm({
               type="text"
               id="tags"
               value={tagInput}
-              onChange={(e: unknown) => setTagInput(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               className="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
               placeholder="Voeg tags toe (druk op Enter)"
