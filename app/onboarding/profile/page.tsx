@@ -15,19 +15,19 @@ export default function ProfileSetupPage(): JSX.Element {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  
+
   const isSpecialist = profile?.type === 'specialist';
-  
+
   const handleSave = async () => {
     if (!user) return;
-    
+
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
-    
+
     try {
       const supabase = getSupabaseBrowserClient();
-      
+
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -37,11 +37,11 @@ export default function ProfileSetupPage(): JSX.Element {
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
-      
+
       if (error) {
         throw error;
       }
-      
+
       setSaveSuccess(true);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -50,22 +50,22 @@ export default function ProfileSetupPage(): JSX.Element {
       setIsSaving(false);
     }
   };
-  
+
   return (
     <div className="max-w-3xl mx-auto">
       <ProgressIndicator />
-      
+
       <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
         <h1 className="text-3xl font-bold text-center text-purple-800 mb-6">
           Uw profiel instellen
         </h1>
-        
+
         <p className="text-lg text-gray-700 mb-6">
-          {isSpecialist 
+          {isSpecialist
             ? 'Vul uw profiel in zodat patiënten u kunnen vinden en contact met u kunnen opnemen. Een volledig profiel helpt bij het opbouwen van vertrouwen.'
             : 'Vul uw profiel in zodat we de app kunnen personaliseren. Deze informatie helpt ons om u beter te ondersteunen.'}
         </p>
-        
+
         <div className="space-y-6">
           <div>
             <label htmlFor="voornaam" className="block text-sm font-medium text-gray-700 mb-1">
@@ -75,12 +75,12 @@ export default function ProfileSetupPage(): JSX.Element {
               type="text"
               id="voornaam"
               value={voornaam}
-              onChange={(e: unknown) => setVoornaam(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVoornaam(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw voornaam"
             />
           </div>
-          
+
           <div>
             <label htmlFor="achternaam" className="block text-sm font-medium text-gray-700 mb-1">
               Achternaam
@@ -89,12 +89,12 @@ export default function ProfileSetupPage(): JSX.Element {
               type="text"
               id="achternaam"
               value={achternaam}
-              onChange={(e: unknown) => setAchternaam(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAchternaam(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw achternaam"
             />
           </div>
-          
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               E-mailadres
@@ -103,7 +103,7 @@ export default function ProfileSetupPage(): JSX.Element {
               type="email"
               id="email"
               value={email}
-              onChange={(e: unknown) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw e-mailadres"
             />
@@ -111,7 +111,7 @@ export default function ProfileSetupPage(): JSX.Element {
               Dit e-mailadres wordt gebruikt voor communicatie en notificaties.
             </p>
           </div>
-          
+
           <div className="flex justify-center">
             <button
               onClick={handleSave}
@@ -124,13 +124,13 @@ export default function ProfileSetupPage(): JSX.Element {
               {isSaving ? 'Opslaan...' : 'Profiel opslaan'}
             </button>
           </div>
-          
+
           {saveError && (
             <div className="p-3 bg-red-50 text-red-700 rounded-md">
               {saveError}
             </div>
           )}
-          
+
           {saveSuccess && (
             <div className="p-3 bg-green-50 text-green-700 rounded-md">
               Uw profiel is succesvol opgeslagen!
@@ -138,7 +138,7 @@ export default function ProfileSetupPage(): JSX.Element {
           )}
         </div>
       </div>
-      
+
       <StepNavigation />
     </div>
   );

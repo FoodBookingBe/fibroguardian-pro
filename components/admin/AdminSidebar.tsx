@@ -1,9 +1,8 @@
 "use client";
 
-import React from 'react';
+import { ArrowUturnLeftIcon, ChartBarIcon, ClockIcon, CreditCardIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline'; // Using Heroicons
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, UsersIcon, CreditCardIcon, ChartBarIcon, ArrowUturnLeftIcon, ClockIcon } from '@heroicons/react/24/outline'; // Using Heroicons
 
 // Navigation items
 const navigation = [
@@ -55,23 +54,23 @@ export default function AdminSidebar(): JSX.Element {
             </ul>
           </li>
           <li className="mt-auto">
-             <ul role="list" className="-mx-2 space-y-1">
-                {secondaryNavigation.map((item: { name: string; href: string; icon: any; current?: boolean }) => (
-                    <li key={item.name}>
-                    <Link
-                        href={item.href}
-                        className={classNames(
-                        pathname === item.href
-                            ? 'bg-purple-800 text-white'
-                            : 'text-purple-100 hover:text-white hover:bg-purple-800',
-                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                        )}
-                    >
-                        <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                        {item.name}
-                    </Link>
-                    </li>
-                ))}
+            <ul role="list" className="-mx-2 space-y-1">
+              {secondaryNavigation.map((item: { name: string; href: string; icon: any; current?: boolean }) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className={classNames(
+                      pathname === item.href
+                        ? 'bg-purple-800 text-white'
+                        : 'text-purple-100 hover:text-white hover:bg-purple-800',
+                      'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                    )}
+                  >
+                    <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </li>
         </ul>

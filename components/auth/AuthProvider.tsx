@@ -1,20 +1,18 @@
-import React from 'react';
-
 'use client';
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { useRouter, usePathname } from 'next/navigation';
-import { Profile } from '@/types';
-import { logger } from '@/lib/monitoring/logger';
-import { ErrorMessage } from '@/hooks/useSupabaseQuery'; // Importeer ErrorMessage
+
 import { useProfile } from '@/hooks/useProfile'; // Importeer useProfile
+import { logger } from '@/lib/monitoring/logger';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Profile } from '@/types';
+import { Session, User } from '@supabase/supabase-js';
+import { usePathname, useRouter } from 'next/navigation';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 // Schema voor auth events voor diagnostiek
-type AuthEventType = 
+type AuthEventType =
   | 'AUTH_INITIALIZED'
   | 'SESSION_REQUESTED'
-  | 'SESSION_LOADED' 
+  | 'SESSION_LOADED'
   | 'SESSION_ERROR'
   | 'SESSION_REFRESHED'
   | 'SESSION_EXPIRED'
@@ -57,11 +55,11 @@ const AuthContext = createContext<AuthContextType>({
   loadingProfile: false,
   authEvents: [],
   lastError: null,
-  refreshSession: async () => {},
+  refreshSession: async () => { },
   lastRefreshAttempt: null,
   lastSuccessfulRefresh: null,
 });
- 
+
 export const _useAuth = () => {
   return useContext(AuthContext);
 };
@@ -92,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Functie om auth events te loggen voor diagnostiek
   const logAuthEvent = useCallback((eventType: AuthEventType, metadata?: Record<string, any>, error?: Error | null) => {
     if (!AUTH_DIAGNOSTICS_ENABLED) return;
-    
+
     const newEvent: AuthEvent = {
       type: eventType,
       timestamp: Date.now(),
@@ -101,23 +99,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       error: error ? (error.message || 'Unknown error') : null,
       metadata
     };
-    
+
     setAuthEvents(prev => {
       const updated = [newEvent, ...prev].slice(0, MAX_AUTH_EVENTS);
-      
+
       try {
         localStorage.setItem('fibroguardian_auth_events', JSON.stringify(updated));
       } catch (e) {
         console.error('Failed to save auth events to localStorage', e);
       }
-      
+
       return updated;
     });
-    
+
     if (process.env.NODE_ENV === 'development') {
-      logger.info(`[Auth Event] ${eventType}`, { 
-        ...newEvent, 
-        timestamp: new Date(newEvent.timestamp).toISOString() 
+      logger.info(`[Auth Event] ${eventType}`, {
+        ...newEvent,
+        timestamp: new Date(newEvent.timestamp).toISOString()
       });
     }
   }, [session?.user?.id, user?.id]); // Gebruik session?.user?.id in deps
@@ -127,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLastRefreshAttempt(Date.now());
       logAuthEvent('SESSION_REQUESTED', { manual: true });
-      
+
       const supabase = supabaseRef.current;
       if (!supabase) {
         console.error("[AuthProvider] Supabase client not initialized in refreshSession.");
@@ -137,19 +135,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const start = performance.now();
       const { data, error } = await supabase.auth.refreshSession();
       const duration = performance.now() - start;
-      
+
       if (error) {
         setLastError(error);
-        logAuthEvent('TOKEN_REFRESH_ERROR', { 
+        logAuthEvent('TOKEN_REFRESH_ERROR', {
           duration_ms: duration,
           error_code: (error as any).code || 'unknown' // Cast error to any to access code
         }, error);
         console.error("[AuthProvider] Session refresh error:", error.message, error);
-        
+
         try {
           const cookies = document.cookie.split(';').map(c => c.trim());
           const sbCookies = cookies.filter(c => c.startsWith('sb-'));
-          logAuthEvent('AUTH_ERROR', { 
+          logAuthEvent('AUTH_ERROR', {
             supabase_cookies_present: sbCookies.length > 0,
             cookies_count: cookies.length
           }, error);
@@ -164,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(data.session);
         setUser(data.session.user);
         setLastSuccessfulRefresh(Date.now());
-        logAuthEvent('TOKEN_REFRESHED', { 
+        logAuthEvent('TOKEN_REFRESHED', {
           duration_ms: duration,
           expires_at: data.session.expires_at,
           access_token_length: data.session.access_token?.length || 0,
@@ -184,12 +182,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logAuthEvent]);
 
   const handleAuthStateChange = useCallback(async (event: string, sessionState: Session | null) => {
-    console.log(`[AuthProvider] Auth state change: ${event}`, sessionState ? { 
+    console.log(`[AuthProvider] Auth state change: ${event}`, sessionState ? {
       user_id: sessionState.user.id,
-      expires_at: sessionState.expires_at, 
-      expires_in: sessionState.expires_at ? new Date(sessionState.expires_at * 1000).getTime() - Date.now() : null 
+      expires_at: sessionState.expires_at,
+      expires_in: sessionState.expires_at ? new Date(sessionState.expires_at * 1000).getTime() - Date.now() : null
     } : 'No session');
-    
+
     let eventType: AuthEventType;
     switch (event) {
       case 'SIGNED_IN':
@@ -208,8 +206,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       default:
         eventType = 'SESSION_LOADED'; // Default for other events like INITIAL_SESSION, PASSWORD_RECOVERY etc.
     }
-    
-    logAuthEvent(eventType, { 
+
+    logAuthEvent(eventType, {
       event_name: event,
       session_expires_at: sessionState?.expires_at,
       access_token_length: sessionState?.access_token?.length || 0,
@@ -220,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const currentUser = sessionState?.user ?? null;
     setUser(currentUser);
     setLoadingAuth(false);
-    
+
     if (sessionState?.expires_at) {
       const expiresAt = new Date(sessionState.expires_at * 1000);
       const now = new Date();
@@ -229,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         now: now.toISOString(),
         expires_at: expiresAt.toISOString()
       });
-      
+
       if (minutesUntilExpiry < 10) {
         console.warn(`[AuthProvider] Session expiring soon: ${minutesUntilExpiry.toFixed(2)} minutes remaining`);
       }
@@ -239,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setLoadingAuth(true);
     logAuthEvent('AUTH_INITIALIZED');
-    
+
     const supabase = supabaseRef.current;
     if (!supabase) {
       // This might happen if the effect runs before the client initialization effect.
@@ -251,20 +249,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const initStart = performance.now();
-    
-    supabase.auth.getSession().then(({ data: { session: initialSession } , error: sessionError }) => {
+
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error: sessionError }) => {
       const duration = performance.now() - initStart;
-      
+
       if (sessionError) {
         console.error("[AuthProvider] Error getting initial session:", sessionError.message);
         setLastError(sessionError as Error); // Cast error to Error
-        logAuthEvent('SESSION_ERROR', { 
+        logAuthEvent('SESSION_ERROR', {
           duration_ms: duration,
           error_code: (sessionError as any).code || 'unknown'
         }, sessionError as Error); // Cast error to Error
         handleAuthStateChange('INITIAL_SESSION_ERROR', null);
       } else if (initialSession) {
-        logAuthEvent('SESSION_LOADED', { 
+        logAuthEvent('SESSION_LOADED', {
           duration_ms: duration,
           expires_at: initialSession.expires_at,
           access_token_length: initialSession.access_token?.length || 0,
@@ -279,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("[AuthProvider] Unexpected error in getSession():", error);
       const err = error instanceof Error ? error : new Error(String(error));
       setLastError(err);
-      logAuthEvent('AUTH_ERROR', { 
+      logAuthEvent('AUTH_ERROR', {
         context: 'getSession',
         duration_ms: performance.now() - initStart
       }, err);
@@ -290,7 +288,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log(`[AuthProvider] Auth state change event: ${event}`);
       handleAuthStateChange(event, sessionState); // Pass sessionState
     });
-    
+
     return () => {
       subscription?.unsubscribe();
     };
@@ -298,13 +296,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return;
-    
+
     const healthCheckInterval = setInterval(() => {
       if (!session) return;
-      
+
       const nowInSeconds = Math.floor(Date.now() / 1000);
-      const tokenExpiryBuffer = 10 * 60; 
-      
+      const tokenExpiryBuffer = 10 * 60;
+
       if (session.expires_at && (session.expires_at - nowInSeconds < tokenExpiryBuffer)) {
         console.log(`[AuthProvider] Token expiring soon, refreshing. Expires in ${session.expires_at - nowInSeconds}s`);
         refreshSession();
@@ -314,8 +312,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           check_time: new Date().toISOString()
         });
       }
-    }, 5 * 60 * 1000); 
-    
+    }, 5 * 60 * 1000);
+
     return () => {
       clearInterval(healthCheckInterval);
     };
@@ -337,7 +335,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, null);
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [logAuthEvent]);
@@ -349,7 +347,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error: profileError,
   } = useProfile(user?.id, {
     enabled: !!user,
-      queryKey: ["profile", userId],
+    queryKey: ["profile", user?.id],
   });
 
   useEffect(() => {
@@ -360,11 +358,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('[AuthProvider] Profile loaded', { user_id: user.id, profile_type: profile.type });
     }
   }, [profile, profileError, user, logAuthEvent]);
- 
+
   useEffect(() => {
     if (loadingAuth) return;
 
-    const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password']; 
+    const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
     const isAuthRoute = authRoutes.some(route => pathname?.startsWith(route));
     const commonProtectedRoutes = [
       '/dashboard', '/taken', '/reflecties', '/rapporten', '/instellingen', '/inzichten', '/auth-test', '/pricing', '/abonnement'
@@ -372,7 +370,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const patientOnlyRoutes = ['/mijn-specialisten', '/overzicht'];
     const specialistOnlyRoutes = ['/specialisten/patienten'];
 
-    const isProtectedRoute = 
+    const isProtectedRoute =
       commonProtectedRoutes.some(prefix => pathname?.startsWith(prefix)) ||
       patientOnlyRoutes.some(prefix => pathname?.startsWith(prefix)) ||
       specialistOnlyRoutes.some(prefix => pathname?.startsWith(prefix));
@@ -400,11 +398,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const overallLoading = loadingAuth || (!!user && loadingProfile);
 
   const authContextValue = {
-    user, 
-    session, 
-    profile: profile ?? null, 
-    loading: overallLoading, 
-    loadingAuth, 
+    user,
+    session,
+    profile: profile ?? null,
+    loading: overallLoading,
+    loadingAuth,
     loadingProfile,
     authEvents,
     lastError,
@@ -427,13 +425,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           <div className="text-xs max-h-20 overflow-y-auto">
             {authEvents.slice(0, 5).map((event, i) => (
               <div key={i} className="opacity-90">
-                [{new Date(event.timestamp).toLocaleTimeString()}] {event.type} 
+                [{new Date(event.timestamp).toLocaleTimeString()}] {event.type}
                 {event.error ? ` (${event.error})` : ''}
               </div>
             ))}
           </div>
-          <button 
-            onClick={() => refreshSession()} 
+          <button
+            onClick={() => refreshSession()}
             className="mt-1 text-xs bg-blue-500 hover:bg-blue-600 text-white py-0.5 px-1 rounded">
             Refresh Session
           </button>

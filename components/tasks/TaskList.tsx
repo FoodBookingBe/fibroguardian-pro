@@ -1,6 +1,5 @@
-import React from 'react';
-
 'use client';
+
 
 import Link from 'next/link';
 
@@ -36,7 +35,7 @@ export default function TaskList({ tasks, isLoading, isError, error }: TaskListP
             <h2 className="text-xl font-semibold text-purple-700 mb-2">{task.titel}</h2>
             <p className="text-sm text-gray-500 mb-3">Type: <span className="font-medium text-gray-700">{task.type}</span></p>
             {task.beschrijving && <p className="text-gray-600 text-sm mb-3 line-clamp-2">{task.beschrijving}</p>}
-            
+
             <div className="text-sm text-gray-700 space-y-1">
               {task.duur && <p>Duur: <span className="font-medium">{task.duur} minuten</span></p>}
               {task.hartslag_doel && <p>Hartslag doel: <span className="font-medium">{task.hartslag_doel} bpm</span></p>}

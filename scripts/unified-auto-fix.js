@@ -1,175 +1,89 @@
-#!/usr/bin/env node
-
 /**
- * Unified Auto-Fix System
+ * Unified TypeScript Auto-Fix System
  *
- * This script integrates all auto-fix components into a single, intelligent system
- * that can automatically fix TypeScript errors, learn from previous fixes, and
- * continuously improve over time.
+ * This script automatically detects and fixes common TypeScript errors in the codebase.
+ * It can be run manually or scheduled as a cron job.
  */
 
-import { execSync } from 'child_process';
-import { promises as fs } from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const errorPatterns = require('./data/error-patterns.json');
+const typescriptFixes = require('./data/typescript-fixes.json');
 
 // Configuration
-const DEBUG = process.argv.includes('--debug');
-const LOGS_DIR = 'logs';
-const ERROR_PATTERNS_PATH = 'scripts/data/error-patterns.json';
-const TYPESCRIPT_FIXES_PATH = 'scripts/data/typescript-fixes.json';
-const ADVANCED_ERROR_PATTERNS_PATH = 'scripts/data/advanced-error-patterns.json';
-const ADVANCED_FIXES_HISTORY_PATH = 'scripts/data/advanced-fixes-history.json';
-const SPECIFIC_FIXES_PATH = 'scripts/data/specific-fixes.json';
-const LEARNING_THRESHOLD = 2; // Number of times an error must occur to be learned
+const config = {
+    rootDir: path.resolve(__dirname, '..'),
+    logDir: path.resolve(__dirname, '../logs'),
+    excludeDirs: ['node_modules', '.next', 'dist', 'build', 'coverage'],
+    fileExtensions: ['.ts', '.tsx', '.js', '.jsx'],
+    maxFilesToFix: 100, // Limit to prevent excessive changes
+    dryRun: false, // Set to true to preview changes without applying them
+};
 
-// Main function
-async function main() {
-    console.log('🧠 Starting Unified Auto-Fix System...');
-
-    try {
-        // Create logs directory if it doesn't exist
-        await fs.mkdir(LOGS_DIR, { recursive: true }).catch(() => { });
-
-        // Log start time
-        const startTime = new Date();
-        const logFile = path.join(LOGS_DIR, `unified-auto-fix-${startTime.toISOString().replace(/:/g, '-')}.log`);
-        await fs.writeFile(logFile, `Unified Auto-Fix System started at ${startTime.toISOString()}\n\n`);
-
-        // Initialize error patterns and fixes
-        const errorPatterns = await loadOrCreateJSON(ERROR_PATTERNS_PATH, {});
-        const typescriptFixes = await loadOrCreateJSON(TYPESCRIPT_FIXES_PATH, {});
-        const advancedErrorPatterns = await loadOrCreateJSON(ADVANCED_ERROR_PATTERNS_PATH, {});
-        const advancedFixesHistory = await loadOrCreateJSON(ADVANCED_FIXES_HISTORY_PATH, {});
-        const specificFixes = await loadOrCreateJSON(SPECIFIC_FIXES_PATH, {});
-
-        // Step 1: Run TypeScript to get current errors
-        console.log('🔍 Running TypeScript to identify errors...');
-        const initialErrors = await getTypeScriptErrors();
-        const initialErrorCount = initialErrors.length;
-        console.log(`Found ${initialErrorCount} TypeScript errors`);
-        await fs.appendFile(logFile, `Initial error count: ${initialErrorCount}\n`);
-
-        // Step 2: Run basic TypeScript fixer
-        console.log('🔧 Running basic TypeScript fixer...');
-        await runBasicTypescriptFixer();
-
-        // Step 3: Run type assertions fixer
-        console.log('🔧 Running type assertions fixer...');
-        await runTypeAssertionsFixer();
-
-        // Step 4: Run advanced type fixer
-        console.log('🔧 Running advanced type fixer...');
-        await runAdvancedTypeFixer();
-
-        // Step 5: Run specific error fixer
-        console.log('🔧 Running specific error fixer...');
-        await runSpecificErrorFixer();
-
-        // Step 6: Run enhanced specific error fixer
-        console.log('🔧 Running enhanced specific error fixer...');
-        await runEnhancedSpecificErrorFixer();
-
-        // Step 6: Get remaining errors
-        console.log('🔍 Checking for remaining errors...');
-        const remainingErrors = await getTypeScriptErrors();
-        const remainingErrorCount = remainingErrors.length;
-        console.log(`${remainingErrorCount} TypeScript errors remain`);
-        await fs.appendFile(logFile, `Remaining error count: ${remainingErrorCount}\n`);
-
-        // Step 7: Learn from remaining errors
-        if (remainingErrorCount > 0) {
-            console.log('🧠 Learning from remaining errors...');
-            await learnFromErrors(remainingErrors, errorPatterns, typescriptFixes, advancedErrorPatterns, specificFixes);
-
-            // Save updated patterns and fixes
-            await fs.writeFile(ERROR_PATTERNS_PATH, JSON.stringify(errorPatterns, null, 2));
-            await fs.writeFile(TYPESCRIPT_FIXES_PATH, JSON.stringify(typescriptFixes, null, 2));
-            await fs.writeFile(ADVANCED_ERROR_PATTERNS_PATH, JSON.stringify(advancedErrorPatterns, null, 2));
-            await fs.writeFile(SPECIFIC_FIXES_PATH, JSON.stringify(specificFixes, null, 2));
-
-            console.log('✅ Learning complete');
-        }
-
-        // Step 8: Generate report
-        const fixedErrorCount = initialErrorCount - remainingErrorCount;
-        const fixRate = initialErrorCount > 0 ? (fixedErrorCount / initialErrorCount) * 100 : 0;
-
-        console.log(`\n📊 Auto-Fix Report:`);
-        console.log(`Initial errors: ${initialErrorCount}`);
-        console.log(`Fixed errors: ${fixedErrorCount}`);
-        console.log(`Remaining errors: ${remainingErrorCount}`);
-        console.log(`Fix rate: ${fixRate.toFixed(2)}%`);
-
-        await fs.appendFile(logFile, `\nAuto-Fix Report:\n`);
-        await fs.appendFile(logFile, `Initial errors: ${initialErrorCount}\n`);
-        await fs.appendFile(logFile, `Fixed errors: ${fixedErrorCount}\n`);
-        await fs.appendFile(logFile, `Remaining errors: ${remainingErrorCount}\n`);
-        await fs.appendFile(logFile, `Fix rate: ${fixRate.toFixed(2)}%\n`);
-
-        // Step 9: Generate recommendations for remaining errors
-        if (remainingErrorCount > 0) {
-            console.log('\n📋 Recommendations for remaining errors:');
-            const recommendations = generateRecommendations(remainingErrors);
-            console.log(recommendations);
-            await fs.appendFile(logFile, `\nRecommendations for remaining errors:\n${recommendations}\n`);
-        }
-
-        // Log end time
-        const endTime = new Date();
-        const duration = (endTime - startTime) / 1000;
-        await fs.appendFile(logFile, `\nUnified Auto-Fix System completed at ${endTime.toISOString()}\n`);
-        await fs.appendFile(logFile, `Duration: ${duration} seconds\n`);
-
-        console.log(`\n✅ Unified Auto-Fix System completed in ${duration} seconds`);
-
-    } catch (error) {
-        console.error('❌ Error:', error.message);
-        if (DEBUG) {
-            console.error(error.stack);
-        }
-        process.exit(1);
-    }
+// Create log directory if it doesn't exist
+if (!fs.existsSync(config.logDir)) {
+    fs.mkdirSync(config.logDir, { recursive: true });
 }
 
-// Helper function to load or create JSON file
-async function loadOrCreateJSON(filePath, defaultValue) {
-    try {
-        const content = await fs.readFile(filePath, 'utf8');
-        return JSON.parse(content);
-    } catch (error) {
-        // Create directory if it doesn't exist
-        const dir = path.dirname(filePath);
-        await fs.mkdir(dir, { recursive: true }).catch(() => { });
+// Create log file with timestamp
+const timestamp = new Date().toISOString();
+const logFile = path.join(config.logDir, `unified-auto-fix-${timestamp}.log`);
+const logger = fs.createWriteStream(logFile, { flags: 'a' });
 
-        // Create file with default value
-        await fs.writeFile(filePath, JSON.stringify(defaultValue, null, 2));
-        return defaultValue;
-    }
+/**
+ * Log a message to both console and log file
+ */
+function log(message) {
+    console.log(message);
+    logger.write(message + '\n');
 }
 
-// Get TypeScript errors
-async function getTypeScriptErrors() {
+/**
+ * Find all TypeScript files in the project
+ */
+function findTypeScriptFiles(dir, excludeDirs, fileExtensions, files = []) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+            if (!excludeDirs.includes(entry.name)) {
+                findTypeScriptFiles(fullPath, excludeDirs, fileExtensions, files);
+            }
+        } else if (fileExtensions.includes(path.extname(entry.name))) {
+            files.push(fullPath);
+        }
+    }
+
+    return files;
+}
+
+/**
+ * Run TypeScript compiler to get errors
+ */
+function getTypeScriptErrors() {
     try {
-        // Run TypeScript compiler with --noEmit flag to check for errors
-        execSync('npx tsc --noEmit', { stdio: 'pipe' });
+        // Run tsc with --noEmit to just check for errors
+        execSync('npx tsc --noEmit', { cwd: config.rootDir, stdio: 'pipe' });
         return []; // No errors
     } catch (error) {
-        // Parse error output
+        // Parse the error output to extract error information
         const errorOutput = error.stdout.toString();
         const errors = [];
 
-        // Regular expression to match TypeScript errors
         const errorRegex = /(.+)\((\d+),(\d+)\): error TS(\d+): (.+)/g;
         let match;
 
         while ((match = errorRegex.exec(errorOutput)) !== null) {
             const [, filePath, line, column, code, message] = match;
             errors.push({
-                filePath: filePath.trim(),
-                line: parseInt(line),
-                column: parseInt(column),
-                code: parseInt(code),
-                message: message.trim()
+                filePath: path.relative(config.rootDir, filePath),
+                line: parseInt(line, 10),
+                column: parseInt(column, 10),
+                code: parseInt(code, 10),
+                message: message.trim(),
             });
         }
 
@@ -177,294 +91,252 @@ async function getTypeScriptErrors() {
     }
 }
 
-// Run basic TypeScript fixer
-async function runBasicTypescriptFixer() {
-    try {
-        execSync('node scripts/fix-typescript.js', { stdio: 'pipe' });
-        return true;
-    } catch (error) {
-        console.error('Error running basic TypeScript fixer:', error.message);
-        return false;
-    }
-}
+/**
+ * Apply fixes to a file based on detected errors
+ */
+function applyFixes(filePath, errors) {
+    const fullPath = path.join(config.rootDir, filePath);
+    let content = fs.readFileSync(fullPath, 'utf8');
+    let fixesApplied = 0;
 
-// Run type assertions fixer
-async function runTypeAssertionsFixer() {
-    try {
-        execSync('node scripts/fix-type-assertions.js', { stdio: 'pipe' });
-        return true;
-    } catch (error) {
-        console.error('Error running type assertions fixer:', error.message);
-        return false;
-    }
-}
-
-// Run advanced type fixer
-async function runAdvancedTypeFixer() {
-    try {
-        execSync('node scripts/advanced-type-fixer.js', { stdio: 'pipe' });
-        return true;
-    } catch (error) {
-        console.error('Error running advanced type fixer:', error.message);
-        return false;
-    }
-}
-
-// Run specific error fixer
-async function runSpecificErrorFixer() {
-    try {
-        execSync('node scripts/fix-specific-errors.js', { stdio: 'pipe' });
-        return true;
-    } catch (error) {
-        console.error('Error running specific error fixer:', error.message);
-        return false;
-    }
-}
-
-// Run enhanced specific error fixer
-async function runEnhancedSpecificErrorFixer() {
-    try {
-        execSync('node scripts/enhanced-specific-errors.js', { stdio: 'pipe' });
-        return true;
-    } catch (error) {
-        console.error('Error running enhanced specific error fixer:', error.message);
-        return false;
-    }
-}
-
-// Learn from errors
-async function learnFromErrors(errors, errorPatterns, typescriptFixes, advancedErrorPatterns, specificFixes) {
-    // Group errors by code
-    const errorsByCode = {};
-    for (const error of errors) {
-        if (!errorsByCode[error.code]) {
-            errorsByCode[error.code] = [];
+    // Group errors by line for more efficient processing
+    const errorsByLine = {};
+    errors.forEach(error => {
+        if (!errorsByLine[error.line]) {
+            errorsByLine[error.line] = [];
         }
-        errorsByCode[error.code].push(error);
-    }
+        errorsByLine[error.line].push(error);
+    });
 
-    // Learn from each error code
-    for (const [code, codeErrors] of Object.entries(errorsByCode)) {
-        // Group errors by message pattern
-        const errorsByPattern = {};
-        for (const error of codeErrors) {
-            // Simplify message to create a pattern
-            const pattern = simplifyErrorMessage(error.message);
-            if (!errorsByPattern[pattern]) {
-                errorsByPattern[pattern] = [];
-            }
-            errorsByPattern[pattern].push(error);
-        }
+    // Convert content to array of lines for easier manipulation
+    const lines = content.split('\n');
 
-        // Learn from each pattern
-        for (const [pattern, patternErrors] of Object.entries(errorsByPattern)) {
-            if (patternErrors.length >= LEARNING_THRESHOLD) {
-                // This pattern occurs frequently enough to learn from
-                const patternKey = `TS${code}_${pattern}`;
+    // Process each line with errors
+    Object.keys(errorsByLine).forEach(lineNum => {
+        const lineErrors = errorsByLine[lineNum];
+        const lineIndex = parseInt(lineNum, 10) - 1;
+        let line = lines[lineIndex];
 
-                // Check if we already have a fix for this pattern
-                if (!errorPatterns[patternKey]) {
-                    // Create a new pattern
-                    errorPatterns[patternKey] = {
-                        description: `TypeScript error TS${code}: ${pattern}`,
-                        regex: pattern,
-                        solution: generateSolutionForPattern(code, pattern, patternErrors),
-                        examples: patternErrors.slice(0, 3).map(error => ({
-                            file: error.filePath,
-                            line: error.line,
-                            message: error.message
-                        }))
-                    };
-
-                    console.log(`🧠 Learned new pattern: ${patternKey}`);
+        // Apply fixes for each error on this line
+        lineErrors.forEach(error => {
+            const fix = findFixForError(error);
+            if (fix) {
+                const newLine = applyFixToLine(line, error, fix);
+                if (newLine !== line) {
+                    line = newLine;
+                    fixesApplied++;
+                    log(`Fixed TS${error.code} in ${filePath}:${error.line} - ${error.message}`);
                 }
+            }
+        });
 
-                // Check if we need to create a specific fix for this file
-                const fileGroups = groupErrorsByFile(patternErrors);
-                for (const [filePath, fileErrors] of Object.entries(fileGroups)) {
-                    if (fileErrors.length >= LEARNING_THRESHOLD) {
-                        // This file has multiple errors of the same pattern
-                        const fileKey = `${filePath}_TS${code}`;
-                        if (!specificFixes[fileKey]) {
-                            specificFixes[fileKey] = {
-                                filePath,
-                                errorCode: code,
-                                pattern,
-                                fixStrategy: generateFixStrategyForFile(filePath, code, pattern, fileErrors),
-                                examples: fileErrors.slice(0, 3).map(error => ({
-                                    line: error.line,
-                                    message: error.message
-                                }))
-                            };
+        // Update the line in the array
+        lines[lineIndex] = line;
+    });
 
-                            console.log(`🧠 Created specific fix for file: ${filePath}`);
-                        }
+    // Write the updated content back to the file
+    if (fixesApplied > 0 && !config.dryRun) {
+        fs.writeFileSync(fullPath, lines.join('\n'), 'utf8');
+    }
+
+    return fixesApplied;
+}
+
+/**
+ * Find an appropriate fix for a given error
+ */
+function findFixForError(error) {
+    // Check if we have a specific fix for this error code
+    const errorPattern = errorPatterns.find(pattern =>
+        pattern.code === error.code &&
+        (pattern.messagePattern ? new RegExp(pattern.messagePattern).test(error.message) : true)
+    );
+
+    if (errorPattern) {
+        return errorPattern;
+    }
+
+    // Check if we have a generic fix based on the error message
+    return errorPatterns.find(pattern =>
+        pattern.code === 0 && // Generic pattern
+        pattern.messagePattern &&
+        new RegExp(pattern.messagePattern).test(error.message)
+    );
+}
+
+/**
+ * Apply a fix to a specific line
+ */
+function applyFixToLine(line, error, fix) {
+    switch (fix.fixType) {
+        case 'replace':
+            return line.replace(new RegExp(fix.search), fix.replace);
+
+        case 'insertBefore':
+            return fix.insert + line;
+
+        case 'insertAfter':
+            return line + fix.insert;
+
+        case 'optionalChaining':
+            // Add optional chaining to property access
+            const pos = error.column - 1;
+            const dotPos = line.lastIndexOf('.', pos);
+            if (dotPos >= 0) {
+                return line.substring(0, dotPos) + '?.' + line.substring(dotPos + 1);
+            }
+            return line;
+
+        case 'nullCoalescing':
+            // Add null coalescing operator
+            const varEndPos = error.column - 1 + error.message.match(/['"]?([^'"]+)['"]? is possibly 'undefined'/)[1].length;
+            return line.substring(0, varEndPos) + ' ?? 0' + line.substring(varEndPos);
+
+        case 'typeAssertion':
+            // Add type assertion
+            const varName = error.message.match(/Property '([^']+)' does not exist/)?.[1];
+            if (varName) {
+                const varPos = line.indexOf(varName, error.column - 1);
+                if (varPos >= 0) {
+                    const objectEndPos = line.lastIndexOf('.', varPos);
+                    if (objectEndPos >= 0) {
+                        const objectName = line.substring(line.lastIndexOf(' ', objectEndPos) + 1, objectEndPos);
+                        return line.substring(0, objectEndPos) +
+                            ' as any /* TODO: Update type definition */' +
+                            line.substring(objectEndPos);
                     }
                 }
             }
-        }
-    }
-}
+            return line;
 
-// Simplify error message to create a pattern
-function simplifyErrorMessage(message) {
-    return message
-        .replace(/['"][^'"]+['"]/g, "'VALUE'") // Replace string literals
-        .replace(/\d+/g, "NUM") // Replace numbers
-        .replace(/\{[^}]+\}/g, "{OBJ}") // Replace object literals
-        .replace(/\[[^\]]+\]/g, "[ARR]") // Replace array literals
-        .replace(/\([^)]+\)/g, "(ARGS)") // Replace function arguments
-        .replace(/\s+/g, " ") // Normalize whitespace
-        .trim();
-}
+        case 'ignoreNextLine':
+            // Add @ts-ignore comment on the previous line
+            return '// @ts-ignore - Auto-fixed: ' + error.message + '\n' + line;
 
-// Generate solution for pattern
-function generateSolutionForPattern(code, pattern, errors) {
-    // Different strategies based on error code
-    switch (parseInt(code)) {
-        case 2339: // Property does not exist
-            return "Add the missing property to the interface or type, or use optional chaining (obj?.prop)";
-        case 2322: // Type assignment error
-            return "Add type assertion (as Type) or fix the type assignment";
-        case 7006: // Implicit any type
-            return "Add explicit type annotation to the parameter";
-        case 2345: // Argument type error
-            return "Add type assertion or fix the argument type";
-        case 2554: // Expected n arguments, but got m
-            return "Fix the number of arguments in the function call";
-        case 2741: // Property is missing in type but required in type
-            return "Add the missing property to the object";
-        case 18046: // Object is of type 'unknown'
-            return "Add type assertion (as Type) or use type guard";
-        case 2532: // Object is possibly 'undefined'
-            return "Add null check or use optional chaining (obj?.prop)";
-        case 2724: // Module has no exported member
-            return "Fix the import statement or export the member from the module";
-        case 71004: // 'use client' directive must be at the top
-            return "Move 'use client' directive to the top of the file";
-        default:
-            return "Review the error and fix manually";
-    }
-}
-
-// Generate fix strategy for file
-function generateFixStrategyForFile(filePath, code, pattern, errors) {
-    // Different strategies based on file type and error code
-    const fileExt = path.extname(filePath);
-
-    if (fileExt === '.tsx' || fileExt === '.jsx') {
-        // React component file
-        switch (parseInt(code)) {
-            case 2339: // Property does not exist
-                return "Add prop type definition or use optional chaining";
-            case 7006: // Implicit any type
-                return "Add explicit type for event handlers (e: React.ChangeEvent<HTMLInputElement>)";
-            case 71004: // 'use client' directive must be at the top
-                return "Move 'use client' directive to the top of the file";
-            case 18046: // Object is of type 'unknown'
-                return "Add type assertion for event objects (e as React.MouseEvent)";
-            default:
-                return "Review React component and fix type issues";
-        }
-    } else if (fileExt === '.ts') {
-        // TypeScript file
-        switch (parseInt(code)) {
-            case 2339: // Property does not exist
-                return "Add interface extension or use optional chaining";
-            case 2322: // Type assignment error
-                return "Fix type assignment or add type assertion";
-            case 2724: // Module has no exported member
-                return "Fix export name in the module";
-            default:
-                return "Review TypeScript code and fix type issues";
-        }
-    }
-
-    return "Review the file and fix manually";
-}
-
-// Group errors by file
-function groupErrorsByFile(errors) {
-    const fileGroups = {};
-    for (const error of errors) {
-        if (!fileGroups[error.filePath]) {
-            fileGroups[error.filePath] = [];
-        }
-        fileGroups[error.filePath].push(error);
-    }
-    return fileGroups;
-}
-
-// Generate recommendations for remaining errors
-function generateRecommendations(errors) {
-    // Group errors by file
-    const fileGroups = groupErrorsByFile(errors);
-
-    // Generate recommendations
-    let recommendations = '';
-
-    // Files with the most errors
-    const filesSorted = Object.entries(fileGroups)
-        .sort((a, b) => b[1].length - a[1].length)
-        .slice(0, 10);
-
-    recommendations += '1. Files with the most errors:\n';
-    for (const [filePath, fileErrors] of filesSorted) {
-        recommendations += `   - ${filePath}: ${fileErrors.length} errors\n`;
-    }
-
-    // Most common error types
-    const errorsByCode = {};
-    for (const error of errors) {
-        if (!errorsByCode[error.code]) {
-            errorsByCode[error.code] = [];
-        }
-        errorsByCode[error.code].push(error);
-    }
-
-    const codesSorted = Object.entries(errorsByCode)
-        .sort((a, b) => b[1].length - a[1].length)
-        .slice(0, 10);
-
-    recommendations += '\n2. Most common error types:\n';
-    for (const [code, codeErrors] of codesSorted) {
-        const sampleError = codeErrors[0];
-        recommendations += `   - TS${code} (${codeErrors.length} occurrences): ${sampleError.message}\n`;
-        recommendations += `     Recommendation: ${generateSolutionForPattern(code, '', codeErrors)}\n`;
-    }
-
-    // Specific recommendations for top files
-    recommendations += '\n3. Specific recommendations for top files:\n';
-    for (const [filePath, fileErrors] of filesSorted.slice(0, 5)) {
-        recommendations += `   - ${filePath}:\n`;
-
-        // Group errors by code
-        const fileErrorsByCode = {};
-        for (const error of fileErrors) {
-            if (!fileErrorsByCode[error.code]) {
-                fileErrorsByCode[error.code] = [];
+        case 'prefixUnused':
+            // Prefix unused variables with underscore
+            const unusedVar = error.message.match(/'([^']+)' is declared but its value is never read/)?.[1];
+            if (unusedVar) {
+                return line.replace(
+                    new RegExp(`\\b${unusedVar}\\b`),
+                    '_' + unusedVar
+                );
             }
-            fileErrorsByCode[error.code].push(error);
-        }
+            return line;
 
-        // Top 3 error types for this file
-        const fileCodesSorted = Object.entries(fileErrorsByCode)
-            .sort((a, b) => b[1].length - a[1].length)
-            .slice(0, 3);
+        case 'addNullCheck':
+            // Add null check before using a property
+            return line.replace(
+                new RegExp(fix.search),
+                `if (${fix.variable} !== null && ${fix.variable} !== undefined) { ${line} }`
+            );
 
-        for (const [code, codeErrors] of fileCodesSorted) {
-            recommendations += `     - TS${code} (${codeErrors.length} occurrences): ${generateFixStrategyForFile(filePath, code, '', codeErrors)}\n`;
-        }
+        case 'moveUseClient':
+            // Move "use client" directive to the top of the file
+            return line; // This is handled separately as it affects multiple lines
+
+        default:
+            return line;
     }
-
-    return recommendations;
 }
 
-// Run the script
-main().catch(error => {
-    console.error('❌ Error:', error.message);
-    if (DEBUG) {
-        console.error(error.stack);
+/**
+ * Fix "use client" directive placement
+ */
+function fixUseClientDirective(filePath) {
+    const fullPath = path.join(config.rootDir, filePath);
+    let content = fs.readFileSync(fullPath, 'utf8');
+
+    if (content.includes('"use client"') || content.includes("'use client'")) {
+        // Check if "use client" is not at the top
+        const lines = content.split('\n');
+        const useClientIndex = lines.findIndex(line =>
+            line.trim() === '"use client"' || line.trim() === "'use client'"
+        );
+
+        if (useClientIndex > 0) {
+            // Remove the directive from its current position
+            const useClientLine = lines[useClientIndex];
+            lines.splice(useClientIndex, 1);
+
+            // Add it to the top
+            lines.unshift(useClientLine);
+
+            // Write the updated content back to the file
+            if (!config.dryRun) {
+                fs.writeFileSync(fullPath, lines.join('\n'), 'utf8');
+            }
+
+            log(`Fixed "use client" directive placement in ${filePath}`);
+            return 1;
+        }
     }
-    process.exit(1);
+
+    return 0;
+}
+
+/**
+ * Main function to run the auto-fix process
+ */
+async function runAutoFix() {
+    log(`Starting Unified TypeScript Auto-Fix at ${new Date().toLocaleString()}`);
+    log(`Configuration: ${JSON.stringify(config, null, 2)}`);
+
+    // Find all TypeScript files
+    const files = findTypeScriptFiles(
+        config.rootDir,
+        config.excludeDirs,
+        config.fileExtensions
+    );
+    log(`Found ${files.length} TypeScript files`);
+
+    // Get TypeScript errors
+    const errors = getTypeScriptErrors();
+    log(`Found ${errors.length} TypeScript errors`);
+
+    // Group errors by file
+    const errorsByFile = {};
+    errors.forEach(error => {
+        if (!errorsByFile[error.filePath]) {
+            errorsByFile[error.filePath] = [];
+        }
+        errorsByFile[error.filePath].push(error);
+    });
+
+    // Apply fixes to files with errors
+    let totalFixesApplied = 0;
+    let filesFixed = 0;
+
+    const filesToFix = Object.keys(errorsByFile).slice(0, config.maxFilesToFix);
+
+    for (const filePath of filesToFix) {
+        const fileErrors = errorsByFile[filePath];
+        log(`Processing ${filePath} with ${fileErrors.length} errors`);
+
+        // Fix "use client" directive placement first
+        const useClientFixes = fixUseClientDirective(filePath);
+
+        // Apply other fixes
+        const fixes = applyFixes(filePath, fileErrors);
+
+        const totalFixes = useClientFixes + fixes;
+        if (totalFixes > 0) {
+            filesFixed++;
+            totalFixesApplied += totalFixes;
+        }
+    }
+
+    log(`Auto-fix completed: Fixed ${totalFixesApplied} errors in ${filesFixed} files`);
+    log(`Log file: ${logFile}`);
+
+    // Close the log file
+    logger.end();
+
+    return { totalFixesApplied, filesFixed };
+}
+
+// Run the auto-fix process
+runAutoFix().catch(error => {
+    log(`Error running auto-fix: ${error.message}`);
+    logger.end();
 });

@@ -1,11 +1,12 @@
 
+'use client';
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-'use client';
 
 import React, { useState } from 'react';
 
@@ -24,42 +25,42 @@ interface KnowledgeEntryFormProps {
  * Form component for creating new knowledge entries
  * Used by specialists to add content to the AI knowledge base
  */
-export default function KnowledgeEntryForm({ 
-  onSuccess, 
-  className = '' 
+export default function KnowledgeEntryForm({
+  onSuccess,
+  className = ''
 }: KnowledgeEntryFormProps): JSX.Element {
   const { user } = useAuth();
   const { addNotification } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form state
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [contentType, setContentType] = useState<ContentType>('article');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  
+
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement><HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!user?.id) {
       setError('U moet ingelogd zijn om kennis toe te voegen');
       return;
     }
-    
+
     if (!title.trim() || !content.trim()) {
       setError('Titel en inhoud zijn verplicht');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       const supabase = getSupabaseBrowserClient();
-      
+
       // Create knowledge entry
       const { data, error: insertError } = await supabase
         .from('expert_knowledge')
@@ -74,25 +75,25 @@ export default function KnowledgeEntryForm({
         })
         .select()
         .single();
-      
+
       if (insertError) {
         throw insertError;
       }
-      
+
       // Success notification
       addNotification({
         type: 'success',
         message: 'Kennis succesvol toegevoegd. Een beheerder zal dit beoordelen.',
         duration: 5000
       });
-      
+
       // Reset form
       setTitle('');
       setContent('');
       setContentType('article');
       setTags([]);
       setTagInput('');
-      
+
       // Call success callback
       if (onSuccess) {
         onSuccess();
@@ -100,7 +101,7 @@ export default function KnowledgeEntryForm({
     } catch (err) {
       console.error('Error creating knowledge entry:', err);
       setError('Er is een fout opgetreden bij het toevoegen van kennis');
-      
+
       addNotification({
         type: 'error',
         message: 'Kon kennis niet toevoegen',
@@ -110,7 +111,7 @@ export default function KnowledgeEntryForm({
       setIsSubmitting(false);
     }
   };
-  
+
   // Handle adding a tag
   const handleAddTag = (): void => {
     const trimmedTag = tagInput.trim().toLowerCase();
@@ -119,24 +120,24 @@ export default function KnowledgeEntryForm({
       setTagInput('');
     }
   };
-  
+
   // Handle removing a tag
   const handleRemoveTag = (tagToRemove: string): void => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
-  
+
   // Handle tag input keydown
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement><HTMLInputElement>) => {
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       handleAddTag();
     }
   };
-  
+
   return (
     <div className={`${className} rounded-lg bg-white p-6 shadow-md`}>
       <h2 className="mb-4 text-xl font-semibold text-gray-800">Kennis Toevoegen</h2>
-      
+
       {error && (
         <AlertMessage
           type="error"
@@ -145,7 +146,7 @@ export default function KnowledgeEntryForm({
           className="mb-4"
         />
       )}
-      
+
       <form onSubmit={handleSubmit}>
         {/* Content Type */}
         <div className="mb-4">
@@ -188,7 +189,7 @@ export default function KnowledgeEntryForm({
             </label>
           </div>
         </div>
-        
+
         {/* Title */}
         <div className="mb-4">
           <label htmlFor="title" className="mb-1 block text-sm font-medium text-gray-700">
@@ -204,7 +205,7 @@ export default function KnowledgeEntryForm({
             required
           />
         </div>
-        
+
         {/* Content */}
         <div className="mb-4">
           <label htmlFor="content" className="mb-1 block text-sm font-medium text-gray-700">
@@ -220,7 +221,7 @@ export default function KnowledgeEntryForm({
             required
           />
         </div>
-        
+
         {/* Tags */}
         <div className="mb-6">
           <label htmlFor="tags" className="mb-1 block text-sm font-medium text-gray-700">
@@ -244,7 +245,7 @@ export default function KnowledgeEntryForm({
               Toevoegen
             </button>
           </div>
-          
+
           {/* Tag list */}
           {tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
@@ -269,7 +270,7 @@ export default function KnowledgeEntryForm({
             </div>
           )}
         </div>
-        
+
         {/* Submit button */}
         <div className="flex justify-end">
           <button

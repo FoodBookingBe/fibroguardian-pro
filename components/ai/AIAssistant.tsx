@@ -1,15 +1,16 @@
 
+'use client';
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { TaskLog, Reflectie } from '@/types';
+import { Reflectie, TaskLog } from '@/types';
 
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
@@ -91,7 +92,7 @@ export default function AIAssistant({
     const now = new Date();
     const hour = now.getHours();
     const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-    
+
     let timeOfDay: UserContext['timeOfDay'] = 'afternoon';
     if (hour >= 5 && hour < 12) {
       timeOfDay = 'morning';
@@ -102,18 +103,18 @@ export default function AIAssistant({
     } else {
       timeOfDay = 'night';
     }
-    
+
     return { timeOfDay, dayOfWeek: day };
   }, []);
 
   // Fetch user context data
   const fetchUserContext = useCallback(async () => {
-    if (!user?.id && !userId) return <></>; // Empty fragment instead of null
-    
+    if (!user?.id && !userId) return null;
+
     try {
       setIsLoading(true);
       const _targetUserId = userId || user?.id;
-      
+
       // If context is provided, use it, otherwise fetch from API
       if (currentContext && Object.keys(currentContext).length > 0) {
         const timeContext = determineTimeContext();
@@ -121,15 +122,14 @@ export default function AIAssistant({
           ...timeContext,
           completedTasksToday: 0,
           pendingTasksToday: 0,
-          ...currentContext} // Type assertion fixed
-const __typedCurrentContext = currentContext as Record<string, unknown>
-        ; as UserContext;
+          ...currentContext
+        } as UserContext;
       }
-      
+
       // Fetch tasks for today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       // This would be replaced with actual API calls in a real implementation
       // For now, we'll simulate the data
       const simulatedContext: UserContext = {
@@ -140,12 +140,12 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         completedTasksToday: Math.floor(Math.random() * 5),
         pendingTasksToday: Math.floor(Math.random() * 3) + 1
       };
-      
+
       return simulatedContext;
     } catch (err) {
       console.error('Error fetching user context:', err);
       setError('Kon gebruikerscontext niet laden');
-      return <></>; // Empty fragment instead of null
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -156,10 +156,10 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
     try {
       // This would be an actual API call in a real implementation
       // For now, we'll simulate the behavior pattern
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Simulated behavior pattern
       return {
         preferredTimeOfDay: ['morning', 'afternoon', 'evening', 'night'][Math.floor(Math.random() * 4)] as 'morning' | 'afternoon' | 'evening' | 'night',
@@ -175,17 +175,17 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
       };
     } catch (err) {
       console.error('Error analyzing user behavior:', err);
-      return <></>; // Empty fragment instead of null
+      return null;
     }
   }, []);
 
   // Adjust assistant behavior based on user patterns
   const adjustAssistantBehavior = useCallback((patterns: UserBehaviorPattern | null, context: UserContext | null) => {
     if (!patterns || !context) return;
-    
+
     // Determine the best assistant mode based on patterns and context
     let newMode: AssistantMode = 'adaptive';
-    
+
     // Adjust based on energy level if enabled
     if (adaptToEnergyLevel && context.energyLevel !== undefined) {
       if (context.energyLevel <= 3) {
@@ -196,7 +196,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         newMode = 'detailed';
       }
     }
-    
+
     // Adjust based on personality preference
     if (personalityMode === 'motivational') {
       if (patterns.responseToMotivation === 'positive') {
@@ -205,10 +205,10 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
     } else if (personalityMode === 'clinical') {
       newMode = 'clinical';
     }
-    
+
     // Set the new mode
     setAssistantMode(newMode);
-    
+
     // Generate appropriate nudges based on context and patterns
     generateNudges(patterns, context, newMode);
   }, [adaptToEnergyLevel, personalityMode]);
@@ -220,21 +220,21 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
     mode: AssistantMode
   ) => {
     const newNudges: Nudge[] = [];
-    
+
     // Limit number of nudges based on mode
     const maxNudges = mode === 'minimal' ? 1 : mode === 'detailed' ? 3 : 2;
-    
+
     // Check if it's a preferred time for tasks
     const isPreferredTime = patterns.preferredTimeOfDay === context.timeOfDay;
     const isHighEnergyDay = patterns.energyPatterns?.highEnergyDays.includes(context.dayOfWeek) || false;
-    
+
     // Add task-related nudges
     if (context.pendingTasksToday > 0) {
       if (isPreferredTime || isHighEnergyDay) {
         newNudges.push({
           id: `task-${Date.now()}`,
           type: 'reminder',
-          message: mode === 'motivational' 
+          message: mode === 'motivational'
             ? 'Dit is een goed moment om een taak af te ronden! Je hebt al eerder laten zien dat je dit kunt.'
             : 'Je hebt nog openstaande taken voor vandaag.',
           priority: 'medium',
@@ -246,7 +246,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         });
       }
     }
-    
+
     // Add energy management nudge if energy is low
     if (context.energyLevel !== undefined && context.energyLevel < 5) {
       newNudges.push({
@@ -259,7 +259,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         actionable: false
       });
     }
-    
+
     // Add encouragement if tasks were completed
     if (context.completedTasksToday > 0) {
       newNudges.push({
@@ -272,7 +272,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         actionable: false
       });
     }
-    
+
     // Add insight based on patterns
     if (patterns.completionRate > 0.7) {
       newNudges.push({
@@ -283,13 +283,13 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         actionable: false
       });
     }
-    
+
     // Limit to max nudges and sort by priority
     const priorityValues = { high: 3, medium: 2, low: 1 };
-    const sortedNudges = newNudges.sort((a, b) => 
+    const sortedNudges = newNudges.sort((a, b) =>
       priorityValues[b.priority] - priorityValues[a.priority]
     ).slice(0, maxNudges);
-    
+
     setNudges(sortedNudges);
   }, []);
 
@@ -297,18 +297,18 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
   useEffect(() => {
     const initializeAssistant = async () => {
       if (!user?.id && !userId) return;
-      
+
       try {
         // Fetch user context
         const context = await fetchUserContext();
         setUserContext(context as UserContext);
-        
+
         if (context) {
           // Analyze user behavior
           const _targetUserId = userId || user?.id as string;
-          const patterns = await analyzeUserBehavior(targetUserId);
+          const patterns = await analyzeUserBehavior(_targetUserId);
           setBehaviorPatterns(patterns);
-          
+
           // Adjust assistant behavior
           if (patterns) {
             adjustAssistantBehavior(patterns, context);
@@ -321,7 +321,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         setIsLoading(false);
       }
     };
-    
+
     initializeAssistant();
   }, [user?.id, userId, fetchUserContext, analyzeUserBehavior, adjustAssistantBehavior]);
 
@@ -330,10 +330,10 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
     if (nudge.action?.onClick) {
       nudge.action.onClick();
     }
-    
+
     // Remove the nudge after action
     setNudges(prev => prev.filter(n => n.id !== nudge.id));
-    
+
     // Add notification for feedback
     addNotification({
       type: 'success',
@@ -389,7 +389,7 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
           <h3 className="text-lg font-medium text-gray-800">AI-assistent</h3>
         </div>
         <p className="mt-2 text-gray-600">
-          {personalityMode === 'clinical' 
+          {personalityMode === 'clinical'
             ? 'Geen aanbevelingen op dit moment. Uw gegevens worden geanalyseerd.'
             : 'Geen suggesties op dit moment. Ik zal je laten weten wanneer ik iets voor je heb!'}
         </p>
@@ -408,17 +408,16 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
         </div>
         <h3 className="text-lg font-medium text-gray-800">AI-assistent</h3>
       </div>
-      
+
       <div className="space-y-3">
         {nudges.map(nudge => (
-          <div 
-            key={nudge.id} 
-            className={`relative rounded-lg border p-3 ${
-              nudge.type === 'reminder' ? 'border-blue-200 bg-blue-50' :
+          <div
+            key={nudge.id}
+            className={`relative rounded-lg border p-3 ${nudge.type === 'reminder' ? 'border-blue-200 bg-blue-50' :
               nudge.type === 'encouragement' ? 'border-green-200 bg-green-50' :
-              nudge.type === 'insight' ? 'border-purple-200 bg-purple-50' :
-              'border-amber-200 bg-amber-50'
-            }`}
+                nudge.type === 'insight' ? 'border-purple-200 bg-purple-50' :
+                  'border-amber-200 bg-amber-50'
+              }`}
           >
             <button
               onClick={() => handleDismissNudge(nudge.id)}
@@ -429,9 +428,9 @@ const __typedCurrentContext = currentContext as Record<string, unknown>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            
+
             <p className="pr-6 text-gray-700">{nudge.message}</p>
-            
+
             {nudge.actionable && nudge.action && (
               <div className="mt-2">
                 {nudge.action.href ? (

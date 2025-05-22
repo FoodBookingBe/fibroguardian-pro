@@ -39,15 +39,19 @@ export interface TaskLog {
   energie_voor?: number;
   energie_na?: number;
   pijn_score?: number;
+  pijn_score_voor?: number;
   vermoeidheid_score?: number;
+  vermoeidheid_score_voor?: number;
   stemming?: string;
   hartslag?: number;
   notitie?: string;
   ai_validatie?: string;
   created_at: Date;
+  tasks?: { titel: string; type: string } | null; // Added to support joined data from database
 }
 
-export type RecentLogWithTaskTitle = TaskLog & { tasks: { titel: string; type: string } | null };
+// This type is now redundant since TaskLog includes tasks
+export type RecentLogWithTaskTitle = TaskLog;
 
 export interface Reflectie {
   id: string;

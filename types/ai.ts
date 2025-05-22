@@ -1,6 +1,6 @@
 // AI-related types for FibroGuardian Pro
 
-import { Task, TaskLog, Reflectie } from './index';
+import { Reflectie, Task, TaskLog } from './index';
 
 // Expert knowledge types
 export type ContentType = 'article' | 'guideline' | 'recommendation';
@@ -69,6 +69,23 @@ export interface AIInsight {
     taskLogs?: TaskLog[];
     reflecties?: Reflectie[];
     patterns?: SymptomPattern[];
+    painScores?: Array<{ score: number | undefined | null; date: Date }>;
+    fatigueScores?: Array<{ score: number | undefined | null; date: Date }>;
+    avgFatigue?: number;
+    taskType?: string;
+    avgPainBefore?: number;
+    avgPainAfter?: number;
+    painDiff?: number;
+    avgFatigueBefore?: number;
+    avgFatigueAfter?: number;
+    fatigueDiff?: number;
+    avgPainLong?: number;
+    avgPainShort?: number;
+    longTasksCount?: number;
+    shortTasksCount?: number;
+    avgPainMorning?: number;
+    avgPainAfternoon?: number;
+    [key: string]: any; // Allow for additional properties
   };
   suggestedActions?: string[];
   confidence: number;

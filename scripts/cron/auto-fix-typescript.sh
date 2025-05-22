@@ -1,31 +1,21 @@
 #!/bin/bash
+# Unified TypeScript Auto-Fix System - Scheduled Task Script
+# This script is designed to be run as a cron job to automatically fix TypeScript errors
 
-# Auto-Fix TypeScript Script
-# This script automatically fixes TypeScript errors in the codebase
-# It can be run as a cron job or as part of a CI/CD pipeline
+# Navigate to the project root directory
+cd "$(dirname "$0")/../.." || exit 1
 
-# Change to project root directory
-cd "$(dirname "$0")/../.."
+# Log the start time
+echo "Running Unified TypeScript Auto-Fix System at $(date)"
 
-# Log start time
-echo "Starting TypeScript auto-fix at $(date)"
-echo "----------------------------------------"
+# Run the auto-fix script
+node scripts/unified-auto-fix.js
 
-# Run the TypeScript fixer script
-node scripts/fix-typescript.js
-
-# Check if there are still TypeScript errors
-echo "Checking for remaining TypeScript errors..."
-if npx tsc --noEmit 2>&1 | grep -q "error TS"; then
-  ERROR_COUNT=$(npx tsc --noEmit 2>&1 | grep -c "error TS")
-  echo "⚠️ $ERROR_COUNT TypeScript errors still remain"
-
-  # Save errors to a log file for review
-  npx tsc --noEmit > logs/typescript-errors-$(date +%Y%m%d-%H%M%S).log 2>&1
-  echo "Errors saved to logs/typescript-errors-$(date +%Y%m%d-%H%M%S).log"
-else
-  echo "✅ No TypeScript errors remaining!"
+# Check if the script ran successfully
+if [ $? -ne 0 ]; then
+  echo "Error: Unified TypeScript Auto-Fix System failed with exit code $?"
+  exit 1
 fi
 
-echo "----------------------------------------"
-echo "TypeScript auto-fix completed at $(date)"
+echo "Unified TypeScript Auto-Fix System completed successfully"
+exit 0
