@@ -3,7 +3,7 @@ import { trackEvent } from '@/lib/analytics/eventTracking';
 // import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook - Unused as local placeholder is used
 import { useEffect, useState, useCallback } from 'react'; // Import useCallback
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 
 interface FeedbackConfig {
   sessionThreshold: number;
@@ -65,7 +65,8 @@ export function useFeedbackCollector(config?: Partial<FeedbackConfig>) {
   const { user } = useAuth();
   const router = useRouter();
   
-  const feedbackConfig = { ...defaultConfig, ...config };
+  const feedbackConfig = { ...defaultConfig, ...config} // Type assertion fixed
+const _typedConfig = config as Record<string, unknown> ;;
   
   const [feedbackState, setFeedbackState] = useLocalStoragePlaceholder<FeedbackState>(
     `fibro_feedback_state_${user?.id || 'guest'}`, // User-specifieke key

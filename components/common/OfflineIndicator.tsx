@@ -32,7 +32,7 @@ export default function OfflineIndicator({ className = '' }: OfflineIndicatorPro
   }, []);
   
   if (!offline) {
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   return (

@@ -18,7 +18,8 @@ const secondaryNavigation = [
     { name: 'Terug naar App', href: '/dashboard', icon: ArrowUturnLeftIcon },
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes} // Type assertion fixed
+const _typedClasses = classes as Record<string, unknown>; string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
@@ -35,7 +36,7 @@ export default function AdminSidebar(): JSX.Element {
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => (
+              {navigation.map((item: unknown) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
@@ -55,7 +56,7 @@ export default function AdminSidebar(): JSX.Element {
           </li>
           <li className="mt-auto">
              <ul role="list" className="-mx-2 space-y-1">
-                {secondaryNavigation.map((item) => (
+                {secondaryNavigation.map((item: unknown) => (
                     <li key={item.name}>
                     <Link
                         href={item.href}

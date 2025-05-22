@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import ProgressIndicator from '@/components/onboarding/ProgressIndicator';
 import StepNavigation from '@/components/onboarding/StepNavigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -75,7 +75,7 @@ export default function ProfileSetupPage(): JSX.Element {
               type="text"
               id="voornaam"
               value={voornaam}
-              onChange={(e) => setVoornaam(e.target.value)}
+              onChange={(e: unknown) => setVoornaam(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw voornaam"
             />
@@ -89,7 +89,7 @@ export default function ProfileSetupPage(): JSX.Element {
               type="text"
               id="achternaam"
               value={achternaam}
-              onChange={(e) => setAchternaam(e.target.value)}
+              onChange={(e: unknown) => setAchternaam(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw achternaam"
             />
@@ -103,7 +103,7 @@ export default function ProfileSetupPage(): JSX.Element {
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: unknown) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Uw e-mailadres"
             />

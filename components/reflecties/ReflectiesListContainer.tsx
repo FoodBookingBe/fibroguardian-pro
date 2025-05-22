@@ -68,7 +68,7 @@ export function ReflectiesListContainer({ userId }: { userId: string }) {
       skeletonType="reflecties" // This type needs to be defined in SkeletonLoader
       emptyFallback={<EmptyReflectiesState />}
     >
-      {(data) => (
+      {(data: unknown) => (
         <ReflectiesList 
           reflecties={data} 
           onDelete={handleDelete} 

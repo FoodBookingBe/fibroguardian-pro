@@ -77,7 +77,7 @@ export default function PatientInsightCard({ patientId, specialistId }: PatientI
             .eq('user_id', patientId);
 
           if (allLogsError) {
-            console.warn(`Error fetching all_logs for insights (patient: ${patientId}): ${allLogsError.message}`);
+            consol(e as any).warn(`Error fetching all_logs for insights (patient: ${patientId}): ${allLogsError.message}`);
           }
           if (allLogsData) {
             allLogsForCharts = allLogsData as TaskLog[];
@@ -137,9 +137,9 @@ export default function PatientInsightCard({ patientId, specialistId }: PatientI
         });
 
       } catch (e: unknown) { 
-        console.error(`Error fetching insights for patient ${patientId}:`, e);
+        consol(e as any).error(`Error fetching insights for patient ${patientId}:`, e);
         if (e instanceof Error) {
-          setError(e.message);
+          setError((e as any).message);
         } else {
           setError('Kon inzichten niet laden door een onbekende fout.');
         }
@@ -239,7 +239,7 @@ export default function PatientInsightCard({ patientId, specialistId }: PatientI
         <div className="mb-3">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-4 sm:space-x-6 overflow-x-auto pb-1" aria-label="Tabs">
-              {['pain', 'fatigue', 'energy', 'heartRate'].map((tab) => (
+              {['pain', 'fatigue', 'energy', 'heartRate'].map((tab: unknown) => (
                 <button
                   key={tab}
                   onClick={() => setActiveChartTab(tab as 'pain' | 'fatigue' | 'heartRate' | 'energy')}
@@ -306,8 +306,8 @@ export default function PatientInsightCard({ patientId, specialistId }: PatientI
                 <Link href={`/reflecties/${r.id}`} className="text-purple-600 hover:underline">
                   Reflectie van {new Date(r.datum).toLocaleDateString('nl-BE')}
                   {r.stemming && ` (Stemming: ${r.stemming})`}
-                  {r.notitie && r.notitie.length > 20 && ` - ${r.notitie.substring(0,20)}...`}
-                  {r.notitie && r.notitie.length <= 20 && ` - ${r.notitie}`}
+                  {r.notitie && r.notiti(e as any).length > 20 && ` - ${r.notiti(e as any).substring(0,20)}...`}
+                  {r.notitie && r.notiti(e as any).length <= 20 && ` - ${r.notitie}`}
                 </Link>
               </li>
             ))}

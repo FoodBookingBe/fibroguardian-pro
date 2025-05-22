@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, useCallback } from 'react';
 import RapportGeneratorPresentational, {
@@ -112,8 +119,8 @@ export default function RapportGeneratorContainer(): JSX.Element {
 
       addNotification({ type: 'success', message: 'Rapport succesvol gegenereerd (simulatie)!' });
     } catch (err: unknown) {
-      setError(err.message || 'Fout bij genereren rapport.');
-      addNotification({ type: 'error', message: err.message || 'Fout bij genereren rapport.' });
+      setError((err as any).message || 'Fout bij genereren rapport.');
+      addNotification({ type: 'error', message: (err as any).message || 'Fout bij genereren rapport.' });
     } finally {
       setLoading(false);
     }
@@ -123,6 +130,7 @@ export default function RapportGeneratorContainer(): JSX.Element {
   React.useEffect(() => {
     handleTypeChange(initialRapportData.type);
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  return undefined; // Add default return
   }, []);
 
 

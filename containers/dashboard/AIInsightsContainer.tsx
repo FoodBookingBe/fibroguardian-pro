@@ -1,9 +1,16 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 // containers/dashboard/AIInsightsContainer.tsx
 'use client';
 import { useState, useMemo } from 'react'; // Added useMemo
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useInsights, useRecentLogs, RecentLogWithTaskTitle } from '@/hooks/useSupabaseQuery';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
 import { useNotification } from '@/context/NotificationContext';
@@ -100,7 +107,7 @@ export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsigh
       skeletonType="card" // Or a more specific 'insights' skeleton
       emptyFallback={<EmptyInsightsState />}
     >
-      {(insightsData) => (
+      {(insightsData: unknown) => (
         <AIInsightsPresentational
           insights={insightsData}
           expandedInsightId={expandedInsightId}

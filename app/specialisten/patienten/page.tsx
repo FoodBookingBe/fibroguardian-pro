@@ -16,7 +16,7 @@ export default async function PatientenPage() {
   
   if (userError || !user) {
     console.error('PatientenPage: User not found or error fetching user.', userError);
-    return null; // DashboardLayout should handle redirect if not authenticated
+    return <></>; // Empty fragment instead of null // DashboardLayout should handle redirect if not authenticated
   }
   
   // Haal patiënten op voor deze specialist

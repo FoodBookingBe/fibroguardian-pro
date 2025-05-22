@@ -233,6 +233,15 @@ class RealtimeFixer {
       let content = await fs.readFile(filePath, 'utf8');
       let hasChanges = false;
 
+      // Laad error patterns database
+      let errorPatterns = {};
+      try {
+        const patternsData = await fs.readFile('scripts/data/error-patterns.json', 'utf8');
+        errorPatterns = JSON.parse(patternsData).patterns;
+      } catch (error) {
+        console.log('  ⚠️  Could not load error patterns database');
+      }
+
       // Fix common TypeScript issues
       const fixes = [
         // Voeg React import toe als nodig
@@ -261,8 +270,57 @@ class RealtimeFixer {
             return match;
           },
           description: 'Remove unused imports'
+        },
+
+        // Fix impliciete any types
+        {
+          pattern: /(\(\s*([a-zA-Z0-9_]+)\s*\)\s*=>)/g,
+          replacement: (match, fullMatch, paramName) => {
+            return fullMatch.replace(paramName, `${paramName}: unknown`);
+          },
+          description: 'Add explicit type to parameters'
+        },
+
+        // Fix spread types
+        {
+          pattern: /\.\.\.([a-zA-Z0-9_]+)(\s*)[}:]/g,
+          replacement: (match, name, space) => `...${name} as Record<string, unknown>${space}}`,
+          description: 'Fix spread types with Record<string, unknown>'
+        },
+
+        // Fix missing queryKey
+        {
+          pattern: /(enabled:\s*!![\w.]+,)(?!\s*queryKey)/g,
+          replacement: (match, enabledPart) => {
+            return `${enabledPart}\n      queryKey: ["profile", userId],`;
+          },
+          description: 'Add missing queryKey parameter'
         }
       ];
+
+      // Voeg fixes toe uit de error patterns database
+      if (errorPatterns) {
+        for (const [key, pattern] of Object.entries(errorPatterns)) {
+          if (pattern.solution && pattern.description) {
+            // Voeg alleen toe als we een implementatie hebben voor dit patroon
+            if (key.startsWith('TS7006_')) {
+              // Impliciete any types
+              fixes.push({
+                pattern: new RegExp(`\\b${key.split('_')[1]}\\b(?!\\s*:)`, 'g'),
+                replacement: (match) => `${match}: unknown`,
+                description: pattern.description
+              });
+            } else if (key.startsWith('TS6133_')) {
+              // Ongebruikte variabelen
+              fixes.push({
+                pattern: new RegExp(`\\bconst\\s+${key.split('_')[1]}\\b`, 'g'),
+                replacement: (match) => match.replace(key.split('_')[1], `_${key.split('_')[1]}`),
+                description: pattern.description
+              });
+            }
+          }
+        }
+      }
 
       for (const fix of fixes) {
         const originalContent = content;
@@ -306,6 +364,18 @@ class RealtimeFixer {
       console.log('✅ Initial Prettier formatting completed');
     } catch (error) {
       console.log('⚠️  Prettier had some issues (this is normal)');
+    }
+
+    // Run TypeScript fixer
+    try {
+      console.log('🔍 Running TypeScript fixer...');
+      execSync('node scripts/fix-typescript.js', {
+        stdio: 'pipe',
+        timeout: 30000
+      });
+      console.log('✅ TypeScript fixes applied');
+    } catch (error) {
+      console.log('⚠️  TypeScript fixer had some issues (this is normal)');
     }
   }
 

@@ -4,7 +4,7 @@ import React from 'react';
 'use client';
 import { useState, useMemo, useEffect } from 'react'; // Added useEffect
 import { useTasks } from '@/hooks/useSupabaseQuery';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
 import DailyPlanner from '@/components/dashboard/DailyPlanner';
 import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd

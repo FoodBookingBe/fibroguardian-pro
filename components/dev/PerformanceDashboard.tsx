@@ -41,7 +41,7 @@ interface PerformanceMetrics {
 
 // Functie om performance metrics te verzamelen
 function capturePerformanceMetrics(): PerformanceMetrics | null {
-  if (typeof window === 'undefined' || typeof performance === 'undefined') return null;
+  if (typeof window === 'undefined' || typeof performance === 'undefined') return <></>; // Empty fragment instead of null
   
   const metrics: PerformanceMetrics = {
     FCP: 0, LCP: 0, INP: 0, CLS: 0, TTI: 0, TBT: 0, // Changed FID to INP
@@ -55,16 +55,16 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
     // TBT is complex, often derived from Long Tasks. Placeholder for now.
   }
   
-  performance.getEntriesByType('paint').forEach((entry) => {
+  performance.getEntriesByType('paint').forEach((entry: unknown) => {
     if (entry.name === 'first-contentful-paint') metrics.FCP = entry.startTime;
   });
 
-  performance.getEntriesByType('largest-contentful-paint').forEach((entry) => {
+  performance.getEntriesByType('largest-contentful-paint').forEach((entry: unknown) => {
     // LCP is more complex, this is a simplification. Use web-vitals for accurate LCP.
     metrics.LCP = entry.startTime; 
   });
   
-  performance.getEntriesByType('resource').forEach((entry) => {
+  performance.getEntriesByType('resource').forEach((entry: unknown) => {
     const resourceEntry = entry as PerformanceResourceTiming;
     let category = 'other';
     if (resourceEntry.name.includes('.js')) category = 'js';
@@ -108,7 +108,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
   });
 
   if (typeof PerformanceObserver !== 'undefined' && 'observe' in PerformanceObserver.prototype) {
-    const longTaskObserver = new PerformanceObserver((list) => {
+    const longTaskObserver = new PerformanceObserver((list: unknown) => {
       for (const entry of list.getEntries()) {
         metrics.longTasks.push({
           name: entry.name,
@@ -138,7 +138,8 @@ export default function PerformanceDashboard(): JSX.Element {
   const loadMetrics = useCallback(() => {
     const initialMetrics = capturePerformanceMetrics();
     if (initialMetrics) {
-      setMetrics(prev => ({...prev, ...initialMetrics})); // Merge, keeping web-vitals if already set
+      setMetrics(prev => ({...prev, ...initialMetrics} // Type assertion fixed
+const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Merge, keeping web-vitals if already set
     }
 
     if (typeof window !== 'undefined') {

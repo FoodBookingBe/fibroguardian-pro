@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client'; // Client component if it has interactive elements like delete button
 import React from 'react';
 import { Profile } from '@/types';

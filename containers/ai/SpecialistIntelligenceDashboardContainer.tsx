@@ -3,7 +3,7 @@
 import React from 'react';
 
 import SpecialistIntelligenceDashboard from '@/components/ai/SpecialistIntelligenceDashboard';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 
 interface SpecialistIntelligenceDashboardContainerProps {

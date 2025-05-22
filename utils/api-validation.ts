@@ -24,7 +24,7 @@ import { ReflectieFormData, TaskLog } from '@/types';
  *   return NextResponse.json(formatApiError(400, error), { status: 400 });
  * }
  * // Use validated data
- * const user = data;
+ * const _user = data;
  */
 export function validateAndSanitizeApiInput<T>(
   data: unknown, 
@@ -88,7 +88,7 @@ export const commonSchemas = {
 /**
  * Specific schemas for different API endpoints
  */
-export const apiSchemas = {
+export const _apiSchemas = {
   /**
    * Schema for validating reflectie input
    */

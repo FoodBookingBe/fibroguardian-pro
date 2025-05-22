@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -46,7 +53,8 @@ export default function CreateTaskAssignmentForm({
   useEffect(() => {
     if (initialData && selectedPatientId === initialData.user_id) { // Zorg dat de geselecteerde patiënt overeenkomt
       // Filter alleen de velden die in TaskFormData zitten
-      const { id, user_id, specialist_id: initialSpecialistId, created_at, updated_at, ...editableData } = initialData;
+      const { id, user_id, specialist_id: initialSpecialistId, created_at, updated_at, ...editableData} // Type assertion fixed
+const _typedEditableData = editableData as Record<string, unknown> ; = initialData;
       setFormData(editableData);
       setIsEditing(true);
       setCurrentTaskId(id);
@@ -119,7 +127,7 @@ export default function CreateTaskAssignmentForm({
     console.log(`[CreateTaskAssignmentForm] Submitting taskPayload (isEditing: ${isEditing}):`, JSON.stringify(taskPayload, null, 2));
 
     upsertTask(taskPayload, {
-      onSuccess: (updatedOrCreatedTask) => {
+      onSuccess: (updatedOrCreatedTask: unknown) => {
         const message = isEditing ? 'Taak succesvol bijgewerkt!' : 'Taak succesvol aangemaakt!';
         addNotification({ type: 'success', message });
         setFormData(defaultFormData); // Reset naar default
@@ -128,7 +136,7 @@ export default function CreateTaskAssignmentForm({
         setErrors({});
         if (onTaskUpserted) onTaskUpserted();
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         const message = isEditing ? 'Fout bij bijwerken taak.' : 'Fout bij aanmaken taak.';
         addNotification({ type: 'error', message: error.userMessage || message });
       }

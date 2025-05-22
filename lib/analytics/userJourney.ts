@@ -29,8 +29,9 @@ export type SubscriptionJourneyStepName = // Hernoemd voor duidelijkheid
 export function trackOnboardingStep(step: OnboardingStepName, extraProperties: Record<string, any> = {}) {
   trackEvent('onboarding_step', {
     step_name: step, // Gebruik step_name voor consistentie met andere analytics events
-    ...extraProperties
-  });
+    ...extraProperties} // Type assertion fixed
+const typedExtraProperties = extraProperties as Record<string, unknown>
+  ;);
   
   if (typeof window !== 'undefined' && localStorage) {
     try {
@@ -77,8 +78,9 @@ export function getLatestCompletedOnboardingStep(): OnboardingStepName | null {
 export function trackSubscriptionJourneyStep(step: SubscriptionJourneyStepName, extraProperties: Record<string, any> = {}) {
   trackEvent('subscription_journey_step', {
     step_name: step,
-    ...extraProperties
-  });
+    ...extraProperties} // Type assertion fixed
+const typedExtraProperties = extraProperties as Record<string, unknown>
+  ;);
 }
 
 /**
@@ -92,8 +94,9 @@ export function trackFeatureUsage(
   trackEvent('feature_usage', {
     feature_id: featureId, // Gebruik snake_case
     action,
-    ...properties
-  });
+    ...properties} // Type assertion fixed
+const _typedProperties = properties as Record<string, unknown>
+  ;);
   
   if (typeof window !== 'undefined' && localStorage) {
     try {
@@ -129,7 +132,8 @@ export function trackFeatureUsage(
 //       trackEvent('feature_view', { featureId, featureName });
 //     }, [featureId, featureName]);
     
-//     return <WrappedComponent {...props} />;
+//     return <WrappedComponent {...props} // Type assertion fixed
+const _typedProps = props as Record<string, unknown>; />;
 //   };
   
 //   TrackingComponent.displayName = `withFeatureViewTracking(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;

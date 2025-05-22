@@ -61,7 +61,8 @@ const defaultOptions: PerformanceMonitoringOptions = {
 export function initPerformanceMonitoring(
   options: PerformanceMonitoringOptions = {}
 ): void {
-  const config = { ...defaultOptions, ...options };
+  const config = { ...defaultOptions, ...options} // Type assertion fixed
+const _typedOptions = options as Record<string, unknown> ;;
   
   // Create the metric handler
   const reportMetric = createMetricHandler(config);

@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React from 'react'; // Keep useState for confirmDelete if needed locally in TaskCard
 import Link from 'next/link';

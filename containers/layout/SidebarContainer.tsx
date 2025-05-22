@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useEffect, ReactElement } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useProfile } from '@/hooks/useSupabaseQuery'; // To get profile type
 import SidebarPresentational, { MenuItemP } from '@/components/layout/SidebarPresentational';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
@@ -16,7 +16,8 @@ export default function SidebarContainer(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useProfile(user?.id, {
-    enabled: !!user, // Only fetch if user is available
+    enabled: !!user,
+      queryKey: ["profile", userId], // Only fetch if user is available
   });
 
   const profileType = profile?.type as 'patient' | 'specialist' | 'admin' | null | undefined;

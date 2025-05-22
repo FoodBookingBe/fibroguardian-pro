@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 'use client';
 
@@ -77,5 +84,5 @@ export default function ServiceWorkerInitializer(): JSX.Element {
   }, [addNotification]);
   
   // This component doesn't render anything
-  return null;
+  return <></>; // Empty fragment instead of null
 }

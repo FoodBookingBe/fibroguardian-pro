@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import AIAssistant, { UserContext } from '@/components/ai/AIAssistant';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { TaskLog, Reflectie } from '@/types';

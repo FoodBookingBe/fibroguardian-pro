@@ -9,9 +9,9 @@ export function handleServerError(
   if (redirectPath) {
     // Note: redirect from next/navigation should be called directly, not returned
     // This function might be better structured to throw a specific error type
-    // that a global error handler (e.g., error.tsx) can catch and then redirect.
+    // that a global error handler (e.g., (error as any).tsx) can catch and then redirect.
     // For now, let's assume this is called in a context where redirect is appropriate.
-    const errorMessage = (error instanceof Error ? error.message : String(error)) || defaultMessage;
+    const errorMessage = (error instanceof Error ? (error as any).message : String(error)) || defaultMessage;
     redirect(`${redirectPath}?error=${encodeURIComponent(errorMessage)}`);
     return; // redirect() will throw an error, so this line might not be reached.
   }

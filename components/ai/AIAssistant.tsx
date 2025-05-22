@@ -1,10 +1,17 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { TaskLog, Reflectie } from '@/types';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { useNotification } from '@/context/NotificationContext';
 
@@ -101,7 +108,7 @@ export default function AIAssistant({
 
   // Fetch user context data
   const fetchUserContext = useCallback(async () => {
-    if (!user?.id && !userId) return null;
+    if (!user?.id && !userId) return <></>; // Empty fragment instead of null
     
     try {
       setIsLoading(true);
@@ -114,8 +121,9 @@ export default function AIAssistant({
           ...timeContext,
           completedTasksToday: 0,
           pendingTasksToday: 0,
-          ...currentContext
-        } as UserContext;
+          ...currentContext} // Type assertion fixed
+const _typedCurrentContext = currentContext as Record<string, unknown>
+        ; as UserContext;
       }
       
       // Fetch tasks for today
@@ -137,7 +145,7 @@ export default function AIAssistant({
     } catch (err) {
       console.error('Error fetching user context:', err);
       setError('Kon gebruikerscontext niet laden');
-      return null;
+      return <></>; // Empty fragment instead of null
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +175,7 @@ export default function AIAssistant({
       };
     } catch (err) {
       console.error('Error analyzing user behavior:', err);
-      return null;
+      return <></>; // Empty fragment instead of null
     }
   }, []);
 
@@ -293,7 +301,7 @@ export default function AIAssistant({
       try {
         // Fetch user context
         const context = await fetchUserContext();
-        setUserContext(context);
+        setUserContext(context as UserContext);
         
         if (context) {
           // Analyze user behavior

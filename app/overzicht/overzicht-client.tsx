@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { format, parseISO, isToday, addDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import MetricCard from '@/components/overzicht/MetricCard'; 
 import { Task, TaskLog as GlobalTaskLog, Reflectie } from '@/types'; 
 
@@ -67,6 +67,7 @@ export default function OverzichtClient({
 
   useEffect(() => {
     setIsClient(true);
+  return undefined; // Add default return
   }, []);
 
   const aiInsights = useMemo(() => {

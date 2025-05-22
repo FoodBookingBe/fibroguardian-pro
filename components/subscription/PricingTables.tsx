@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -7,7 +14,7 @@ import { useSearchParams, useRouter } from 'next/navigation'; // useRouter voor 
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
 // import { Grid } from '@/components/ds/layout/Grid'; // Placeholder
 // import { Toggle } from '@/components/ds/atoms/Toggle'; // Placeholder
-import { useAuth } from '@/components/auth/AuthProvider'; 
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
 import { patientPlans, specialistPlans, SubscriptionPlan, subscriptionFeatures } from '@/types/subscription';
 import { createCheckoutSession } from '@/lib/stripe';
@@ -15,12 +22,14 @@ import { Check } from 'lucide-react'; // X is not used
 import { useNotification } from '@/context/NotificationContext';
 
 // Basis Button component als ds/atoms/Button niet bestaat
-const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', loading, disabled, fullWidth, size = 'md', ...props }: unknown) => (
+const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', loading, disabled, fullWidth, size = 'md', ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
   <button 
     onClick={onClick} 
     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${fullWidth ? 'w-full' : ''} ${size === 'sm' ? 'text-xs px-3 py-1.5' : ''} ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'danger' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
     disabled={loading || disabled}
-    {...props}
+    {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;
   >
     {loading ? (
       <span className="inline-block h-4 w-4 border-2 border-t-transparent border-current rounded-full animate-spin mr-2" />
@@ -29,8 +38,10 @@ const Button = ({ onClick, children, variant = 'primary', className: btnClassNam
   </button>
 );
 // Basis Card component
-const Card = ({ children, className: cardClassName = '', ...props }: unknown) => (
-  <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props}>
+const Card = ({ children, className: cardClassName = '', ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
+  <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;>
     {children}
   </div>
 );
@@ -60,7 +71,7 @@ export function PricingTables(): JSX.Element {
   const searchParams = useSearchParams();
   const router = useRouter();
   const userTypeParam = searchParams.get('userType');
-  // const upgradeParam = searchParams.get('upgrade'); // Unused variable
+  // const _upgradeParam = searchParams.get('upgrade'); // Unused variable
   
   const { user, profile, loading: loadingAuth } = useAuth();
   const { subscription, isLoadingSubscription } = useFeatureAccess(); // isLoadingSubscription van hier
@@ -105,7 +116,7 @@ export function PricingTables(): JSX.Element {
       );
     } catch (error: unknown) {
       console.error('Error creating checkout session:', error);
-      addNotification({type: 'error', message: error.message || 'Kon checkout sessie niet starten.'});
+      addNotification({type: 'error', message: (error as any).message || 'Kon checkout sessie niet starten.'});
     } finally {
       setProcessingPlanId(null);
     }
@@ -183,7 +194,7 @@ export function PricingTables(): JSX.Element {
       </div>
       
       <div className={`grid grid-cols-1 md:grid-cols-${Math.min(plansToDisplay.length, 3)} gap-6 lg:gap-8`}>
-        {plansToDisplay.map((plan) => (
+        {plansToDisplay.map((plan: unknown) => (
           <Card
             key={plan.id}
             className={`p-6 flex flex-col ${
@@ -221,7 +232,7 @@ export function PricingTables(): JSX.Element {
                 {subscriptionFeatures
                   .filter(f => plan.features.includes(f.id) || (plan.id !== 'free' && f.tiers.includes(plan.id))) // Toon alle features van het plan
                   .sort((a,b) => (a.highlight === b.highlight)? 0 : a.highlight? -1 : 1) // Highlighted bovenaan
-                  .map((feature) => (
+                  .map((feature: unknown) => (
                   <li key={feature.id} className="flex items-start">
                     <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700">{feature.name}</span>

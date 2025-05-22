@@ -1,6 +1,13 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, FormEvent } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider'; 
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
 import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
 import { ErrorMessage } from '@/lib/error-handler';
 import AddPatientButtonPresentational from '@/components/specialisten/AddPatientButtonPresentational';
@@ -28,7 +35,7 @@ export default function AddPatientButtonContainer(): JSX.Element {
   
   const handleOpenModal = () => {
     setEmail(''); // Reset email
-    reset(); // Reset mutation state (error, success flags)
+    reset(); // Reset mutation state (error: unknown, success flags)
     setShowModal(true);
   };
 
@@ -63,7 +70,7 @@ export default function AddPatientButtonContainer(): JSX.Element {
           handleCloseModal(); 
         }, 1500); // Keep modal open for a bit to show success message
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         // Notification is handled by the hook via NotificationContext if configured
         // Or, can add specific notification here too
         addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Kon patiënt niet toevoegen.' });
@@ -74,7 +81,7 @@ export default function AddPatientButtonContainer(): JSX.Element {
   // If user is not a specialist, this button might not be rendered at all by parent.
   // Or add a check here:
   // const { data: profile } = useProfile(user?.id);
-  // if (profile?.type !== 'specialist') return null;
+  // if (profile?.type !== 'specialist') return <></>; // Empty fragment instead of null
 
 
   return (

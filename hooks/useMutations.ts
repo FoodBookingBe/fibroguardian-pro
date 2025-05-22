@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useMutation, useQueryClient, UseMutationOptions, UseMutationResult } from '@tanstack/react-query'; // Added UseMutationResult
 
@@ -38,7 +45,7 @@ export function useUpsertTask(
       
       return responseData.data || responseData; // API might return { data: Task } or just Task
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data, variables: unknown) => {
       // Invalidate en refetch betreffende queries
       queryClient.invalidateQueries({ queryKey: ['tasks'] }); 
       if (variables.id) {
@@ -52,7 +59,7 @@ export function useUpsertTask(
         queryClient.setQueryData(['task', data.id], data);
       }
     },
-    onError: (error: ErrorMessage, variables) => { 
+    onError: (error: ErrorMessage, variables: unknown) => { 
       console.error(`Fout bij opslaan taak (ID: ${variables.id || 'new'}):`, error.userMessage, error.technicalMessage);
       addNotification({ type: 'error', message: error.userMessage || 'Opslaan van taak mislukt.' });
     },
@@ -84,7 +91,7 @@ export function useDeleteTask(
       
       return responseData; // API returns { message: string }
     },
-    onSuccess: (_data, taskId, _context) => { // data and context marked as unused
+    onSuccess: (_data: unknown, taskId, _context) => { // data and context marked as unused
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.removeQueries({ queryKey: ['task', taskId] });
       // Potentially invalidate user-specific task list if applicable
@@ -127,7 +134,7 @@ export function useUpdateProfile(
       }
       return responseData as Profile; // API returns the updated profile
     },
-    onSuccess: (updatedProfile, variables) => {
+    onSuccess: (updatedProfile, variables: unknown) => {
       queryClient.invalidateQueries({ queryKey: ['profile', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }); 
       
@@ -137,7 +144,7 @@ export function useUpdateProfile(
         queryClient.setQueryData(['profile', 'me'], updatedProfile);
       }
     },
-    onError: (error: ErrorMessage, variables) => { 
+    onError: (error: ErrorMessage, variables: unknown) => { 
       console.error(`Fout bij bijwerken profiel (ID: ${variables.id}):`, error.userMessage, error.technicalMessage);
       addNotification({ type: 'error', message: error.userMessage || 'Bijwerken van profiel mislukt.' });
     },
@@ -155,7 +162,7 @@ export function useAddTaskLog(
   const { addNotification } = useNotification();
   
   return useMutation<TaskLog, ErrorMessage, Partial<Omit<TaskLog, 'id' | 'created_at' | 'user_id'>> & { task_id: string; start_tijd: string }>({
-    mutationFn: async (logData) => {
+    mutationFn: async (logData: unknown) => {
       const response = await fetch('/api/task-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -172,14 +179,14 @@ export function useAddTaskLog(
       }
       return responseData as TaskLog;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data, variables: unknown) => {
       queryClient.invalidateQueries({ queryKey: ['taskLogs', variables.task_id] });
       queryClient.invalidateQueries({ queryKey: ['recentLogs'] }); 
       if (data?.user_id) {
         queryClient.invalidateQueries({ queryKey: ['recentLogs', data.user_id] });
       }
     },
-    onError: (error: ErrorMessage, variables) => { 
+    onError: (error: ErrorMessage, variables: unknown) => { 
       console.error(`Fout bij opslaan taaklog voor taak ${variables.task_id}:`, error.userMessage, error.technicalMessage);
       addNotification({ type: 'error', message: error.userMessage || 'Opslaan van taaklog mislukt.' });
     },
@@ -293,7 +300,7 @@ export function useDeleteReflectie(
       }
       return responseData;
     },
-    onSuccess: (_data, variables) => { // data marked as unused
+    onSuccess: (_data: unknown, variables) => { // data marked as unused
       if (variables.userId) {
         queryClient.invalidateQueries({ queryKey: ['reflecties', variables.userId] });
       } else {
@@ -371,7 +378,7 @@ export function useDeleteSpecialistPatientRelation(
       }
       return responseData;
     },
-    onSuccess: (_data, variables) => { // data marked as unused
+    onSuccess: (_data: unknown, variables) => { // data marked as unused
       // Invalidate lists of patients and specialists for the affected users
       // This might require knowing both specialistId and patientId from the deleted relation,
       // or having the currentUserId to invalidate their specific list.
@@ -428,7 +435,7 @@ export function useSignInEmailPassword(
       }
       return data.user;
     },
-    onSuccess: (_user) => { // user marked as unused
+    onSuccess: (_user: unknown) => { // user marked as unused
       queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
       queryClient.invalidateQueries({ queryKey: ['user'] }); // General user query if used
       // addNotification({ type: 'success', message: 'Succesvol ingelogd!' });
@@ -490,7 +497,7 @@ export function useSignUpWithEmailPassword(
       // data.session will also be null in that case.
       return { user: data.user }; 
     },
-    onSuccess: (_data) => { // data marked as unused
+    onSuccess: (_data: unknown) => { // data marked as unused
       // if (data.user) {
         // addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail.' });
       // } else {

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import AddSpecialistButtonContainer from '@/containers/specialisten/AddSpecialistButtonContainer'; // Updated import
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import SpecialistLoadingSkeleton from '@/components/specialisten/SpecialistLoadingSkeleton';
 import EmptySpecialistState from '@/components/specialisten/EmptySpecialistState';
 import SpecialistsList from '@/components/specialisten/SpecialistsList';
@@ -30,6 +30,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
 
   useEffect(() => {
     setIsClient(true);
+  return undefined; // Add default return
   }, []);
   
   // Remove debug logging for production
@@ -77,7 +78,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
       setLocalSpecialists(prev => prev.filter(s => s.id !== specialistId));
     } catch (err: unknown) {
       console.error('Error removing specialist:', err);
-      setError(err.message || 'Er is een fout opgetreden bij het verwijderen.');
+      setError((err as any).message || 'Er is een fout opgetreden bij het verwijderen.');
     } finally {
       setIsLoading(false);
     }

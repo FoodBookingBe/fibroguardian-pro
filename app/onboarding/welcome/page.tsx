@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Image from 'next/image';
 
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import ProgressIndicator from '@/components/onboarding/ProgressIndicator';
 import StepNavigation from '@/components/onboarding/StepNavigation';
 import { useOnboarding } from '@/context/OnboardingContext';
@@ -16,6 +16,7 @@ export default function WelcomePage(): JSX.Element {
   // Start onboarding when the page loads
   useEffect(() => {
     startOnboarding();
+  return undefined; // Add default return
   }, [startOnboarding]);
   
   const isSpecialist = profile?.type === 'specialist';

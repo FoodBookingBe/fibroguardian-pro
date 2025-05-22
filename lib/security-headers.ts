@@ -20,7 +20,7 @@ const ContentSecurityPolicy = `
 `;
 
 // Exporteert een array van beveiligingsheaders
-export const securityHeaders = [
+export const _securityHeaders = [
   // X-DNS-Prefetch-Control: Controleert DNS prefetching
   {
     key: 'X-DNS-Prefetch-Control',

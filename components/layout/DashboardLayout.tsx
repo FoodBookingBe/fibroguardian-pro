@@ -4,12 +4,12 @@ import React from 'react';
 import SidebarContainer from '@/containers/layout/SidebarContainer';
 import TopbarContainer from '@/containers/layout/TopbarContainer'; // Updated import
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, loadingAuth, loadingProfile } = useAuth(); // Use more specific loading states from AuthProvider
-  // const router = useRouter(); // No longer needed for redirection here
+  // const _router = useRouter(); // No longer needed for redirection here
   const [mounted, setMounted] = useState(false);
 
   // console.log('[Client DashboardLayout] State:', { user: !!user, loading, mounted });
@@ -17,6 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Voorkomen van hydration mismatch
   useEffect(() => {
     setMounted(true);
+  return undefined; // Add default return
   }, []);
 
   // Redirection logic is now primarily handled by AuthProvider.
@@ -46,7 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // This case should ideally not be hit for protected routes as AuthProvider would redirect.
     // If it is, it might indicate a public page using DashboardLayout or a race condition.
     // console.log('[Client DashboardLayout] User is null after loading, AuthProvider should handle redirect.');
-    return null; // Or a more graceful "unauthorized" message if this layout can be on public pages
+    return <></>; // Empty fragment instead of null // Or a more graceful "unauthorized" message if this layout can be on public pages
   }
  
   // console.log('[Client DashboardLayout] Rendering main layout');

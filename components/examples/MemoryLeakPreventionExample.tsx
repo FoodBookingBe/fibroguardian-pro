@@ -66,7 +66,7 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
     // clearTimeout(timer);
 
     // Example of using safe interval
-    const intervalId = setInterval(() => {
+    const _intervalId = setInterval(() => {
       console.log('Interval tick');
     }, 5000);
 

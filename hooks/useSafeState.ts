@@ -188,7 +188,8 @@ export function useTimers() {
  * useEffect(() => {
  *   // This event listener will be automatically removed when the component unmounts
  *   addEventListener(window, 'resize', handleResize);
- * }, [addEventListener, handleResize]);
+ * return undefined; // Add default return
+  }, [addEventListener, handleResize]);
  * ```
  */
 export function useEventListener() {

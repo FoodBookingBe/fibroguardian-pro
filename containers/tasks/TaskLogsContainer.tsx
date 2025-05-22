@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useCallback } from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import TaskLogsPresentational from '@/components/tasks/TaskLogsPresentational';
 import { useTaskLogs, useRecentLogs } from '@/hooks/useSupabaseQuery';
 import { ErrorMessage } from '@/lib/error-handler';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import ProgressVisualization from '@/components/charts/ProgressVisualization';
 
 export default function ProgressPage(): JSX.Element {

@@ -55,7 +55,7 @@ export default function RecentUsersTable({ users }: RecentUsersTableProps) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users.map((user) => (
+          {users.map((user: unknown) => (
             <tr key={user.id}>
               <td className="whitespace-nowrap px-6 py-4">
                 <div className="flex items-center">

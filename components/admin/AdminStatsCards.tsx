@@ -24,7 +24,7 @@ export default function AdminStatsCards({ stats }: AdminStatsCardsProps) {
   return (
     <div>
       <dl className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {statItems.map((item) => (
+        {statItems.map((item: unknown) => (
           <div
             key={item.name}
             className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"

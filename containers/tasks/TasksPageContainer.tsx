@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -8,7 +15,7 @@ import TaskList from '@/components/tasks/TaskList';
 import TaskFilters from '@/components/tasks/TaskFilters'; 
 import AddTaskButton from '@/components/tasks/AddTaskButton'; 
 import { useTasks } from '@/hooks/useSupabaseQuery';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
 import { useState, useEffect, useMemo } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';

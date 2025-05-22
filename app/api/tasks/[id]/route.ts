@@ -84,9 +84,11 @@ export async function PUT(
     // Verwijder user_id en specialist_id uit de taskData om te voorkomen dat deze per ongeluk worden gewijzigd.
     // De eigenaar (user_id) van een taak zou normaal gesproken niet moeten veranderen.
     // De specialist_id (aanmaker) zou ook niet moeten veranderen.
-    const { user_id: taskUserId, specialist_id: taskSpecialistId, ...editableTaskData } = taskData;
+    const { user_id: taskUserId, specialist_id: taskSpecialistId, ...editableTaskData} // Type assertion fixed
+const typedEditableTaskData = editableTaskData as Record<string, unknown> ; = taskData;
 
-    const updatePayload = { ...editableTaskData }; // Alleen de bewerkbare velden
+    const updatePayload = { ...editableTaskData} // Type assertion fixed
+const typedEditableTaskData = editableTaskData as Record<string, unknown> ;; // Alleen de bewerkbare velden
 
     // De RLS policy moet afdwingen dat alleen de toegewezen specialist (of admin) kan updaten.
     // De query hieronder voegt een extra check toe dat de ingelogde gebruiker de specialist_id is.

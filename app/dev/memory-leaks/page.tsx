@@ -76,7 +76,7 @@ export default function MemoryLeakPreventionPage(): JSX.Element {
               <code>{`const [data, setData] = useSafeState(initialState);
 
 // Safe to use in async functions
-const fetchData = async () => {
+const _fetchData = async () => {
   const result = await api.getData();
   setData(result); // Won't cause memory leak if unmounted
 };`}</code>
@@ -134,7 +134,8 @@ useEffect(() => {
 useEffect(() => {
   addEventListener(window, 'resize', handleResize);
   // No need to remove event listener manually
-}, [addEventListener, handleResize]);`}</code>
+return undefined; // Add default return
+  }, [addEventListener, handleResize]);`}</code>
             </pre>
           </div>
         </div>

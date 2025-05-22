@@ -11,7 +11,7 @@ interface NotificationListProps {
 
 export function NotificationList({ notifications, onDismiss }: NotificationListProps) {
   if (!notifications || notifications.length === 0) {
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   return (
@@ -37,6 +37,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
   
   useEffect(() => {
     setIsVisible(true);
+  return undefined; // Add default return
   }, []);
   
   const typeStyles = {

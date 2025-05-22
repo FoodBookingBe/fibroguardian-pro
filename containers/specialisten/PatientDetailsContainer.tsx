@@ -1,7 +1,14 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useTasks, useRecentLogs, useReflecties, useInsights, useProfile } from '@/hooks/useSupabaseQuery'; // Changed useReflections to useReflecties
 import { useDeleteSpecialistPatientRelation } from '@/hooks/useMutations'; // Changed useRemoveSpecialistPatientRelation
 import PatientDetailsPresentational from '@/components/specialisten/PatientDetailsPresentational';
@@ -36,7 +43,8 @@ export default function PatientDetailsContainer({ patientId, initialPatientProfi
     isError: isPatientProfileError
   } = useProfile(patientId, { 
     initialData: initialPatientProfile,
-    enabled: !!patientId, // Fetch only if patientId is available
+    enabled: !!patientId,
+      queryKey: ["profile", userId], // Fetch only if patientId is available
   });
 
   // Data fetching hooks for each tab, enabled based on activeTab
@@ -60,7 +68,7 @@ export default function PatientDetailsContainer({ patientId, initialPatientProfi
     if ((activeTab === 'logs' || activeTab === 'overview') && isLogsError) return logsError as ErrorMessage | null;
     if (activeTab === 'reflecties' && isReflectionsError) return reflectionsError as ErrorMessage | null;
     if (activeTab === 'inzichten' && isInsightsError) return insightsError as ErrorMessage | null;
-    return null;
+    return <></>; // Empty fragment instead of null
   }, [activeTab, isTasksError, tasksError, isLogsError, logsError, isReflectionsError, reflectionsError, isInsightsError, insightsError]);
 
 
@@ -96,7 +104,7 @@ export default function PatientDetailsContainer({ patientId, initialPatientProfi
   };
   
   const calculateAge = (birthdate?: string | Date) => {
-    if (!birthdate) return null;
+    if (!birthdate) return <></>; // Empty fragment instead of null
     const today = new Date();
     const birthDate = new Date(birthdate);
     let age = today.getFullYear() - birthDate.getFullYear();

@@ -25,10 +25,12 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) { // A
           return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: unknown) {
-          cookieStore.set({ name, value, ...options });
+          cookieStore.set({ name, value, ...options} // Type assertion fixed
+const typedOptions = options as Record<string, unknown> ;);
         },
         remove(name: string, options: unknown) {
-          cookieStore.set({ name, value: '', ...options });
+          cookieStore.set({ name, value: '', ...options} // Type assertion fixed
+const typedOptions = options as Record<string, unknown> ;);
         },
       },
     }

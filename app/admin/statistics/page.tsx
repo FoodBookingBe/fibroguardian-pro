@@ -108,7 +108,7 @@ async function getStats(): Promise<StatData> {
     console.error("Error fetching statistics:", error);
     let message = "Kon statistieken niet laden.";
     if (error instanceof Error) {
-      message = error.message;
+      message = (error as any).message;
     } else if (typeof error === 'string') {
       message = error;
     }

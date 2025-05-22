@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Stripe checkout session creation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Interne serverfout bij het aanmaken van de checkout sessie.' },
+      { error: (error as any).message || 'Interne serverfout bij het aanmaken van de checkout sessie.' },
       { status: 500 }
     );
   }

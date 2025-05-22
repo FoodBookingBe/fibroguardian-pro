@@ -45,7 +45,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
   }, [insight, logs]);
 
   const stringToSentimentScore = (sentiment?: string): number | null => {
-    if (!sentiment) return null;
+    if (!sentiment) return <></>; // Empty fragment instead of null
     const sentimentMap: Record<string, number> = {
       'zeer goed': 18, 'goed': 15, 'neutraal': 10, 'redelijk': 12, // Added redelijk
       'matig': 8, 'slecht': 5, 'zeer slecht': 2,
@@ -67,7 +67,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
   const currentMetricInfo = metricsInfo[metric] || metricsInfo['pijn_score'];
 
   const renderTrendIcon = () => {
-    if (!insight.trend_type) return null;
+    if (!insight.trend_type) return <></>; // Empty fragment instead of null
     const trend = insight.trend_type.toLowerCase();
     let icon = null;
     let text = '';

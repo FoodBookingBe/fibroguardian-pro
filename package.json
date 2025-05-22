@@ -37,6 +37,16 @@
     "autofix:watch": "node scripts/realtime-fixer.js",
     "autofix:setup": "node scripts/realtime-fixer.js --setup",
     "autofix:now": "node scripts/realtime-fixer.js --fix-now",
+    "autofix:db": "node scripts/auto-fix-system.js && node scripts/fix-typescript.js",
+    "autofix:types": "scripts/cron/auto-fix-typescript.bat",
+    "autofix:types:unix": "bash scripts/cron/auto-fix-typescript.sh",
+    "autofix:learn": "node scripts/auto-learning-system.js",
+    "autofix:assertions": "node scripts/fix-type-assertions.js",
+    "autofix:advanced": "node scripts/advanced-type-fixer.js",
+    "autofix:specific": "node scripts/fix-specific-errors.js",
+    "autofix:enhanced": "node scripts/enhanced-specific-errors.js",
+    "autofix:unified": "node scripts/unified-auto-fix.js",
+    "autofix:all": "npm run autofix:unified",
     "// Quality Reports": "",
     "quality:report": "npm run quality:eslint && npm run quality:types && npm run quality:complexity",
     "quality:eslint": "eslint . --ext .ts,.tsx,.js,.jsx --format json > reports/eslint-report.json || true",
@@ -110,6 +120,9 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md,yml,yaml}": [
       "prettier --write"
     ]
   },

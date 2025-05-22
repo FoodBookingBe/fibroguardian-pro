@@ -20,10 +20,12 @@ const UsersPageClientView: React.FC<UsersPageClientViewProps> = ({ initialUsers,
 
   useEffect(() => {
     setUsers(initialUsers); // Sync if initialUsers prop changes (e.g., after server-side re-fetch)
+  return undefined; // Add default return
   }, [initialUsers]);
 
   useEffect(() => {
     setCurrentFetchError(fetchError || null);
+  return undefined; // Add default return
   }, [fetchError]);
 
 
@@ -70,7 +72,7 @@ const UsersPageClientView: React.FC<UsersPageClientViewProps> = ({ initialUsers,
           </div>
         )}
         {/* TODO: Implement UserFilterControls */}
-        <AdminUsersList users={users} onEditUser={handleOpenEditModal} onDeleteUser={(userId) => alert(`Verwijder gebruiker ${userId} (TODO)`)} />
+        <AdminUsersList users={users} onEditUser={handleOpenEditModal} onDeleteUser={(userId: unknown) => alert(`Verwijder gebruiker ${userId} (TODO)`)} />
       </div>
 
       {isAddUserModalOpen && (

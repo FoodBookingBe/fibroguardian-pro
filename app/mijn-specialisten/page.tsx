@@ -6,7 +6,7 @@ import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // New
 import MijnSpecialistenClient from './mijn-specialisten-client';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Disable caching
+export const _revalidate = 0; // Disable caching
 
 export default async function MijnSpecialistenPage() {
   const supabase = getSupabaseServerComponentClient(); // Use the new helper

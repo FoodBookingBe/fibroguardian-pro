@@ -1,0 +1,5 @@
+Specific Error Fixer started at 2025-05-22T14:43:39.139Z
+
+Specific Error Fixer completed at 2025-05-22T14:43:47.735Z
+Duration: 8.596 seconds
+Fixed files: utils/schemas/taskSchema.ts, components/specialisten/DynamicSpecialistComponents.tsx, utils/service-worker.ts, components/ai/KnowledgeEntryForm.tsx, app/opdrachten/page.tsx, components/ai/AIAssistant.tsx, hooks/useTypedSupabase.ts, hooks/useSupabaseQuery.ts, utils/ai-insights.ts

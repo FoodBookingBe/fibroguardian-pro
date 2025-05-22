@@ -68,7 +68,7 @@ export default function ReflectieFormPresentational({
         <div className="mb-5">
           <label className="block text-gray-700 font-medium mb-2">Hoe voelt u zich vandaag?</label>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Stemming selectie">
-            {stemmingOpties.map((stemming) => (
+            {stemmingOpties.map((stemming: unknown) => (
               <button
                 key={stemming} type="button" onClick={() => onStemmingSelect(stemming)}
                 className={`px-4 py-2 rounded-md transition ${

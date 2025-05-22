@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -8,7 +15,7 @@ import Link from 'next/link'; // Import Link
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
 // import { Container } from '@/components/ds/layout/Container'; // Placeholder
 // import { Grid } from '@/components/ds/layout/Grid'; // Placeholder
-import { useAuth } from '@/components/auth/AuthProvider'; // Gebruik bestaande AuthProvider
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; // Gebruik bestaande AuthProvider
 // import { useSubscription } from '@/hooks/useSubscription'; // Placeholder hook
 // import { formatCurrency } from '@/utils/format'; // Placeholder util - Removed as formatCurrency is defined locally or globally
 import { useNotification } from '@/context/NotificationContext'; // Voor feedback
@@ -76,7 +83,8 @@ const useSubscription = (userId: string | undefined) => {
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         if (subscription) {
-          setSubscription({ ...subscription, ...updates });
+          setSubscription({ ...subscription, ...updates} // Type assertion fixed
+const _typedUpdates = updates as Record<string, unknown> ;);
            addNotification({type: 'success', message: 'Abonnement succesvol bijgewerkt.'});
           resolve();
         } else {

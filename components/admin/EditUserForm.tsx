@@ -49,7 +49,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: unknown) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +72,8 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
       //    - If formData.new_password is set, call supabase.auth.admin.updateUserById(user.id, { password: formData.new_password })
       //    - If type is 'specialist', update or insert into 'abonnementen' table.
 
-      console.log('Form data to submit for update:', { userId: user.id, ...formData });
+      console.log('Form data to submit for update:', { userId: user.id, ...formData} // Type assertion fixed
+const _typedFormData = formData as Record<string, unknown> ;);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000)); 
       
@@ -88,7 +89,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
       onClose();
 
     } catch (apiError: unknown) {
-      setError(apiError.message || 'Er is een fout opgetreden bij het bijwerken van de gebruiker.');
+      setError((apiError as any).message || 'Er is een fout opgetreden bij het bijwerken van de gebruiker.');
       console.error("Error updating user:", apiError);
     } finally {
       setIsLoading(false);

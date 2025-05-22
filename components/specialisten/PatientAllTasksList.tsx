@@ -104,7 +104,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
           .order('created_at', { ascending: false });
 
         if (allLogsError) {
-          console.warn(`Error fetching all_logs for PatientAllTasksList (patient: ${patientId}): ${allLogsError.message}`);
+          consol(e as any).warn(`Error fetching all_logs for PatientAllTasksList (patient: ${patientId}): ${allLogsError.message}`);
         }
         if (allLogsData) {
           allLogsForTasks = allLogsData as TaskLog[];
@@ -138,8 +138,8 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
         setTasksWithDetails(processedTasks as TaskWithStatusAndFeedbackForCard[]);
 
       } catch (e: unknown) { // ESLint zal hier nog steeds klagen, maar functioneel ok voor nu
-        console.error(`Error fetching all task details for patient ${patientId}:`, e);
-        setError(e.message || 'Kon taakdetails niet laden.');
+        consol(e as any).error(`Error fetching all task details for patient ${patientId}:`, e);
+        setError((e as any).message || 'Kon taakdetails niet laden.');
       } finally {
         setIsLoading(false);
       }

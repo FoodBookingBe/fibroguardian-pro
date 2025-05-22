@@ -8,7 +8,7 @@ import { ErrorMessage } from '@/types'; // Zorg dat ErrorMessage beschikbaar is
 export function useProfile(userId: string | undefined, options?: UseQueryOptions<any, ErrorMessage, any, QueryKey>) {
   return useSupabaseQuery<any, ErrorMessage>(
     ['profile', userId],
-    async (supabase) => {
+    async (supabase: unknown) => {
       if (!userId) {
         throw new Error('User ID is required to fetch profile.');
       }
@@ -24,7 +24,8 @@ export function useProfile(userId: string | undefined, options?: UseQueryOptions
       return data;
     },
     {
-      enabled: !!userId, // Query alleen uitvoeren als userId aanwezig is
+      enabled: !!userId,
+      queryKey: ["profile", userId], // Query alleen uitvoeren als userId aanwezig is
       ...options,
     }
   );

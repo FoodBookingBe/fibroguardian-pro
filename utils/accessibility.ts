@@ -3,7 +3,7 @@ import React from 'react';
 import { useRef, useEffect } from 'react'; // React import verwijderd
 
 // Helper voor correcte ARIA attributen
-export const ariaProps = {
+export const _ariaProps = {
   button: (expanded: boolean) => ({
     'aria-expanded': expanded.toString(), 
     'role': 'button',
@@ -85,7 +85,8 @@ export const ariaProps = {
 //   ...rest
 // }: IconButtonProps): JSX.Element {
 //   return (
-//     <button type="button" aria-label={label} className={className} {...rest}>
+//     <button type="button" aria-label={label} className={className} {...rest} // Type assertion fixed
+const _typedRest = rest as Record<string, unknown>;>
 //       {icon}
 //       <span className="sr-only">{label}</span>
 //     </button>

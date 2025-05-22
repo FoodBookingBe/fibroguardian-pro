@@ -1,8 +1,15 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 
 import React, { useState } from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { useNotification } from '@/context/NotificationContext';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -34,7 +41,7 @@ export default function KnowledgeEntryForm({
   const [tagInput, setTagInput] = useState('');
   
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement><HTMLFormElement><HTMLFormElement>) => {
     e.preventDefault();
     
     if (!user?.id) {
@@ -119,7 +126,7 @@ export default function KnowledgeEntryForm({
   };
   
   // Handle tag input keydown
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement><HTMLInputElement><HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       handleAddTag();
@@ -191,7 +198,7 @@ export default function KnowledgeEntryForm({
             type="text"
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e: unknown) => setTitle(e.target.value)}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
             placeholder="Voer een titel in"
             required
@@ -206,7 +213,7 @@ export default function KnowledgeEntryForm({
           <textarea
             id="content"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e: unknown) => setContent(e.target.value)}
             rows={6}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
             placeholder="Voer de inhoud in"
@@ -224,7 +231,7 @@ export default function KnowledgeEntryForm({
               type="text"
               id="tags"
               value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
+              onChange={(e: unknown) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               className="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
               placeholder="Voeg tags toe (druk op Enter)"

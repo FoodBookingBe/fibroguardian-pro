@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -26,7 +33,8 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
     error: tasksError,
     refetch: refetchTasks // Functie om taken opnieuw op te halen
   } = useTasksForUserBySpecialist(selectedPatientId, specialistId, { 
-    enabled: !!selectedPatientId, // Alleen fetchen als een patiënt is geselecteerd
+    enabled: !!selectedPatientId,
+      queryKey: ["profile", userId], // Alleen fetchen als een patiënt is geselecteerd
   });
 
   const { addNotification } = useNotification();
@@ -70,7 +78,7 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
           setEditingTask(null);
         }
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
       }
     });
@@ -79,6 +87,7 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
   // Wanneer de geselecteerde patiënt verandert, reset de editingTask state
   useEffect(() => {
     setEditingTask(null);
+  return undefined; // Add default return
   }, [selectedPatientId]);
 
   // Verwijder het gedupliceerde blok hieronder
@@ -92,7 +101,7 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
   //       addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
   //       refetchTasks(); // Ververs de lijst
   //     },
-  //     onError: (error) => {
+  //     onError: (error: unknown) => {
   //       addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
   //     }
   //   });

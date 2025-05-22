@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   
   if (error || !user) {
     redirect('/auth/login');
-    // return null; // redirect() throws an error, so this is unreachable
+    // return <></>; // Empty fragment instead of null // redirect() throws an error, so this is unreachable
   }
   
   // Fetch profile to check admin status

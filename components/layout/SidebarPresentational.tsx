@@ -32,7 +32,7 @@ export default function SidebarPresentational({
   renderIcon,
 }: SidebarPresentationalProps) {
   // If no user, don't render the sidebar content (container might return null earlier)
-  if (!user) return null;
+  if (!user) return <></>; // Empty fragment instead of null
 
   return (
     <>
@@ -67,7 +67,7 @@ export default function SidebarPresentational({
           
           <nav className="flex-1 overflow-y-auto py-3">
             <ul className="space-y-1 px-3">
-              {menuItems.map((item) => {
+              {menuItems.map((item: unknown) => {
                 const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
                 return (
                   <li key={item.href}>

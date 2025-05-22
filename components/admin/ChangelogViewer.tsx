@@ -162,7 +162,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="version-filter"
             value={filterVersion}
-            onChange={(e) => setFilterVersion(e.target.value)}
+            onChange={(e: unknown) => setFilterVersion(e.target.value)}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle versies</option>
@@ -181,7 +181,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="category-filter"
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value as ChangeCategory | '')}
+            onChange={(e: unknown) => setFilterCategory(e.target.value as ChangeCategory | '')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle categorieën</option>
@@ -202,7 +202,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="impact-filter"
             value={filterImpact}
-            onChange={(e) => setFilterImpact(e.target.value as ChangeImpact | '')}
+            onChange={(e: unknown) => setFilterImpact(e.target.value as ChangeImpact | '')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle impact levels</option>
@@ -220,7 +220,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="sort-by"
             value={sortByDate ? 'date' : 'version'}
-            onChange={(e) => setSortByDate(e.target.value === 'date')}
+            onChange={(e: unknown) => setSortByDate(e.target.value === 'date')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="date">Datum</option>

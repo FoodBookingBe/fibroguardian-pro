@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
@@ -92,7 +99,7 @@ export default function AuthFormContainer({ initialIsLoginMode = true }: { initi
 
     if (isLogin) {
       signIn({ email: formData.email, password: formData.password }, {
-        onSuccess: (user) => {
+        onSuccess: (user: unknown) => {
           if (user && user.id) {
             addNotification({ type: 'success', message: 'Succesvol ingelogd! U wordt doorverwezen...' });
             // router.push('/dashboard'); // Or appropriate redirect
@@ -120,7 +127,7 @@ export default function AuthFormContainer({ initialIsLoginMode = true }: { initi
           }
         }
       }, {
-        onSuccess: (data) => {
+        onSuccess: (data: unknown) => {
           if (data.user) {
             addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.' });
           } else {

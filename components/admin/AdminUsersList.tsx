@@ -32,7 +32,7 @@ const AdminUsersList: React.FC<AdminUsersListProps> = ({ users, onEditUser, onDe
           </tr>
         </thead>
         <tbody className="text-gray-700 dark:text-gray-300 text-sm font-light">
-          {users.map((user) => (
+          {users.map((user: unknown) => (
             <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               <td className="py-3 px-6 whitespace-nowrap">{user.id}</td>
               {/* <td className="py-3 px-6">{user.email || 'N/A'}</td> */}

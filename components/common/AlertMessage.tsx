@@ -66,7 +66,7 @@ export function AlertMessage({
   
   const style = styles[type];
   
-  if (!message) return null;
+  if (!message) return <></>; // Empty fragment instead of null
 
   return (
     <div className={`p-4 rounded-md border ${style.bg} ${style.border} ${className}`}>

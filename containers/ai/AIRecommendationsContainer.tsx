@@ -1,3 +1,10 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 
 import React, { useState, useCallback } from 'react';
@@ -5,7 +12,7 @@ import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AIRecommendationCard from '@/components/ai/AIRecommendationCard';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { useNotification } from '@/context/NotificationContext';
@@ -83,7 +90,7 @@ export default function AIRecommendationsContainer({
       
       return recommendationId;
     },
-    onSuccess: (recommendationId) => {
+    onSuccess: (recommendationId: unknown) => {
       // Update the cache to remove the dismissed recommendation
       queryClient.setQueryData(
         ['ai_recommendations', user?.id, contextType, limit],
@@ -99,7 +106,7 @@ export default function AIRecommendationsContainer({
         duration: 3000
       });
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error('Error dismissing recommendation:', error);
       setError('Kon de aanbeveling niet verwijderen. Probeer het later opnieuw.');
       

@@ -17,7 +17,7 @@ import {
 } from 'recharts';
 
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 
 type ChartType = 'line' | 'area' | 'bar';
@@ -312,7 +312,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
   
   // Get trend message based on trend and metric
   const getTrendMessage = () => {
-    if (!trend) return null;
+    if (!trend) return <></>; // Empty fragment instead of null
     
     switch (metric) {
       case 'pain':
@@ -340,7 +340,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             ? 'Uw taakvoltooing vertoont een dalende trend. Probeer kleinere taken te plannen.' 
             : 'Uw taakvoltooing is stabiel.';
       default:
-        return null;
+        return <></>; // Empty fragment instead of null
     }
   };
   
@@ -398,7 +398,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <YAxis stroke="#6b7280" />
               <Tooltip 
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value) => [value, label]}
+                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
               <Line 
@@ -423,7 +423,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <YAxis stroke="#6b7280" />
               <Tooltip 
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value) => [value, label]}
+                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
               <Area 
@@ -447,7 +447,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <YAxis stroke="#6b7280" />
               <Tooltip 
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value) => [value, label]}
+                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
               <Bar dataKey="value" name={label} fill={color} radius={[4, 4, 0, 0]} />
@@ -456,7 +456,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         );
       
       default:
-        return null;
+        return <></>; // Empty fragment instead of null
     }
   };
   
@@ -474,7 +474,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
           <div className="flex flex-wrap gap-2">
             <select
               value={metric}
-              onChange={(e) => setMetric(e.target.value as MetricType)}
+              onChange={(e: unknown) => setMetric(e.target.value as MetricType)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer metriek"
             >
@@ -486,7 +486,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+              onChange={(e: unknown) => setTimeRange(e.target.value as TimeRange)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer tijdsperiode"
             >
@@ -498,7 +498,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             
             <select
               value={chartType}
-              onChange={(e) => setChartType(e.target.value as ChartType)}
+              onChange={(e: unknown) => setChartType(e.target.value as ChartType)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer grafiektype"
             >

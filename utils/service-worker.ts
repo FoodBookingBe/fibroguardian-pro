@@ -64,7 +64,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
 };
 
 // Unregister all service workers
-export const unregisterServiceWorkers = async (): Promise<boolean> => {
+export const _unregisterServiceWorkers = async (): Promise<boolean> => {
   if (!isServiceWorkerSupported()) {
     return false;
   }
@@ -147,7 +147,7 @@ export interface OfflineData {
 }
 
 // Store data in IndexedDB for offline use
-export const storeOfflineData = async (
+export const _storeOfflineData = async (
   storeName: string,
   data: OfflineData,
   id?: string
@@ -160,7 +160,7 @@ export const storeOfflineData = async (
       reject(new Error('Failed to open IndexedDB.'));
     };
     
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = (event: unknown) => {
       const db = (event.target as IDBOpenDBRequest).result;
       
       if (!db.objectStoreNames.contains(storeName)) {
@@ -168,7 +168,7 @@ export const storeOfflineData = async (
       }
     };
     
-    request.onsuccess = (event) => {
+    request.onsuccess = (event: unknown) => {
       const db = (event.target as IDBOpenDBRequest).result;
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -200,7 +200,7 @@ export const storeOfflineData = async (
 };
 
 // Retrieve data from IndexedDB
-export const getOfflineData = async (
+export const _getOfflineData = async (
   storeName: string,
   id: string
 ): Promise<OfflineData | null> => {
@@ -212,7 +212,7 @@ export const getOfflineData = async (
       reject(new Error('Failed to open IndexedDB.'));
     };
     
-    request.onsuccess = (event) => {
+    request.onsuccess = (event: unknown) => {
       const db = (event.target as IDBOpenDBRequest).result;
       
       if (!db.objectStoreNames.contains(storeName)) {
@@ -228,7 +228,7 @@ export const getOfflineData = async (
         reject(new Error('Failed to retrieve data from IndexedDB.'));
       };
       
-      getRequest.onsuccess = (event) => {
+      getRequest.onsuccess = (event: unknown) => {
         const result = (event.target as IDBRequest).result;
         resolve(result ? result.data : null);
       };
@@ -241,7 +241,7 @@ export const getOfflineData = async (
 };
 
 // Get all offline data from a store
-export const getAllOfflineData = async (
+export const _getAllOfflineData = async (
   storeName: string
 ): Promise<OfflineData[]> => {
   return new Promise((resolve, reject) => {
@@ -252,7 +252,7 @@ export const getAllOfflineData = async (
       reject(new Error('Failed to open IndexedDB.'));
     };
     
-    request.onsuccess = (event) => {
+    request.onsuccess = (event: unknown) => {
       const db = (event.target as IDBOpenDBRequest).result;
       
       if (!db.objectStoreNames.contains(storeName)) {
@@ -268,7 +268,7 @@ export const getAllOfflineData = async (
         reject(new Error('Failed to retrieve data from IndexedDB.'));
       };
       
-      getAllRequest.onsuccess = (event) => {
+      getAllRequest.onsuccess = (event: unknown) => {
         const results = (event.target as IDBRequest).result;
         resolve(results.map((item: { data: OfflineData }) => item.data));
       };
@@ -281,7 +281,7 @@ export const getAllOfflineData = async (
 };
 
 // Delete data from IndexedDB
-export const deleteOfflineData = async (
+export const _deleteOfflineData = async (
   storeName: string,
   id: string
 ): Promise<boolean> => {
@@ -293,7 +293,7 @@ export const deleteOfflineData = async (
       reject(new Error('Failed to open IndexedDB.'));
     };
     
-    request.onsuccess = (event) => {
+    request.onsuccess = (event: unknown) => {
       const db = (event.target as IDBOpenDBRequest).result;
       
       if (!db.objectStoreNames.contains(storeName)) {

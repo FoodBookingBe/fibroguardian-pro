@@ -1,0 +1,166 @@
+{
+    "patterns": {
+        "TS18046_e_unknown": {
+            "description": "'e' is of type 'unknown' in event handlers",
+            "solution": "Add appropriate React event type to event handler parameters",
+            "examples": [
+                "onChange={(e) => setValue(e.target.value)}",
+                "onClick={(e) => handleClick(e)}",
+                "onSubmit={(e) => handleSubmit(e)}"
+            ]
+        },
+        "TS18046_item_unknown": {
+            "description": "'item' is of type 'unknown' in map functions",
+            "solution": "Add explicit type annotation to the map callback parameter",
+            "examples": [
+                "items.map((item) => item.name)",
+                "navigation.map((item) => item.href)",
+                "data.map((item) => item.id)"
+            ]
+        },
+        "TS71004_use_client": {
+            "description": "The `\"use client\"` directive must be put at the top of the file",
+            "solution": "Move 'use client' directive to the top of the file",
+            "examples": [
+                "import React from 'react';\n\n'use client';",
+                "// Comment\n'use client';",
+                "import { useState } from 'react';\n\n'use client';"
+            ]
+        },
+        "TS2339_property_never": {
+            "description": "Property does not exist on type 'never'",
+            "solution": "Add proper type definition or use type assertion",
+            "examples": [
+                "error.message",
+                "data.tasks",
+                "result.value"
+            ]
+        },
+        "TS2739_missing_properties": {
+            "description": "Type is missing properties from type",
+            "solution": "Add the missing properties to the object",
+            "examples": [
+                "<TaskList tasks={tasks} />",
+                "<Component data={data} />",
+                "<Form values={values} />"
+            ]
+        },
+        "TS6133_unused_variable": {
+            "description": "Variable is declared but never read",
+            "solution": "Prefix variable with underscore or remove it",
+            "examples": [
+                "const router = useRouter()",
+                "const [state, setState] = useState()",
+                "const { data, error } = await supabase"
+            ]
+        },
+        "TS7019_rest_any_type": {
+            "description": "Rest parameter implicitly has an 'any[]' type",
+            "solution": "Add explicit type annotation to the rest parameter",
+            "examples": [
+                "function classNames(...classes)",
+                "function merge(...objects)",
+                "function combine(...arrays)"
+            ]
+        },
+        "TS7006_parameter_any": {
+            "description": "Parameter implicitly has an 'any' type",
+            "solution": "Add explicit type annotation to the parameter",
+            "examples": [
+                "function handleChange(e)",
+                "const handleSubmit = (data) => {}",
+                "items.map((item) => item.id)"
+            ]
+        },
+        "TS2352_type_conversion": {
+            "description": "Conversion of type may be a mistake",
+            "solution": "Add proper type assertion or fix the type assignment",
+            "examples": [
+                "Object.assign({}, ...classes)",
+                "const result = { ...data }",
+                "const merged = { ...obj1, ...obj2 }"
+            ]
+        },
+        "TS2769_no_overload_matches": {
+            "description": "No overload matches this call",
+            "solution": "Fix the argument types to match the function signature",
+            "examples": [
+                "formatter={(value: unknown) => [value, name]}",
+                "Component.apply(this, arguments)",
+                "fn.call(obj, ...args)"
+            ]
+        },
+        "TS2532_possibly_undefined": {
+            "description": "Object is possibly 'undefined'",
+            "solution": "Add null check or use optional chaining (obj?.prop)",
+            "examples": [
+                "data.items",
+                "user.profile",
+                "result.value"
+            ]
+        },
+        "TS18048_property_undefined": {
+            "description": "Property is possibly 'undefined'",
+            "solution": "Add null check or use optional chaining (obj?.prop)",
+            "examples": [
+                "item.score",
+                "log.pain_score",
+                "user.settings.theme"
+            ]
+        },
+        "TS2614_no_exported_member": {
+            "description": "Module has no exported member",
+            "solution": "Fix import statement or export the member from the module",
+            "examples": [
+                "import { useTaskLogs } from '@/hooks/useSupabaseQuery'",
+                "import { ErrorMessage } from '@/types'",
+                "import { Component } from './components'"
+            ]
+        },
+        "TS2345_argument_type": {
+            "description": "Argument of type is not assignable to parameter of type",
+            "solution": "Add type assertion or fix the argument type",
+            "examples": [
+                "new Date(date)",
+                "setValue(event.target.value)",
+                "setData(response)"
+            ]
+        },
+        "TS2304_cannot_find_name": {
+            "description": "Cannot find name",
+            "solution": "Import the name or define it in the current scope",
+            "examples": [
+                "Cannot find name 'React'",
+                "Cannot find name 'useState'",
+                "Cannot find name 'Component'"
+            ]
+        },
+        "TS2554_expected_arguments": {
+            "description": "Expected n arguments, but got m",
+            "solution": "Fix the number of arguments in the function call",
+            "examples": [
+                "classNames('a', 'b')",
+                "Component(prop1, prop2)",
+                "fn(arg1)"
+            ]
+        },
+        "TS2322_type_assignment": {
+            "description": "Type is not assignable to type",
+            "solution": "Add type assertion or fix the type assignment",
+            "examples": [
+                "const value: string = 123",
+                "const items: string[] = { key: 'value' }",
+                "const fn: () => void = async () => {}"
+            ]
+        },
+        "TS2355_function_return": {
+            "description": "A function whose declared type is neither 'undefined', 'void', nor 'any' must return a value",
+            "solution": "Add return statement or change the return type",
+            "examples": [
+                "function getValue(): string { }",
+                "const getItems = (): Item[] => { }",
+                "function process(): boolean { }"
+            ]
+        }
+    }
+}

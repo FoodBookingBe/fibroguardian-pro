@@ -26,7 +26,7 @@ export function useLocalStorage<T>(
   });
   
   // Wrapped setter die waarde naar localStorage persist.
-  const setValue: Dispatch<SetStateAction<T>> = (value) => {
+  const setValue: Dispatch<SetStateAction<T>> = (value: unknown) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);

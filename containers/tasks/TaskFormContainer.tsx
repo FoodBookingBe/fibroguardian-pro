@@ -1,10 +1,17 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Task } from '@/types';
 import { useUpsertTask } from '@/hooks/useMutations';
 import { useTask } from '@/hooks/useSupabaseQuery';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { ErrorMessage } from '@/lib/error-handler';
 import TaskFormPresentational, { TaskFormData } from '@/components/tasks/TaskFormPresentational';
@@ -131,12 +138,12 @@ export default function TaskFormContainer({
     }
     
     upsertTask(taskToSubmit, {
-      onSuccess: (savedTask) => {
+      onSuccess: (savedTask: unknown) => {
         addNotification({ type: 'success', message: `Taak '${savedTask.titel}' succesvol ${isEditing ? 'bijgewerkt' : 'aangemaakt'}!` });
         router.push('/taken'); 
         router.refresh(); // To ensure server components using this data are updated
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Opslaan van taak mislukt.' });
       }
     });

@@ -22,7 +22,7 @@ export default async function Dashboard() {
   
   if (userError || !user) {
     console.error('Dashboard Page: User not found or error fetching user.', userError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   // Fetch user profile to determine role
@@ -34,7 +34,7 @@ export default async function Dashboard() {
   
   if (profileError) {
     console.error('Error fetching user profile:', profileError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   const userRole = profile?.type || 'patient';

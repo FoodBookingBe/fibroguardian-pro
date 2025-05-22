@@ -15,7 +15,7 @@ export const createExpertKnowledgeSchema = z.object({
 });
 
 // Schema for updating an expert knowledge entry (all fields optional)
-export const updateExpertKnowledgeSchema = createExpertKnowledgeSchema.partial();
+export const _updateExpertKnowledgeSchema = createExpertKnowledgeSchema.partial();
 
 // Define a Zod schema for creating a new AI recommendation
 export const createAIRecommendationSchema = z.object({
@@ -31,16 +31,16 @@ export const createAIRecommendationSchema = z.object({
 });
 
 // Schema for updating an AI recommendation (all fields optional)
-export const updateAIRecommendationSchema = createAIRecommendationSchema.partial();
+export const _updateAIRecommendationSchema = createAIRecommendationSchema.partial();
 
 // Schema for dismissing an AI recommendation
-export const dismissAIRecommendationSchema = z.object({
+export const _dismissAIRecommendationSchema = z.object({
   id: z.string().uuid({ message: 'Ongeldige aanbeveling-ID (UUID).' }),
   is_dismissed: z.literal(true)
 });
 
 // Schema for AI analysis request
-export const aiAnalysisRequestSchema = z.object({
+export const _aiAnalysisRequestSchema = z.object({
   userId: z.string().uuid({ message: 'Ongeldige gebruikers-ID (UUID).' }),
   analysisType: z.enum(['task_suggestion', 'symptom_pattern', 'insight_generation'], {
     errorMap: () => ({ message: 'Analyse type moet task_suggestion, symptom_pattern of insight_generation zijn.' })
@@ -54,7 +54,7 @@ export const aiAnalysisRequestSchema = z.object({
 });
 
 // Schema for task suggestion
-export const taskSuggestionSchema = z.object({
+export const _taskSuggestionSchema = z.object({
   suggestedTask: z.object({
     type: z.string().optional(),
     titel: z.string(),
@@ -73,7 +73,7 @@ export const taskSuggestionSchema = z.object({
 });
 
 // Schema for task difficulty adjustment
-export const taskDifficultyAdjustmentSchema = z.object({
+export const _taskDifficultyAdjustmentSchema = z.object({
   taskId: z.string().uuid(),
   newDifficulty: z.number().int().min(1).max(10),
   reason: z.string(),
@@ -93,7 +93,7 @@ export const symptomPatternSchema = z.object({
 });
 
 // Schema for AI insight
-export const aiInsightSchema = z.object({
+export const _aiInsightSchema = z.object({
   userId: z.string().uuid(),
   title: z.string(),
   description: z.string(),

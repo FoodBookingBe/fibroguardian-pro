@@ -1,0 +1,1242 @@
+{
+  "app/overzicht/page.tsx_TS1003": {
+    "filePath": "app/overzicht/page.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 139,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 139,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/common/ErrorBoundary.tsx_TS1003": {
+    "filePath": "components/common/ErrorBoundary.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 169,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 169,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 171,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/common/LazyImage.tsx_TS1003": {
+    "filePath": "components/common/LazyImage.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 136,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 136,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/onboarding/GuidedTour.tsx_TS1003": {
+    "filePath": "components/onboarding/GuidedTour.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 34,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 34,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1003": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 32,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 32,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 44,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/subscription/SubscriptionManagement.tsx_TS1003": {
+    "filePath": "components/subscription/SubscriptionManagement.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 91,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 91,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1003": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 73,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 73,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 84,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/subscription/withFeatureAccess.tsx_TS1003": {
+    "filePath": "components/subscription/withFeatureAccess.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 60,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 60,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "components/support/SupportWidget.tsx_TS1003": {
+    "filePath": "components/support/SupportWidget.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 58,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 58,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "lib/performance/imageLazyOptimizer.tsx_TS1003": {
+    "filePath": "lib/performance/imageLazyOptimizer.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 105,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 105,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 113,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "tests/LazyImage.spec.tsx_TS1003": {
+    "filePath": "tests/LazyImage.spec.tsx",
+    "errorCode": "1003",
+    "pattern": "Identifier expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 29,
+        "message": "Identifier expected."
+      },
+      {
+        "line": 29,
+        "message": "Identifier expected."
+      }
+    ]
+  },
+  "app/overzicht/page.tsx_TS1005": {
+    "filePath": "app/overzicht/page.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 141,
+        "message": "'</' expected."
+      },
+      {
+        "line": 141,
+        "message": "'}' expected."
+      }
+    ]
+  },
+  "app/rapporten/page.tsx_TS1005": {
+    "filePath": "app/rapporten/page.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 23,
+        "message": "',' expected."
+      },
+      {
+        "line": 25,
+        "message": "',' expected."
+      },
+      {
+        "line": 25,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "app/reflecties/page.tsx_TS1005": {
+    "filePath": "app/reflecties/page.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 23,
+        "message": "',' expected."
+      },
+      {
+        "line": 25,
+        "message": "',' expected."
+      },
+      {
+        "line": 25,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "app/specialisten/page.tsx_TS1005": {
+    "filePath": "app/specialisten/page.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 22,
+        "message": "',' expected."
+      },
+      {
+        "line": 24,
+        "message": "',' expected."
+      },
+      {
+        "line": 24,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "app/taken/[taskId]/edit/page.tsx_TS1005": {
+    "filePath": "app/taken/[taskId]/edit/page.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 29,
+        "message": "',' expected."
+      },
+      {
+        "line": 31,
+        "message": "',' expected."
+      },
+      {
+        "line": 31,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "components/admin/AdminSidebar.tsx_TS1005": {
+    "filePath": "components/admin/AdminSidebar.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 21,
+        "message": "',' expected."
+      },
+      {
+        "line": 22,
+        "message": "',' expected."
+      },
+      {
+        "line": 22,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS1005": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 44,
+        "message": "',' expected."
+      },
+      {
+        "line": 44,
+        "message": "',' expected."
+      },
+      {
+        "line": 129,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "components/common/LazyImage.tsx_TS1005": {
+    "filePath": "components/common/LazyImage.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 42,
+        "message": "',' expected."
+      },
+      {
+        "line": 42,
+        "message": "',' expected."
+      },
+      {
+        "line": 43,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "components/dev/PerformanceDashboard.tsx_TS1005": {
+    "filePath": "components/dev/PerformanceDashboard.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 142,
+        "message": "')' expected."
+      },
+      {
+        "line": 142,
+        "message": "',' expected."
+      },
+      {
+        "line": 154,
+        "message": "';' expected."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1005": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 26,
+        "message": "')' expected."
+      },
+      {
+        "line": 42,
+        "message": "')' expected."
+      }
+    ]
+  },
+  "components/subscription/SubscriptionManagement.tsx_TS1005": {
+    "filePath": "components/subscription/SubscriptionManagement.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 87,
+        "message": "',' expected."
+      },
+      {
+        "line": 90,
+        "message": "',' expected."
+      },
+      {
+        "line": 91,
+        "message": "':' expected."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1005": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 68,
+        "message": "')' expected."
+      },
+      {
+        "line": 82,
+        "message": "')' expected."
+      }
+    ]
+  },
+  "components/subscription/withFeatureAccess.tsx_TS1005": {
+    "filePath": "components/subscription/withFeatureAccess.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 91,
+        "message": "'}' expected."
+      },
+      {
+        "line": 102,
+        "message": "'</' expected."
+      },
+      {
+        "line": 102,
+        "message": "'}' expected."
+      }
+    ]
+  },
+  "lib/analytics/userJourney.ts_TS1005": {
+    "filePath": "lib/analytics/userJourney.ts",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 33,
+        "message": "',' expected."
+      },
+      {
+        "line": 82,
+        "message": "',' expected."
+      },
+      {
+        "line": 98,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "lib/supabase-server.ts_TS1005": {
+    "filePath": "lib/supabase-server.ts",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 101,
+        "message": "',' expected."
+      },
+      {
+        "line": 103,
+        "message": "',' expected."
+      },
+      {
+        "line": 103,
+        "message": "',' expected."
+      }
+    ]
+  },
+  "tests/LazyImage.spec.tsx_TS1005": {
+    "filePath": "tests/LazyImage.spec.tsx",
+    "errorCode": "1005",
+    "pattern": "'VALUE' expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 35,
+        "message": "'}' expected."
+      },
+      {
+        "line": 41,
+        "message": "'}' expected."
+      },
+      {
+        "line": 51,
+        "message": "'}' expected."
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS1109": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "1109",
+    "pattern": "Expression expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 44,
+        "message": "Expression expected."
+      },
+      {
+        "line": 129,
+        "message": "Expression expected."
+      }
+    ]
+  },
+  "components/subscription/withFeatureAccess.tsx_TS1109": {
+    "filePath": "components/subscription/withFeatureAccess.tsx",
+    "errorCode": "1109",
+    "pattern": "Expression expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 65,
+        "message": "Expression expected."
+      },
+      {
+        "line": 94,
+        "message": "Expression expected."
+      }
+    ]
+  },
+  "tests/LazyImage.spec.tsx_TS1109": {
+    "filePath": "tests/LazyImage.spec.tsx",
+    "errorCode": "1109",
+    "pattern": "Expression expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 62,
+        "message": "Expression expected."
+      },
+      {
+        "line": 81,
+        "message": "Expression expected."
+      }
+    ]
+  },
+  "utils/accessibility.ts_TS1109": {
+    "filePath": "utils/accessibility.ts",
+    "errorCode": "1109",
+    "pattern": "Expression expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 89,
+        "message": "Expression expected."
+      },
+      {
+        "line": 102,
+        "message": "Expression expected."
+      }
+    ]
+  },
+  "app/api/auth/callback/route.ts_TS1128": {
+    "filePath": "app/api/auth/callback/route.ts",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 34,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 35,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 36,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "app/rapporten/page.tsx_TS1128": {
+    "filePath": "app/rapporten/page.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 23,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 24,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 27,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "app/reflecties/page.tsx_TS1128": {
+    "filePath": "app/reflecties/page.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 23,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 24,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 27,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "app/specialisten/page.tsx_TS1128": {
+    "filePath": "app/specialisten/page.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 22,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 23,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 26,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "app/taken/[taskId]/edit/page.tsx_TS1128": {
+    "filePath": "app/taken/[taskId]/edit/page.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 29,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 30,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 33,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS1128": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 44,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 129,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/dev/PerformanceDashboard.tsx_TS1128": {
+    "filePath": "components/dev/PerformanceDashboard.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 142,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 154,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 154,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/onboarding/GuidedTour.tsx_TS1128": {
+    "filePath": "components/onboarding/GuidedTour.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 29,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 29,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 29,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1128": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 26,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 26,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 26,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/subscription/SubscriptionManagement.tsx_TS1128": {
+    "filePath": "components/subscription/SubscriptionManagement.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 87,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 95,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 95,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1128": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 68,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 68,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 68,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/support/SupportWidget.tsx_TS1128": {
+    "filePath": "components/support/SupportWidget.tsx",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 51,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 51,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 51,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "lib/analytics/userJourney.ts_TS1128": {
+    "filePath": "lib/analytics/userJourney.ts",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 34,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 83,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 99,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "lib/supabase-server.ts_TS1128": {
+    "filePath": "lib/supabase-server.ts",
+    "errorCode": "1128",
+    "pattern": "Declaration or statement expected.",
+    "fixStrategy": "Review TypeScript code and fix type issues",
+    "examples": [
+      {
+        "line": 101,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 105,
+        "message": "Declaration or statement expected."
+      },
+      {
+        "line": 106,
+        "message": "Declaration or statement expected."
+      }
+    ]
+  },
+  "components/common/ErrorBoundary.tsx_TS1145": {
+    "filePath": "components/common/ErrorBoundary.tsx",
+    "errorCode": "1145",
+    "pattern": "'VALUE' or JSX element expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 169,
+        "message": "'{' or JSX element expected."
+      },
+      {
+        "line": 171,
+        "message": "'{' or JSX element expected."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1145": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1145",
+    "pattern": "'VALUE' or JSX element expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 32,
+        "message": "'{' or JSX element expected."
+      },
+      {
+        "line": 44,
+        "message": "'{' or JSX element expected."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1145": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1145",
+    "pattern": "'VALUE' or JSX element expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 73,
+        "message": "'{' or JSX element expected."
+      },
+      {
+        "line": 84,
+        "message": "'{' or JSX element expected."
+      }
+    ]
+  },
+  "lib/performance/imageLazyOptimizer.tsx_TS1145": {
+    "filePath": "lib/performance/imageLazyOptimizer.tsx",
+    "errorCode": "1145",
+    "pattern": "'VALUE' or JSX element expected.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 105,
+        "message": "'{' or JSX element expected."
+      },
+      {
+        "line": 113,
+        "message": "'{' or JSX element expected."
+      }
+    ]
+  },
+  "components/subscription/withFeatureAccess.tsx_TS1381": {
+    "filePath": "components/subscription/withFeatureAccess.tsx",
+    "errorCode": "1381",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&rbrace;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 61,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 77,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 80,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      }
+    ]
+  },
+  "lib/performance/imageLazyOptimizer.tsx_TS1381": {
+    "filePath": "lib/performance/imageLazyOptimizer.tsx",
+    "errorCode": "1381",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&rbrace;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 106,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 133,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      }
+    ]
+  },
+  "tests/LazyImage.spec.tsx_TS1381": {
+    "filePath": "tests/LazyImage.spec.tsx",
+    "errorCode": "1381",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&rbrace;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 30,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 31,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 36,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      }
+    ]
+  },
+  "components/common/ErrorBoundary.tsx_TS1382": {
+    "filePath": "components/common/ErrorBoundary.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 169,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 171,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 171,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1382": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 33,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 44,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1382": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 74,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 84,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "components/subscription/withFeatureAccess.tsx_TS1382": {
+    "filePath": "components/subscription/withFeatureAccess.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 60,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 92,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "lib/performance/imageLazyOptimizer.tsx_TS1382": {
+    "filePath": "lib/performance/imageLazyOptimizer.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 107,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 121,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 122,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "tests/LazyImage.spec.tsx_TS1382": {
+    "filePath": "tests/LazyImage.spec.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 29,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 34,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 38,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS1434": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "1434",
+    "pattern": "Unexpected keyword or identifier.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 26,
+        "message": "Unexpected keyword or identifier."
+      },
+      {
+        "line": 42,
+        "message": "Unexpected keyword or identifier."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS1434": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "1434",
+    "pattern": "Unexpected keyword or identifier.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 68,
+        "message": "Unexpected keyword or identifier."
+      },
+      {
+        "line": 82,
+        "message": "Unexpected keyword or identifier."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS2657": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "2657",
+    "pattern": "JSX expressions must have one parent element.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 27,
+        "message": "JSX expressions must have one parent element."
+      },
+      {
+        "line": 43,
+        "message": "JSX expressions must have one parent element."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS2657": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "2657",
+    "pattern": "JSX expressions must have one parent element.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 69,
+        "message": "JSX expressions must have one parent element."
+      },
+      {
+        "line": 83,
+        "message": "JSX expressions must have one parent element."
+      }
+    ]
+  },
+  "lib/performance/imageLazyOptimizer.tsx_TS2657": {
+    "filePath": "lib/performance/imageLazyOptimizer.tsx",
+    "errorCode": "2657",
+    "pattern": "JSX expressions must have one parent element.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 97,
+        "message": "JSX expressions must have one parent element."
+      },
+      {
+        "line": 109,
+        "message": "JSX expressions must have one parent element."
+      }
+    ]
+  },
+  "components/subscription/PricingTables.tsx_TS17002": {
+    "filePath": "components/subscription/PricingTables.tsx",
+    "errorCode": "17002",
+    "pattern": "Expected corresponding JSX closing tag for 'VALUE'.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 38,
+        "message": "Expected corresponding JSX closing tag for 'string'."
+      },
+      {
+        "line": 46,
+        "message": "Expected corresponding JSX closing tag for 'string'."
+      }
+    ]
+  },
+  "components/subscription/UpgradePrompt.tsx_TS17002": {
+    "filePath": "components/subscription/UpgradePrompt.tsx",
+    "errorCode": "17002",
+    "pattern": "Expected corresponding JSX closing tag for 'VALUE'.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 78,
+        "message": "Expected corresponding JSX closing tag for 'string'."
+      },
+      {
+        "line": 86,
+        "message": "Expected corresponding JSX closing tag for 'string'."
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS1381": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "1381",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&rbrace;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 50,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 55,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      },
+      {
+        "line": 64,
+        "message": "Unexpected token. Did you mean `{'}'}` or `&rbrace;`?"
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS1382": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "1382",
+    "pattern": "Unexpected token. Did you mean `{OBJ}` or `&gt;`?",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 44,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 71,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      },
+      {
+        "line": 115,
+        "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?"
+      }
+    ]
+  },
+  "components/ai/KnowledgeEntryForm.tsx_TS17008": {
+    "filePath": "components/ai/KnowledgeEntryForm.tsx",
+    "errorCode": "17008",
+    "pattern": "JSX element 'VALUE' has no corresponding closing tag.",
+    "fixStrategy": "Review React component and fix type issues",
+    "examples": [
+      {
+        "line": 44,
+        "message": "JSX element 'HTMLFormElement' has no corresponding closing tag."
+      },
+      {
+        "line": 129,
+        "message": "JSX element 'HTMLInputElement' has no corresponding closing tag."
+      },
+      {
+        "line": 129,
+        "message": "JSX element 'HTMLInputElement' has no corresponding closing tag."
+      }
+    ]
+  }
+}

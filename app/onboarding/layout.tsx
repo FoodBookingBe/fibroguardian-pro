@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { OnboardingProvider, useOnboarding } from '@/context/OnboardingContext';
 
 // Wrapper component that uses the onboarding context

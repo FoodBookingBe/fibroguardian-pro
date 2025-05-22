@@ -1,8 +1,15 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Task, TaskLog } from '@/types';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useAddTaskLog, useUpdateTaskLog } from '@/hooks/useMutations';
 import { ErrorMessage } from '@/lib/error-handler';
 import TaskExecutionPresentational, { FeedbackState } from '@/components/tasks/TaskExecutionPresentational';
@@ -31,6 +38,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
   } = useTask(taskId, { 
     initialData: initialTask,
     enabled: !!taskId,
+      queryKey: ["profile", userId],
   });
 
   // State management
@@ -87,7 +95,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
     };
 
     addTaskLog(logDataToCreateInput, {
-      onSuccess: (createdLog) => {
+      onSuccess: (createdLog: unknown) => {
         if (createdLog && createdLog.id) {
           setStartTime(now);
           setCurrentLogId(createdLog.id);
@@ -98,7 +106,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
             addNotification({ type: 'error', message: 'Kon taaklog niet aanmaken.'});
         }
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Starten van taak mislukt.' });
       }
     });
@@ -142,7 +150,7 @@ export default function TaskExecutionContainer({ taskId, initialTask, onComplete
           router.push('/taken');
         }
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
          addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Opslaan van feedback mislukt.' });
       }
     });

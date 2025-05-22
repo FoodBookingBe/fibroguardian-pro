@@ -20,7 +20,7 @@ export const createTaskSchema = z.object({
 });
 
 // Schema for updating a task (all fields optional)
-export const updateTaskSchema = z.object({
+export const _updateTaskSchema = z.object({
   user_id: z.string().uuid({ message: 'Ongeldige gebruikers-ID (UUID).' }).optional(),
   type: z.string().min(1, { message: 'Type is verplicht.' }).optional(),
   titel: z.string().min(1, { message: 'Titel is verplicht.' }).optional(),

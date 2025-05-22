@@ -9,7 +9,7 @@
  * @param email The email string to validate.
  * @returns True if the email is valid, false otherwise.
  */
-export const validateEmail = (email: string): boolean => {
+export const _validateEmail = (email: string): boolean => {
   if (!email) return false;
   
   // Trim the email to remove any leading/trailing whitespace
@@ -49,7 +49,7 @@ const COMMON_PASSWORDS = [
  * @param password The password string to validate.
  * @returns An object with validation results including validity, message, and strength.
  */
-export const validatePassword = (password: string): PasswordValidationResult => {
+export const _validatePassword = (password: string): PasswordValidationResult => {
   if (!password) {
     return { valid: false, message: 'Wachtwoord is verplicht.', strength: 'weak' };
   }

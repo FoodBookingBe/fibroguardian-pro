@@ -49,7 +49,7 @@ export default async function AdminDashboardPage() {
 
   } catch (error: unknown) {
     console.error("[AdminDashboardPage] Error fetching dashboard data:", 
-      error instanceof Error ? error.message : 'Unknown error');
+      error instanceof Error ? (error as any).message : 'Unknown error');
     // Optionally, render an error state or pass error to components
   }
    

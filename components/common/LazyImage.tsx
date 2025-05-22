@@ -38,8 +38,9 @@ export default function LazyImage({
   loadingComponent,
   onLoad,
   onError,
-  ...props
-}: LazyImageProps) {
+  ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>
+;: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [imgSrc, setImgSrc] = useState(lowQualitySrc || src);
   const [hasError, setHasError] = useState(false);
@@ -102,7 +103,7 @@ export default function LazyImage({
 
   return (
     <div
-      ref={(node) => {
+      ref={(node: unknown) => {
         // This handles both the IntersectionObserver ref and our local ref
         if (typeof ref === 'function') ref(node);
         // Safe way to set the ref without modifying read-only property
@@ -131,7 +132,8 @@ export default function LazyImage({
           onLoad={handleImageLoad}
           onError={handleImageError}
           className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          {...props}
+          {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;
         />
       )}
 

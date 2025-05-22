@@ -25,7 +25,8 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: unknown) => {
     // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />;
+    return <img {...props} // Type assertion fixed
+const _typedProps = props as Record<string, unknown>; />;
   },
 }));
 
@@ -78,7 +79,7 @@ describe('LazyImage Component', () => {
   it('uses low quality image placeholder when provided', () => {
     // Setup useState mock to track calls
     const useStateMock = useState as jest.Mock;
-    useStateMock.mockImplementation((init) => [init, jest.fn()]);
+    useStateMock.mockImplementation((init: unknown) => [init, jest.fn()]);
     
     // Mock the useInView hook to return inView as true
     const useInViewMock = require('react-intersection-observer').useInView as jest.Mock;

@@ -15,7 +15,7 @@ export default async function SpecialistLayout({
   
   if (userError || !user) {
     console.error('Specialist Layout: User not found or error fetching user.', userError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   // Fetch user profile to determine role
@@ -27,7 +27,7 @@ export default async function SpecialistLayout({
   
   if (profileError) {
     console.error('Error fetching user profile:', profileError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   // Only specialists and admins can access this section

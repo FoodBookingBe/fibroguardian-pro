@@ -29,7 +29,7 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
   
   // Helper om stemming te visualiseren
   const getStemmingBadge = (stemming?: string) => {
-    if (!stemming) return null;
+    if (!stemming) return <></>; // Empty fragment instead of null
     
     const stemmingLower = stemming.toLowerCase();
     let style = { bg: 'bg-gray-200', text: 'text-gray-700' }; // Default

@@ -1,7 +1,14 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 import React from 'react';
 
 'use client';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useMySpecialists, SpecialistWithRelation } from '@/hooks/useSupabaseQuery'; // Import SpecialistWithRelation
 import { useDeleteSpecialistPatientRelation } from '@/hooks/useMutations';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';

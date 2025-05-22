@@ -16,7 +16,7 @@ export default async function AdminChangelogPage() {
   
   if (userError || !user) {
     console.error('Admin Changelog Page: User not found or error fetching user.', userError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   // Fetch user profile to determine role
@@ -28,7 +28,7 @@ export default async function AdminChangelogPage() {
   
   if (profileError) {
     console.error('Error fetching user profile:', profileError);
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   // Only admins can access this page

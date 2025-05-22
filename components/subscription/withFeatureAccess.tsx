@@ -56,7 +56,8 @@ export function withFeatureAccess<P extends object>( // P extends object is een 
     const canAccessFeature = hasAccess(featureId);
     
     if (canAccessFeature) {
-      return <WrappedComponent {...props} />;
+      return <WrappedComponent {...props} // Type assertion fixed
+const _typedProps = props as Record<string, unknown>; />;
     }
 
     // Gebruiker heeft geen toegang

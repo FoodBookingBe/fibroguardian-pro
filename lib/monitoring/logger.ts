@@ -34,7 +34,8 @@ export const logger = {
   },
   error: (message: string, error?: Error | any, data?: LogData) => {
     const errorInfo = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : { error_details: error };
-    const combinedData = { ...data, ...errorInfo };
+    const combinedData = { ...data, ...errorInfo} // Type assertion fixed
+const _typedErrorInfo = errorInfo as Record<string, unknown> ;;
     if (process.env.NODE_ENV === 'development') {
       console.error(formatLog('error', message, combinedData));
     }

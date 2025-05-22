@@ -1,6 +1,6 @@
-import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
+import { QueryKey, useQuery, UseQueryOptions } from '@tanstack/react-query';
+
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Database } from '@/types/database'; // Zorg dat dit pad correct is
 
 type SupabaseQueryFunction<TQueryFnData, TError> = (
   supabase: ReturnType<typeof getSupabaseBrowserClient>
@@ -12,8 +12,12 @@ export interface ErrorMessage { // Voeg 'export' toe
   code?: string;
 }
 
-interface SupabaseQueryHookOptions<TQueryFnData, TError, TData, TQueryKey extends QueryKey> extends UseQueryOptions<TQueryFnData, TError, TData, TQueryKey> {
-  // Geen extra properties nodig, UseQueryOptions definieert queryKey al correct
+interface SupabaseQueryHookOptions<TQueryFnData, TError, TData, TQueryKey extends QueryKey> extends Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey'> {
+  // queryKey wordt apart doorgegeven aan useSupabaseQuery
+  supabaseOptions?: {
+    schema?: string;
+    headers?: Record<string, string>;
+  };
 }
 
 /**
@@ -53,9 +57,9 @@ function useSupabaseQuery<
       } catch (error: unknown) {
         // Formatteer Supabase errors of andere errors
         const errorMessage: ErrorMessage = {
-          message: error.message || 'An unknown error occurred',
-          details: error.details || error.hint || undefined,
-          code: error.code || undefined,
+          message: (error as Record<string, unknown>)?.message as string || 'An unknown error occurred',
+          details: (error as Record<string, unknown>)?.details as string || (error as Record<string, unknown>)?.hint as string || undefined,
+          code: (error as Record<string, unknown>)?.code as string || undefined,
         };
         throw errorMessage;
       }
@@ -67,10 +71,19 @@ function useSupabaseQuery<
 export default useSupabaseQuery;
 
 // Aangepaste hook voor het ophalen van een gebruikersprofiel
-export function useProfile(userId: string | undefined, options?: UseQueryOptions<any, ErrorMessage>) {
-  return useSupabaseQuery<any, ErrorMessage>(
+export interface Profile {
+  id: string;
+  voornaam: string;
+  achternaam: string;
+  type: 'patient' | 'specialist' | 'admin';
+  avatar_url?: string;
+  geboortedatum?: string;
+}
+
+export function useProfile(userId: string | undefined, options?: Omit<UseQueryOptions<Profile, ErrorMessage, Profile, readonly unknown[]>, 'queryKey'>) {
+  return useSupabaseQuery<Profile, ErrorMessage>(
     ['profile', userId],
-    async (supabase) => {
+    async (supabase: unknown) => {
       if (!userId) {
         throw new Error('User ID is required to fetch profile.');
       }

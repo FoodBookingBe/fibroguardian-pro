@@ -322,12 +322,18 @@ class AutoFixSystem {
     const vscodeSettings = {
       "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true,
-        "source.organizeImports": true
+        "source.organizeImports": true,
+        "source.removeUnusedImports": true
       },
       "editor.formatOnSave": true,
       "typescript.preferences.useAliasesForRenames": false,
       "eslint.workingDirectories": ["."],
-      "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"]
+      "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
+      "eslint.run": "onType",
+      "eslint.autoFixOnSave": true,
+      "files.trimTrailingWhitespace": true,
+      "files.insertFinalNewline": true,
+      "javascript.suggest.autoImports": true
     };
 
     try {
@@ -343,6 +349,9 @@ class AutoFixSystem {
       "*.{js,jsx,ts,tsx}": [
         "eslint --fix",
         "prettier --write"
+      ],
+      "*.{json,css,md,yml,yaml}": [
+        "prettier --write"
       ]
     };
 
@@ -353,6 +362,61 @@ class AutoFixSystem {
       console.log('✅ Lint-staged configuratie toegevoegd');
     } catch (error) {
       console.log('❌ Kon lint-staged niet configureren');
+    }
+
+    // Setup automatische database integratie
+    await this.setupDatabaseIntegration();
+  }
+
+  async setupDatabaseIntegration() {
+    console.log('\n🗄️  Setting up database integration...');
+
+    // Maak cron job voor automatische database schema validatie
+    const cronJobScript = `#!/bin/bash
+# Automatische database schema validatie en type generatie
+cd ${process.cwd()}
+npm run db:types
+npm run db:validate
+npm run fix:types
+
+# Run auto-fix system
+node scripts/auto-fix-system.js
+node scripts/fix-typescript.js
+
+# Log resultaat
+echo "$(date): Automatische database integratie en auto-fix uitgevoerd" >> logs/auto-fix.log
+`;
+
+    try {
+      await fs.mkdir('scripts/cron', { recursive: true });
+      await fs.writeFile('scripts/cron/auto-fix-db.sh', cronJobScript);
+      await fs.chmod('scripts/cron/auto-fix-db.sh', '755');
+      console.log('✅ Cron job script aangemaakt');
+
+      // Maak logs directory
+      await fs.mkdir('logs', { recursive: true });
+
+      // Voeg instructies toe voor het instellen van de cron job
+      const cronInstructions = `
+# Automatische Database Integratie en Auto-Fix
+
+Om de automatische database integratie en auto-fix in te stellen, voeg de volgende regel toe aan je crontab:
+
+\`\`\`
+# Run elke dag om 2:00 AM
+0 2 * * * ${process.cwd()}/scripts/cron/auto-fix-db.sh
+\`\`\`
+
+Je kunt dit doen door \`crontab -e\` uit te voeren en de bovenstaande regel toe te voegen.
+
+Voor Windows, gebruik Task Scheduler om het script \`scripts/cron/auto-fix-db.sh\` dagelijks uit te voeren.
+`;
+
+      await fs.writeFile('docs/CRON_SETUP.md', cronInstructions);
+      console.log('✅ Cron job instructies aangemaakt in docs/CRON_SETUP.md');
+
+    } catch (error) {
+      console.log(`❌ Kon database integratie niet instellen: ${error.message}`);
     }
   }
 }

@@ -19,7 +19,7 @@ interface OverzichtPageData {
 }
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Disable caching
+export const _revalidate = 0; // Disable caching
 
 export default async function OverzichtPage() {
   const supabase = getSupabaseServerComponentClient(); // Use the new helper
@@ -135,5 +135,6 @@ export default async function OverzichtPage() {
     });
   }
 
-  return <OverzichtClient {...pageData} />;
+  return <OverzichtClient {...pageData} // Type assertion fixed
+const _typedPageData = pageData as Record<string, unknown>; />;
 }

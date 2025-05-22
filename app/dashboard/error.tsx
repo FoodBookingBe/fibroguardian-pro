@@ -12,6 +12,7 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('Dashboard error:', error);
+  return undefined; // Add default return
   }, [error]);
 
   return (

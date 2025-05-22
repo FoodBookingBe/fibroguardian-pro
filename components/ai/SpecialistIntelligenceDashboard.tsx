@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';

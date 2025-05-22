@@ -23,7 +23,7 @@ export interface ValidationResult { // Exporting for use in other modules if nee
 }
 
 // Validatiefuncties voor verschillende soorten invoer
-export const validate = {
+export const _validate = {
   email: (value: string): ValidationResult => {
     if (!value) return { isValid: false, message: 'E-mailadres is verplicht.' }; // Consistent message
     if (!patterns.email.test(value)) {
@@ -116,7 +116,7 @@ export const validate = {
   }
 };
 
-export const sanitize = {
+export const _sanitize = {
   html: (value: string | undefined | null): string => {
     if (!value) return '';
     // Order matters: & first

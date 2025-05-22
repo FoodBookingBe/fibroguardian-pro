@@ -67,7 +67,7 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
             id="type-filter"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e: unknown) => setTypeFilter(e.target.value)}
           >
             <option value="">Alle Types</option>
             <option value="taak">Taak</option>
@@ -80,7 +80,7 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
             id="pattern-filter"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={patternFilter}
-            onChange={(e) => setPatternFilter(e.target.value)}
+            onChange={(e: unknown) => setPatternFilter(e.target.value)}
           >
             <option value="">Alle Patronen</option>
             <option value="eenmalig">Eenmalig</option>

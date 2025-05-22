@@ -46,7 +46,7 @@ export default function InzichtenPage(): JSX.Element {
       setInsights(data || []);
     } catch (error: unknown) {
       console.error('Fout bij ophalen inzichten:', error);
-      setError(error.message || 'Er is een fout opgetreden bij het ophalen van de inzichten');
+      setError((error as any).message || 'Er is een fout opgetreden bij het ophalen van de inzichten');
     } finally {
       setLoading(false);
     }
@@ -54,6 +54,7 @@ export default function InzichtenPage(): JSX.Element {
 
   useEffect(() => {
     fetchInsights();
+  return undefined; // Add default return
   }, [fetchInsights]);
   
   // Fetch logs for a specific insight when expanded

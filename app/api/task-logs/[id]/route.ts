@@ -56,7 +56,7 @@ export async function PUT(
     if (error instanceof Error) {
         const errorInfo = handleSupabaseError(error, 'tasklog-bijwerken');
         userMessage = errorInfo.userMessage;
-        if (error.message && error.message.includes('Task log not found or user does not have permission')) {
+        if ((error as any).message && (error as any).message.includes('Task log not found or user does not have permission')) {
             statusCode = 403;
         }
     }

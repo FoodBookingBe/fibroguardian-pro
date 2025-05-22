@@ -1,6 +1,13 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, FormEvent } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider'; 
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
 import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
 import { ErrorMessage } from '@/lib/error-handler';
 import AddSpecialistButtonPresentational from '@/components/specialisten/AddSpecialistButtonPresentational';
@@ -99,7 +106,7 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
 
     } catch (err: unknown) {
       console.error('Error in AddSpecialistButton handleSubmit:', err);
-      const userMessage = err.message || 'Er is een onverwachte fout opgetreden.';
+      const userMessage = (err as any).message || 'Er is een onverwachte fout opgetreden.';
       setFormError(userMessage);
       addNotification({ type: 'error', message: userMessage });
     }
@@ -108,7 +115,7 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
   // This button might be conditionally rendered by its parent if only patients can see it.
   // If not, add a check here based on user's profile type.
   // const { data: profile } = useProfile(user?.id);
-  // if (profile?.type !== 'patient') return null;
+  // if (profile?.type !== 'patient') return <></>; // Empty fragment instead of null
 
 
   return (

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { trackOnboardingStep, OnboardingStepName } from '@/lib/analytics/userJourney'; // Import OnboardingStepName
 import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook
 // import { useFocusTrap } from '@/lib/accessibility/focus-trap'; // Placeholder hook
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // X was unused
 
 // Placeholder voor useFocusTrap hook
@@ -25,11 +25,13 @@ const useFocusTrap = (ref: React.RefObject<HTMLElement>, active: boolean) => {
 };
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props }: unknown) => (
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
   <button 
     onClick={onClick} 
     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-60 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-    {...props}
+    {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;
   >
     {children}
   </button>
@@ -220,7 +222,7 @@ export function GuidedTour({
   }, [isOpen, targetElement, steps]);
 
 
-  if (!isOpen || !currentStep) return null;
+  if (!isOpen || !currentStep) return <></>; // Empty fragment instead of null
 
   return createPortal(
     <>

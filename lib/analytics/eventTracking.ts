@@ -119,13 +119,15 @@ class AnalyticsService {
   
   public identify(userId: string, properties: Record<string, any> = {}) {
     this.userId = userId;
-    this.userProperties = { ...this.userProperties, ...properties }; // Merge properties
+    this.userProperties = { ...this.userProperties, ...properties} // Type assertion fixed
+const typedProperties = properties as Record<string, unknown> ;; // Merge properties
     if (this.debugMode) console.log('[Analytics] Identify:', { userId, properties });
     // Stuur eventueel een 'identify' call naar je analytics backend
   }
 
   public setUserProperties(properties: Record<string, any>) {
-    this.userProperties = { ...this.userProperties, ...properties };
+    this.userProperties = { ...this.userProperties, ...properties} // Type assertion fixed
+const typedProperties = properties as Record<string, unknown> ;;
     if (this.debugMode) console.log('[Analytics] Set User Properties:', { properties });
   }
 

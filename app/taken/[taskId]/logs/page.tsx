@@ -49,7 +49,7 @@ export default function TaskSpecificLogsPage(): JSX.Element {
         setTask(data as Task);
       } catch (error: unknown) {
         console.error('Fout bij ophalen taak:', error);
-        setError(error.message || 'Er is een fout opgetreden bij het ophalen van de taak');
+        setError((error as any).message || 'Er is een fout opgetreden bij het ophalen van de taak');
       } finally {
         setLoading(false);
       }

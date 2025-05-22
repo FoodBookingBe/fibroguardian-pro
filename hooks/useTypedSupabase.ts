@@ -11,7 +11,7 @@ import { useCallback } from 'react';
 import { PostgrestError } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { Database } from '@/types/database';
 
@@ -158,7 +158,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
     typedQuery: {
       // Profiles
       profiles: {
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('profiles')
@@ -174,7 +174,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByUserId: async (userId) => {
+        getByUserId: async (userId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('profiles')
@@ -215,7 +215,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        update: async (id, data) => {
+        update: async (id: unknown, data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: updatedData, error } = await supabase
             .from('profiles')
@@ -231,7 +231,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        create: async (data) => {
+        create: async (data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: createdData, error } = await supabase
             .from('profiles')
@@ -263,7 +263,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('tasks')
@@ -279,7 +279,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByUser: async (userId) => {
+        getByUser: async (userId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('tasks')
@@ -294,7 +294,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        create: async (data) => {
+        create: async (data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: createdData, error } = await supabase
             .from('tasks')
@@ -309,7 +309,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        update: async (id, data) => {
+        update: async (id: unknown, data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: updatedData, error } = await supabase
             .from('tasks')
@@ -325,7 +325,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        delete: async (id) => {
+        delete: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { error } = await supabase
             .from('tasks')
@@ -356,7 +356,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('task_logs')
@@ -372,7 +372,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByUser: async (userId) => {
+        getByUser: async (userId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('task_logs')
@@ -387,7 +387,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByTask: async (taskId) => {
+        getByTask: async (taskId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('task_logs')
@@ -402,7 +402,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        create: async (data) => {
+        create: async (data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: createdData, error } = await supabase
             .from('task_logs')
@@ -417,7 +417,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        update: async (id, data) => {
+        update: async (id: unknown, data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: updatedData, error } = await supabase
             .from('task_logs')
@@ -433,7 +433,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        delete: async (id) => {
+        delete: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { error } = await supabase
             .from('task_logs')
@@ -464,7 +464,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('reflecties')
@@ -480,7 +480,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByUser: async (userId) => {
+        getByUser: async (userId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('reflecties')
@@ -512,7 +512,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        create: async (data) => {
+        create: async (data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: createdData, error } = await supabase
             .from('reflecties')
@@ -527,7 +527,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        update: async (id, data) => {
+        update: async (id: unknown, data: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data: updatedData, error } = await supabase
             .from('reflecties')
@@ -543,7 +543,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        delete: async (id) => {
+        delete: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { error } = await supabase
             .from('reflecties')
@@ -574,7 +574,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('expert_knowledge')
@@ -590,7 +590,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getBySpecialist: async (specialistId) => {
+        getBySpecialist: async (specialistId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('expert_knowledge')
@@ -605,7 +605,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByContentType: async (contentType) => {
+        getByContentType: async (contentType: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('expert_knowledge')
@@ -635,7 +635,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        update: async (id, data) => {
+        update: async (id: unknown, data) => {
           const supabase = getSupabaseBrowserClient();
           const { data: updatedData, error } = await supabase
             .from('expert_knowledge')
@@ -651,7 +651,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        delete: async (id) => {
+        delete: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { error } = await supabase
             .from('expert_knowledge')
@@ -682,7 +682,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getById: async (id) => {
+        getById: async (id: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('ai_recommendations')
@@ -713,7 +713,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByContextType: async (contextType) => {
+        getByContextType: async (contextType: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('ai_recommendations')
@@ -822,7 +822,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getBySpecialist: async (specialistId) => {
+        getBySpecialist: async (specialistId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('specialist_patienten')
@@ -837,7 +837,7 @@ export function useTypedSupabase(): { typedQuery: TypedSupabaseClient } {
           };
         },
         
-        getByPatient: async (patientId) => {
+        getByPatient: async (patientId: unknown) => {
           const supabase = getSupabaseBrowserClient();
           const { data, error, count } = await supabase
             .from('specialist_patienten')

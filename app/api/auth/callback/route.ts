@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
             });
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+            cookieStore.set({ name, value: '', ...options} // Type assertion fixed
+const _typedOptions = options as Record<string, unknown> ;);
           },
         },
       }

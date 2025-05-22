@@ -1,7 +1,7 @@
 import React from 'react';
 
 'use client';
-import { useAuth } from '@/components/auth/AuthProvider'; // Import useAuth
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; // Import useAuth
 
 export default function SessionStatus(): JSX.Element {
   const { user, session, loading, profile } = useAuth();

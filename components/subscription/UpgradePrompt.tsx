@@ -34,13 +34,13 @@ export function UpgradePrompt({
   
   // Als gebruiker al toegang heeft, of subscription nog laadt, of prompt is gesloten, toon niets
   if (isLoadingSubscription || hasAccess(featureId) || !isVisible) {
-    return null;
+    return <></>; // Empty fragment instead of null
   }
   
   const feature = subscriptionFeatures.find(f => f.id === featureId);
   if (!feature) {
     console.warn(`UpgradePrompt: Feature met ID '${featureId}' niet gevonden.`);
-    return null; // Feature niet gedefinieerd, toon geen prompt
+    return <></>; // Empty fragment instead of null // Feature niet gedefinieerd, toon geen prompt
   }
 
   const plans = userType === 'specialist' ? specialistPlans : patientPlans;
@@ -64,11 +64,13 @@ export function UpgradePrompt({
   };
   
   // Basis Button component als ds/atoms/Button niet bestaat
-  const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', icon, iconPosition, ...props }: unknown) => (
+  const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', icon, iconPosition, ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
     <button 
       onClick={onClick} 
       className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-      {...props}
+      {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;
     >
       {iconPosition === 'left' && icon && <span className="mr-2">{icon}</span>}
       {children}
@@ -76,8 +78,10 @@ export function UpgradePrompt({
     </button>
   );
   // Basis Card component
-  const Card = ({ children, className: cardClassName = '', ...props }: unknown) => (
-    <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props}>
+  const Card = ({ children, className: cardClassName = '', ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
+    <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;>
       {children}
     </div>
   );

@@ -14,7 +14,7 @@ export interface ErrorMessage { // Added export
  * @param context De context waar de fout optrad (bv. 'taak-opslaan', 'profiel-bijwerken')
  * @returns Gestructureerd foutbericht
  */
-export const handleSupabaseError = (
+export const _handleSupabaseError = (
   error: PostgrestError | Error | unknown, 
   context: string = 'algemeen'
 ): ErrorMessage => {
@@ -137,7 +137,7 @@ export const handleSupabaseError = (
  * @param message Foutbericht
  * @returns Geformatteerd foutbericht object
  */
-export const formatApiError = (statusCode: number, message: string) => {
+export const _formatApiError = (statusCode: number, message: string) => {
   return {
     status: statusCode,
     error: {

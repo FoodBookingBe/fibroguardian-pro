@@ -114,7 +114,8 @@ export class OnboardingEngine {
 
   public async completeOnboardingStep(user: User, step: OnboardingStepName, data?: unknown) {
     if (!user) return;
-    trackOnboardingStep(step, { userId: user.id, ...data });
+    trackOnboardingStep(step, { userId: user.id, ...data} // Type assertion fixed
+const _typedData = data as Record<string, unknown> ;);
     
     // const profile = await this.getUserProfile(user.id); // Haal up-to-date profiel
     // if (profile) {
@@ -137,4 +138,4 @@ export class OnboardingEngine {
 }
 
 // Singleton instance (optioneel, kan ook per context/gebruik aangemaakt worden)
-// export const onboardingEngine = new OnboardingEngine();
+// export const _onboardingEngine = new OnboardingEngine();

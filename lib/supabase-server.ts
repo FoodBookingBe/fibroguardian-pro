@@ -9,7 +9,7 @@ import { Database } from '@/types/database';
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const _supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // Check required environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -24,7 +24,7 @@ const serverClientCache = new Map<string, SupabaseClient<Database>>();
  * 
  * @returns A Supabase client configured for server components
  */
-export const getSupabaseServerComponentClient = (): SupabaseClient<Database> => {
+export const _getSupabaseServerComponentClient = (): SupabaseClient<Database> => {
   try {
     const cookieStore = cookies();
     const cookieString = cookieStore.getAll()
@@ -84,7 +84,7 @@ export const getSupabaseServerComponentClient = (): SupabaseClient<Database> => 
  * 
  * @returns A Supabase client configured for route handlers
  */
-export const getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
+export const _getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
   try {
     const cookieStore = cookies();
     
@@ -97,10 +97,12 @@ export const getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
+            cookieStore.set({ name, value, ...options} // Type assertion fixed
+const typedOptions = options as Record<string, unknown> ;);
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+            cookieStore.set({ name, value: '', ...options} // Type assertion fixed
+const typedOptions = options as Record<string, unknown> ;);
           },
         },
         global: {

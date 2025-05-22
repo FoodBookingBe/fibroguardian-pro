@@ -64,7 +64,7 @@ export default function PatientList({ patients, onAddPatient }: PatientListProps
               type="text"
               placeholder="Zoek op naam of postcode"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: unknown) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

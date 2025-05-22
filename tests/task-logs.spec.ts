@@ -20,8 +20,9 @@ describe('Task Log AI Validation', () => {
       energie_na: 5,
       pijn_score: 5,
       vermoeidheid_score: 5,
-      ...overrides
-    };
+      ...overrides} // Type assertion fixed
+const typedOverrides = overrides as Record<string, unknown>
+    ;;
   };
 
   // Helper function to create a basic task object for testing
@@ -31,8 +32,9 @@ describe('Task Log AI Validation', () => {
       titel: 'Test Taak',
       type: 'taak',
       duur: 30,
-      ...overrides
-    };
+      ...overrides} // Type assertion fixed
+const typedOverrides = overrides as Record<string, unknown>
+    ;;
   };
 
   beforeEach(() => {

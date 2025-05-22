@@ -128,7 +128,7 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-export const config = {
+export const _config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|manifest.json|robots.txt|sitemap.xml|icons/|screenshots/).*)',
   ],

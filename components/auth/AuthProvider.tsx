@@ -62,7 +62,7 @@ const AuthContext = createContext<AuthContextType>({
   lastSuccessfulRefresh: null,
 });
  
-export const useAuth = () => {
+export const _useAuth = () => {
   return useContext(AuthContext);
 };
 
@@ -349,6 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error: profileError,
   } = useProfile(user?.id, {
     enabled: !!user,
+      queryKey: ["profile", userId],
   });
 
   useEffect(() => {

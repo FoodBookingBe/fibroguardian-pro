@@ -1,7 +1,14 @@
+
+// Fix voor ontbrekende property 'addNotification' op Element type
+declare module "react" {
+  interface Element {
+    addNotification?: unknown;
+  }
+}
 'use client';
 import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useUpsertReflectie } from '@/hooks/useMutations';
 import { ReflectieFormData as ReflectieUpsertData } from '@/types'; // Renaming for clarity if ReflectieFormData is also used for form state
 import { ErrorMessage } from '@/lib/error-handler';
@@ -87,7 +94,7 @@ export default function ReflectieFormContainer({ initialDatum }: ReflectieFormCo
         setTimeout(() => router.push('/reflecties'), 500); 
         router.refresh(); // Ensure server components on the target page are updated
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         // Notification is handled by the hook's global error handling via NotificationContext
         // but if specific local display is needed, it can be done here too.
         // addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Opslaan van reflectie mislukt.' });

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, FormEvent } from 'react'; // Import React en FormEvent
 // import { Button } from '@/components/ds/atoms/Button'; // Placeholder
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
-import { useAuth } from '@/components/auth/AuthProvider'; 
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
 import { MessageSquare, X, ChevronUp, ChevronDown, Search, HelpCircle } from 'lucide-react';
 
@@ -47,13 +47,15 @@ const faqs: FAQItem[] = [
 ];
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props }: unknown) => (
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown> ;: unknown) => (
   <button 
     type={type}
     onClick={onClick} 
     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-60 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
     disabled={disabled}
-    {...props}
+    {...props} // Type assertion fixed
+const typedProps = props as Record<string, unknown>;
   >
     {children}
   </button>
@@ -161,7 +163,7 @@ export function SupportWidget(): JSX.Element {
               placeholder="Zoek in FAQs..."
               className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: unknown) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -209,11 +211,11 @@ export function SupportWidget(): JSX.Element {
             <form onSubmit={handleContactSubmit} className="space-y-3">
               <div>
                 <label htmlFor="support-subject" className="block text-xs font-medium text-gray-600 mb-0.5">Onderwerp</label>
-                <input type="text" id="support-subject" className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.subject} onChange={(e) => setContactFormData({...contactFormData, subject: e.target.value})} required />
+                <input type="text" id="support-subject" className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.subject} onChange={(e: unknown) => setContactFormData({...contactFormData, subject: e.target.value})} required />
               </div>
               <div>
                 <label htmlFor="support-message" className="block text-xs font-medium text-gray-600 mb-0.5">Bericht</label>
-                <textarea id="support-message" rows={3} className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.message} onChange={(e) => setContactFormData({...contactFormData, message: e.target.value})} required></textarea>
+                <textarea id="support-message" rows={3} className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.message} onChange={(e: unknown) => setContactFormData({...contactFormData, message: e.target.value})} required></textarea>
               </div>
               <div className="flex justify-end space-x-2 pt-1">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowContactForm(false)} disabled={isSubmitting}>Annuleren</Button>

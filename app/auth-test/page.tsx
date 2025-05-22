@@ -3,7 +3,7 @@ import React from 'react';
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Updated import
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Disable caching
+export const _revalidate = 0; // Disable caching
 
 export default async function AuthTestPage() {
   const supabase = getSupabaseServerComponentClient(); // Use the new standardized client

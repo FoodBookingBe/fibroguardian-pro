@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { useProfile } from '@/hooks/useSupabaseQuery';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ export default function TopbarContainer(): JSX.Element {
 
   const { data: fullProfile, isLoading: isLoadingProfile } = useProfile(user?.id, {
     enabled: !!user,
+      queryKey: ["profile", userId],
     // select option removed, will derive TopbarProfileData from fullProfile
   });
 

@@ -154,7 +154,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
  * @returns The wrapped component
  * 
  * @example
- * const SafeComponent = withErrorBoundary(MyComponent, {
+ * const _SafeComponent = withErrorBoundary(MyComponent, {
  *   fallback: <p>Something went wrong</p>
  * });
  */
@@ -164,9 +164,11 @@ export function withErrorBoundary<P extends object>(
 ): React.FC<P> {
   const displayName = Component.displayName || Component.name || 'Component';
   
-  const WrappedComponent: React.FC<P> = (props) => (
-    <ErrorBoundary {...errorBoundaryProps}>
-      <Component {...props} />
+  const WrappedComponent: React.FC<P> = (props: unknown) => (
+    <ErrorBoundary {...errorBoundaryProps} // Type assertion fixed
+const _typedErrorBoundaryProps = errorBoundaryProps as Record<string, unknown>;>
+      <Component {...props} // Type assertion fixed
+const _typedProps = props as Record<string, unknown>; />
     </ErrorBoundary>
   );
   

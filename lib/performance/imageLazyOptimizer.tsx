@@ -49,8 +49,8 @@ export default function LazyImage({
     }
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      (entries: unknown) => {
+        entries.forEach((entry: unknown) => {
           if (entry.isIntersecting) {
             setIsInView(true);
             observer.unobserve(entry.target); // Disconnect after first intersection
@@ -101,21 +101,24 @@ export default function LazyImage({
         width: width ? `${width}px` : (layoutProps.fill ? '100%' : 'auto'), 
         height: height ? `${height}px` : (layoutProps.fill ? '100%' : 'auto'),
         minHeight: '1px', // Prevent collapse before loading
-        ...wrapperStyle 
-      }}
+        ...wrapperStyle} // Type assertion fixed
+const _typedWrapperStyle = wrapperStyle as Record<string, unknown> 
+      ;}
     >
       {(isInView || priority) ? (
         <Image
           src={src}
           alt={alt}
-          {...layoutProps} // Use fill or width/height
+          {...layoutProps} // Type assertion fixed
+const _typedLayoutProps = layoutProps as Record<string, unknown>; // Use fill or width/height
           onLoad={() => setIsLoaded(true)}
           style={imageStyle} // Apply custom blur or other styles
           className={imageClassName}
           priority={priority}
           // If using Next/Image's blur, provide blurDataURL
           placeholder={blurEffect && src.startsWith('data:') ? undefined : placeholder} // Don't use Next/Image blur if custom is active and not a data URL
-          {...rest}
+          {...rest} // Type assertion fixed
+const _typedRest = rest as Record<string, unknown>;
         />
       ) : (
         <div 

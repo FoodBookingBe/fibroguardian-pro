@@ -1,0 +1,71 @@
+Unified Auto-Fix System started at 2025-05-22T14:51:13.714Z
+
+Initial error count: 301
+Remaining error count: 340
+
+Auto-Fix Report:
+Initial errors: 301
+Fixed errors: -39
+Remaining errors: 340
+Fix rate: -12.96%
+
+Recommendations for remaining errors:
+1. Files with the most errors:
+   - components/ai/KnowledgeEntryForm.tsx: 47 errors
+   - tests/LazyImage.spec.tsx: 36 errors
+   - components/subscription/PricingTables.tsx: 22 errors
+   - components/subscription/UpgradePrompt.tsx: 22 errors
+   - components/subscription/withFeatureAccess.tsx: 18 errors
+   - lib/performance/imageLazyOptimizer.tsx: 17 errors
+   - lib/supabase-server.ts: 17 errors
+   - components/subscription/SubscriptionManagement.tsx: 16 errors
+   - app/rapporten/page.tsx: 14 errors
+   - app/reflecties/page.tsx: 14 errors
+
+2. Most common error types:
+   - TS1005 (87 occurrences): ',' expected.
+     Recommendation: Review the error and fix manually
+   - TS1128 (86 occurrences): Declaration or statement expected.
+     Recommendation: Review the error and fix manually
+   - TS1381 (39 occurrences): Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     Recommendation: Review the error and fix manually
+   - TS1003 (31 occurrences): Identifier expected.
+     Recommendation: Review the error and fix manually
+   - TS1382 (30 occurrences): Unexpected token. Did you mean `{'>'}` or `&gt;`?
+     Recommendation: Review the error and fix manually
+   - TS1145 (14 occurrences): '{' or JSX element expected.
+     Recommendation: Review the error and fix manually
+   - TS2657 (13 occurrences): JSX expressions must have one parent element.
+     Recommendation: Review the error and fix manually
+   - TS1109 (11 occurrences): Expression expected.
+     Recommendation: Review the error and fix manually
+   - TS17002 (8 occurrences): Expected corresponding JSX closing tag for 'string'.
+     Recommendation: Review the error and fix manually
+   - TS1434 (7 occurrences): Unexpected keyword or identifier.
+     Recommendation: Review the error and fix manually
+
+3. Specific recommendations for top files:
+   - components/ai/KnowledgeEntryForm.tsx:
+     - TS1381 (18 occurrences): Review React component and fix type issues
+     - TS1005 (17 occurrences): Review React component and fix type issues
+     - TS1382 (5 occurrences): Review React component and fix type issues
+   - tests/LazyImage.spec.tsx:
+     - TS1381 (11 occurrences): Review React component and fix type issues
+     - TS1005 (9 occurrences): Review React component and fix type issues
+     - TS1382 (9 occurrences): Review React component and fix type issues
+   - components/subscription/PricingTables.tsx:
+     - TS1128 (6 occurrences): Review React component and fix type issues
+     - TS1003 (4 occurrences): Review React component and fix type issues
+     - TS1005 (2 occurrences): Review React component and fix type issues
+   - components/subscription/UpgradePrompt.tsx:
+     - TS1128 (6 occurrences): Review React component and fix type issues
+     - TS1003 (4 occurrences): Review React component and fix type issues
+     - TS1005 (2 occurrences): Review React component and fix type issues
+   - components/subscription/withFeatureAccess.tsx:
+     - TS1381 (6 occurrences): Review React component and fix type issues
+     - TS1005 (3 occurrences): Review React component and fix type issues
+     - TS1003 (2 occurrences): Review React component and fix type issues
+
+
+Unified Auto-Fix System completed at 2025-05-22T14:51:56.999Z
+Duration: 43.285 seconds

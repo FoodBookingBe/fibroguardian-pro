@@ -17,6 +17,7 @@ Dit document beschrijft het Auto-Fix System voor FibroGuardian Pro, een geautoma
 Het Auto-Fix System is ontworpen om code quality issues automatisch te detecteren en op te lossen, waardoor de ontwikkelaars zich kunnen concentreren op het bouwen van features in plaats van het handmatig oplossen van linting en formatting issues.
 
 Het systeem bestaat uit verschillende componenten:
+
 - **Auto-Fix System**: Detecteert en lost code quality issues op
 - **Real-time Fixer**: Monitort bestanden tijdens ontwikkeling en lost issues direct op
 - **TypeScript Fixer**: Specifiek voor het oplossen van TypeScript-gerelateerde issues
@@ -30,6 +31,7 @@ Het systeem bestaat uit verschillende componenten:
 Het hoofdsysteem dat code quality issues detecteert en oplost. Het analyseert de codebase op ESLint, TypeScript en andere issues en past automatisch fixes toe waar mogelijk.
 
 Belangrijkste features:
+
 - Detectie van ESLint issues
 - Automatische fixes voor veelvoorkomende problemen
 - Gedetailleerde rapportage van opgeloste issues
@@ -40,6 +42,7 @@ Belangrijkste features:
 Een file watcher die bestanden monitort tijdens ontwikkeling en issues direct oplost zodra ze ontstaan.
 
 Belangrijkste features:
+
 - Real-time monitoring van bestandswijzigingen
 - Onmiddellijke fixes voor ESLint en formatting issues
 - Integratie met VS Code en Git hooks
@@ -50,6 +53,7 @@ Belangrijkste features:
 Een gespecialiseerde fixer voor TypeScript-gerelateerde issues.
 
 Belangrijkste features:
+
 - Toevoegen van ontbrekende React imports
 - Toevoegen van return types voor React componenten
 - Vervangen van `any` types met `unknown`
@@ -60,6 +64,7 @@ Belangrijkste features:
 GitHub Actions workflow voor automatische fixes in de CI/CD pipeline.
 
 Belangrijkste features:
+
 - Automatische fixes bij elke push en pull request
 - Dagelijkse proactieve cleanup
 - Gedetailleerde rapportage in pull requests
@@ -70,6 +75,7 @@ Belangrijkste features:
 Editor configuratie voor auto-fixes tijdens ontwikkeling.
 
 Belangrijkste features:
+
 - Auto-fix on save
 - Import organization
 - Tailwind CSS optimalisatie
@@ -82,22 +88,26 @@ Het Auto-Fix System is al geïnstalleerd in het FibroGuardian Pro project. De be
 Als je het systeem wilt installeren in een ander project, volg dan deze stappen:
 
 1. Kopieer de scripts naar je project:
+
    ```bash
    cp scripts/auto-fix-system.js scripts/realtime-fixer.js scripts/fix-typescript.js <jouw-project>/scripts/
    ```
 
 2. Kopieer de GitHub Actions workflow:
+
    ```bash
    mkdir -p <jouw-project>/.github/workflows
    cp .github/workflows/auto-fix.yml <jouw-project>/.github/workflows/
    ```
 
 3. Installeer de benodigde dependencies:
+
    ```bash
    npm install --save-dev eslint-plugin-unused-imports organize-imports-cli chokidar husky lint-staged
    ```
 
 4. Voeg de scripts toe aan `package.json`:
+
    ```json
    "scripts": {
      "fix": "npm run fix:lint && npm run fix:format && npm run fix:imports",
@@ -115,6 +125,7 @@ Als je het systeem wilt installeren in een ander project, volg dan deze stappen:
    ```
 
 5. Setup de Git hooks:
+
    ```bash
    npm run autofix:setup
    ```
@@ -174,6 +185,29 @@ De VS Code instellingen zijn al geconfigureerd voor auto-fixes tijdens ontwikkel
 - Import organization
 - Tailwind CSS optimalisatie
 
+### Automatische Database Integratie
+
+Het Auto-Fix System is geïntegreerd met de database schema validatie en type generatie. Dit zorgt ervoor dat de TypeScript types altijd up-to-date zijn met het database schema.
+
+```bash
+# Handmatig uitvoeren van de database integratie (aanbevolen, werkt op alle platforms)
+npm run autofix:db
+
+# Alternatieve methoden
+bash scripts/cron/auto-fix-db.sh      # Linux/macOS
+scripts\cron\auto-fix-db.bat          # Windows
+```
+
+Voor automatische uitvoering, zie [CRON_SETUP.md](CRON_SETUP.md) voor instructies over het instellen van een cron job of scheduled task.
+
+De database integratie voert de volgende taken uit:
+
+1. Database schema validatie
+2. TypeScript type generatie
+3. TypeScript fixes
+4. Code quality fixes
+5. Logging van alle uitgevoerde acties
+
 ## Configuratie
 
 ### ESLint Configuratie
@@ -202,6 +236,8 @@ De workflow bestaat uit twee jobs:
 2. **quality-gate**: Controleert of er nog kritieke issues zijn
 
 Als er issues zijn die niet automatisch opgelost kunnen worden, wordt er een issue aangemaakt in de repository.
+
+Daarnaast is er een wekelijkse scheduled run die automatisch alle fixes uitvoert, zelfs als er geen code changes zijn. Dit zorgt ervoor dat de codebase altijd up-to-date blijft met de laatste best practices.
 
 ## Best Practices
 
@@ -232,3 +268,15 @@ Als je nieuwe regels wilt toevoegen aan het Auto-Fix System, kun je deze toevoeg
 ### 7. Integreer met je eigen CI/CD pipeline
 
 Integreer het Auto-Fix System in je eigen CI/CD pipeline om automatisch fixes toe te passen bij elke push en pull request.
+
+### 8. Gebruik de automatische database integratie
+
+Stel de automatische database integratie in om ervoor te zorgen dat de TypeScript types altijd up-to-date zijn met het database schema. Zie [CRON_SETUP.md](CRON_SETUP.md) voor instructies.
+
+### 9. Monitor de logs
+
+Controleer regelmatig de logs in `logs/auto-fix.log` om te zien of er problemen zijn met de automatische fixes.
+
+### 10. Houd de auto-fix scripts up-to-date
+
+Update de auto-fix scripts regelmatig om nieuwe features en verbeteringen toe te voegen.

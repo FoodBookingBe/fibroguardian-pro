@@ -36,7 +36,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: unknown) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +86,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
       onClose();
 
     } catch (apiError: unknown) {
-      setError(apiError.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker.');
+      setError((apiError as any).message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker.');
       console.error("Error creating user:", apiError);
     } finally {
       setIsLoading(false);

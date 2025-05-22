@@ -1,4 +1,4 @@
-import { useAuth } from '@/components/auth/AuthProvider'; // Aangepast pad
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; // Aangepast pad
 // import { useSubscription } from '@/hooks/useSubscription'; // Placeholder, zie hieronder
 import { subscriptionFeatures, SubscriptionFeature, SubscriptionTier, patientPlans, specialistPlans } from '@/types/subscription';
 import { useCallback, useState, useEffect } from 'react';
