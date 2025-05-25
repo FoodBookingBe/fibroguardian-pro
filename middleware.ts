@@ -1,8 +1,8 @@
 // middleware.ts
-import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { securityHeaders } from './lib/security-headers';
+import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from './lib/monitoring/logger';
+import { securityHeaders } from './lib/security-headers';
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({
@@ -35,32 +35,10 @@ export async function middleware(req: NextRequest) {
           });
         },
       },
-      global: {
-        fetch: (url, options) => {
-          return fetch(url, {
-            ...options,
-            signal: AbortSignal.timeout(5000), // 5 second timeout for middleware
-          });
-        }
-      }
     }
   );
 
-  // Refresh the session token if available
-  try {
-    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-    
-    if (refreshError) {
-      logger.debug("[Middleware] Session refresh failed, will try to use existing session");
-    } else if (refreshData.session) {
-      // The session was refreshed successfully
-      await supabase.auth.getUser();
-    }
-  } catch (error) {
-    logger.error("[Middleware] Unexpected error during session refresh", { error });
-  }
-
-  // Check user authentication
+  // Simply check user authentication without forcing refresh
   const { data: { user }, error: getUserError } = await supabase.auth.getUser();
 
   // Handle authentication and authorization
@@ -68,15 +46,15 @@ export async function middleware(req: NextRequest) {
     // User is not authenticated
     const url = req.nextUrl.clone();
     const publicPaths = [
-      '/', 
-      '/auth/login', 
-      '/auth/register', 
-      '/auth/forgot-password', 
-      '/api/auth/callback', 
+      '/',
+      '/auth/login',
+      '/auth/register',
+      '/auth/forgot-password',
+      '/api/auth/callback',
       '/offline',
       '/pricing'
     ];
-    
+
     // Allow API routes to handle their own auth to prevent redirect loops
     const isApiRoute = req.nextUrl.pathname.startsWith('/api/');
 
@@ -95,18 +73,18 @@ export async function middleware(req: NextRequest) {
           .select('type')
           .eq('id', user.id)
           .single();
-        
+
         if (profileError) {
-          logger.error("[Middleware] Error fetching profile for admin check", { 
-            userId: user.id, 
-            error: profileError 
+          logger.error("[Middleware] Error fetching profile for admin check", {
+            userId: user.id,
+            error: profileError
           });
         }
-        
+
         if (!profile || profile.type !== 'admin') {
           // Unauthorized admin access attempt
           const url = req.nextUrl.clone();
-          url.pathname = '/dashboard'; 
+          url.pathname = '/dashboard';
           url.searchParams.set('error', 'unauthorized_admin_access');
           return NextResponse.redirect(url);
         }
@@ -119,7 +97,7 @@ export async function middleware(req: NextRequest) {
       }
     }
   }
-  
+
   // Apply security headers from the centralized configuration
   securityHeaders.forEach(header => {
     res.headers.set(header.key, header.value);

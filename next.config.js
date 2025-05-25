@@ -9,7 +9,13 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     images: {
-        domains: ['vqxhwbdhguhcigdouqpc.supabase.co'], // Add Supabase storage domain
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'vqxhwbdhguhcigdouqpc.supabase.co',
+                pathname: '/storage/v1/object/**',
+            },
+        ],
     },
     // PWA configuration can be added here if next-pwa is used
 }
