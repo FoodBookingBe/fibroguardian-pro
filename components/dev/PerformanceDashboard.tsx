@@ -1,19 +1,18 @@
-import React from 'react';
-
 'use client';
-import { useState, useEffect, useCallback } from 'react';
-import { Doughnut, Bar } from 'react-chartjs-2';
+
 import {
-  Chart as ChartJS,
   ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Colors,
+  Legend,
+  LinearScale,
   Title,
-  Colors, // Import Colors plugin
+  Tooltip,
 } from 'chart.js';
+import { useCallback, useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(
   ArcElement,
@@ -41,37 +40,40 @@ interface PerformanceMetrics {
 
 // Functie om performance metrics te verzamelen
 function capturePerformanceMetrics(): PerformanceMetrics | null {
-  if (typeof window === 'undefined' || typeof performance === 'undefined') return <></>; // Empty fragment instead of null
-  
+  if (typeof window === 'undefined' || typeof performance === 'undefined') return null;
+
   const metrics: PerformanceMetrics = {
     FCP: 0, LCP: 0, INP: 0, CLS: 0, TTI: 0, TBT: 0, // Changed FID to INP
-    resourceLoading: [], jsExecution: [], renderBlocking: [], longTasks: [],
+    resourceLoading: [],
+    jsExecution: [],
+    renderBlocking: [],
+    longTasks: []
   };
-  
+
   const navigationEntries = performance.getEntriesByType('navigation');
   if (navigationEntries.length > 0) {
     const navEntry = navigationEntries[0] as PerformanceNavigationTiming;
     metrics.TTI = navEntry.domInteractive;
     // TBT is complex, often derived from Long Tasks. Placeholder for now.
   }
-  
-  performance.getEntriesByType('paint').forEach((entry: unknown) => {
+
+  performance.getEntriesByType('paint').forEach((entry: PerformanceEntry) => {
     if (entry.name === 'first-contentful-paint') metrics.FCP = entry.startTime;
   });
 
-  performance.getEntriesByType('largest-contentful-paint').forEach((entry: unknown) => {
+  performance.getEntriesByType('largest-contentful-paint').forEach((entry: PerformanceEntry) => {
     // LCP is more complex, this is a simplification. Use web-vitals for accurate LCP.
-    metrics.LCP = entry.startTime; 
+    metrics.LCP = entry.startTime;
   });
-  
-  performance.getEntriesByType('resource').forEach((entry: unknown) => {
+
+  performance.getEntriesByType('resource').forEach((entry: PerformanceEntry) => {
     const resourceEntry = entry as PerformanceResourceTiming;
     let category = 'other';
     if (resourceEntry.name.includes('.js')) category = 'js';
     else if (resourceEntry.name.includes('.css')) category = 'css';
     else if (/\.(jpe?g|png|gif|svg|webp)$/i.test(resourceEntry.name)) category = 'image';
     else if (resourceEntry.name.includes('/api/')) category = 'api';
-    
+
     metrics.resourceLoading.push({
       name: new URL(resourceEntry.name, window.location.origin).pathname,
       startTime: resourceEntry.startTime,
@@ -99,7 +101,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
     };
 
     if (isRenderBlocking(resourceEntry)) {
-       metrics.renderBlocking.push({
+      metrics.renderBlocking.push({
         name: new URL(resourceEntry.name, window.location.origin).pathname,
         duration: resourceEntry.duration,
         size: resourceEntry.transferSize || resourceEntry.decodedBodySize || 0,
@@ -108,7 +110,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
   });
 
   if (typeof PerformanceObserver !== 'undefined' && 'observe' in PerformanceObserver.prototype) {
-    const longTaskObserver = new PerformanceObserver((list: unknown) => {
+    const longTaskObserver = new PerformanceObserver((list: PerformanceObserverEntryList) => {
       for (const entry of list.getEntries()) {
         metrics.longTasks.push({
           name: entry.name,
@@ -117,7 +119,7 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
         });
         // Update TBT based on long tasks over 50ms
         if (entry.duration > 50) {
-            metrics.TBT += (entry.duration - 50);
+          metrics.TBT += (entry.duration - 50);
         }
       }
     });
@@ -127,42 +129,41 @@ function capturePerformanceMetrics(): PerformanceMetrics | null {
       console.warn('Longtask observer not supported or failed.', e);
     }
   }
-  
+
   return metrics;
 }
 
 export default function PerformanceDashboard(): JSX.Element {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [view, setView] = useState<'overview' | 'resources' | 'javascript' | 'rendering'>('overview');
-  
+
   const loadMetrics = useCallback(() => {
     const initialMetrics = capturePerformanceMetrics();
     if (initialMetrics) {
-      setMetrics(prev => ({...prev, ...initialMetrics} // Type assertion fixed
-const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Merge, keeping web-vitals if already set
+      setMetrics(prev => ({ ...prev, ...initialMetrics })); // Merge, keeping web-vitals if already set
     }
 
     if (typeof window !== 'undefined') {
-      import('web-vitals').then(({ onCLS, onINP, onLCP, onFCP, Metric }) => { // Updated to onINP, added Metric type
-        onCLS((metric: Metric) => setMetrics(prev => ({ ...prev!, CLS: metric.value })), { reportAllChanges: true });
-        onINP((metric: Metric) => setMetrics(prev => ({ ...prev!, INP: metric.value }))); // Changed from onFID to onINP
-        onLCP((metric: Metric) => setMetrics(prev => ({ ...prev!, LCP: metric.value })));
-        // onFCP((metric: Metric) => setMetrics(prev => ({ ...prev!, FCP: metric.value }))); // FCP is also available via web-vitals if needed, but already captured
+      import('web-vitals').then(({ onCLS, onINP, onLCP }) => { // Removed onFCP since it's not used
+        onCLS((metric: any) => setMetrics(prev => ({ ...prev!, CLS: metric.value })), { reportAllChanges: true });
+        onINP((metric: any) => setMetrics(prev => ({ ...prev!, INP: metric.value }))); // Changed from onFID to onINP
+        onLCP((metric: any) => setMetrics(prev => ({ ...prev!, LCP: metric.value })));
+        // onFCP((metric: any) => setMetrics(prev => ({ ...prev!, FCP: metric.value }))); // FCP is also available via web-vitals if needed, but already captured
         // TBT is calculated from long tasks observer, direct onTBT is not standard in web-vitals
       });
     }
   }, []);
-  
+
   useEffect(() => {
     loadMetrics(); // Initial load
     const timeout = setTimeout(loadMetrics, 3000); // Load again after page is likely settled
     return () => clearTimeout(timeout);
   }, [loadMetrics]);
-  
+
   if (!metrics) {
     return <div className="p-8 text-center text-gray-500">Verzamelen van performance metrics...</div>;
   }
-  
+
   // Data for Resource Loading Chart
   const topSlowestResources = [...metrics.resourceLoading]
     .sort((a, b) => b.duration - a.duration)
@@ -174,7 +175,7 @@ const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Me
       label: 'Laadtijd (ms)',
       data: topSlowestResources.map(r => r.duration),
       backgroundColor: topSlowestResources.map(r => {
-        switch(r.category) {
+        switch (r.category) {
           case 'js': return 'rgba(139, 92, 246, 0.7)'; // purple
           case 'css': return 'rgba(236, 72, 153, 0.7)'; // pink
           case 'image': return 'rgba(6, 182, 212, 0.7)'; // cyan
@@ -193,23 +194,22 @@ const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Me
         </h1>
         <p className="text-gray-600">Real-time inzichten in de prestaties van de applicatie.</p>
       </header>
-      
+
       <nav className="mb-6 flex space-x-2 border-b border-gray-300 pb-2">
         {(['overview', 'resources', 'javascript', 'rendering'] as const).map(v => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`px-4 py-2 rounded-t-md text-sm font-medium transition-colors ${
-              view === v 
-                ? 'bg-purple-600 text-white border-b-2 border-purple-700' 
-                : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 rounded-t-md text-sm font-medium transition-colors ${view === v
+              ? 'bg-purple-600 text-white border-b-2 border-purple-700'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+              }`}
           >
             {v.charAt(0).toUpperCase() + v.slice(1)}
           </button>
         ))}
       </nav>
-        
+
       {view === 'overview' && (
         <section id="overview-metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <MetricCard title="First Contentful Paint (FCP)" value={metrics.FCP} unit="ms" goodThreshold={1800} poorThreshold={3000} />
@@ -220,7 +220,7 @@ const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Me
           <MetricCard title="Total Blocking Time (TBT)" value={metrics.TBT} unit="ms" goodThreshold={200} poorThreshold={600} />
         </section>
       )}
-      
+
       {view === 'resources' && (
         <section id="resource-analysis" className="space-y-6 bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Resource Analyse</h2>
@@ -230,11 +230,11 @@ const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Me
           <ResourceTable resources={metrics.resourceLoading} />
         </section>
       )}
-      
+
       {/* TODO: Implement JavaScript and Rendering views */}
       {view === 'javascript' && <div className="bg-white p-6 rounded-lg shadow"><h2 className="text-xl font-semibold">JavaScript Execution</h2><p>Details over JS execution komen hier.</p></div>}
       {view === 'rendering' && <div className="bg-white p-6 rounded-lg shadow"><h2 className="text-xl font-semibold">Render-Blocking Resources</h2><p>Details over render-blocking resources komen hier.</p></div>}
-      
+
       <footer className="mt-8 text-center">
         <button
           onClick={loadMetrics}
@@ -251,7 +251,7 @@ const _typedInitialMetrics = initialMetrics as Record<string, unknown>;)); // Me
 }
 
 // Helper component voor metrieken
-function MetricCard({ title, value, unit, goodThreshold, poorThreshold, precision = 0 }: 
+function MetricCard({ title, value, unit, goodThreshold, poorThreshold, precision = 0 }:
   { title: string; value?: number; unit: string; goodThreshold: number; poorThreshold: number; precision?: number }
 ) {
   let status = 'unknown';
@@ -260,20 +260,20 @@ function MetricCard({ title, value, unit, goodThreshold, poorThreshold, precisio
 
   if (value !== undefined && value !== null) {
     if (title === 'Cumulative Layout Shift') { // Lower is better for CLS
-        if (value <= goodThreshold) status = 'good';
-        else if (value <= poorThreshold) status = 'warning';
-        else status = 'poor';
+      if (value <= goodThreshold) status = 'good';
+      else if (value <= poorThreshold) status = 'warning';
+      else status = 'poor';
     } else { // Higher is better for others (or rather, lower time is better)
-        if (value <= goodThreshold) status = 'good';
-        else if (value <= poorThreshold) status = 'warning';
-        else status = 'poor';
+      if (value <= goodThreshold) status = 'good';
+      else if (value <= poorThreshold) status = 'warning';
+      else status = 'poor';
     }
   }
-  
+
   if (status === 'good') { bgColor = 'bg-green-100'; textColor = 'text-green-800'; }
   else if (status === 'warning') { bgColor = 'bg-yellow-100'; textColor = 'text-yellow-800'; }
   else if (status === 'poor') { bgColor = 'bg-red-100'; textColor = 'text-red-800'; }
-  
+
   return (
     <div className={`${bgColor} p-4 rounded-lg shadow-md`}>
       <h3 className="text-sm font-medium text-gray-700 truncate">{title}</h3>
@@ -281,11 +281,10 @@ function MetricCard({ title, value, unit, goodThreshold, poorThreshold, precisio
         {value !== undefined && value !== null ? value.toFixed(precision) : '-'}
         <span className="text-sm font-normal ml-1">{unit}</span>
       </p>
-      <p className={`text-xs mt-1 ${
-        status === 'good' ? 'text-green-600' : 
-        status === 'warning' ? 'text-yellow-600' : 
-        status === 'poor' ? 'text-red-600' : 'text-gray-500'
-      }`}>
+      <p className={`text-xs mt-1 ${status === 'good' ? 'text-green-600' :
+        status === 'warning' ? 'text-yellow-600' :
+          status === 'poor' ? 'text-red-600' : 'text-gray-500'
+        }`}>
         {status === 'good' ? 'Goed' : status === 'warning' ? 'Matig' : status === 'poor' ? 'Slecht' : 'N/A'}
       </p>
     </div>
@@ -305,8 +304,8 @@ const resourceChartOptions = {
 };
 
 // Table for Resources
-function ResourceTable({ resources }: { resources: PerformanceMetrics['resourceLoading']}) {
-  const sortedResources = [...resources].sort((a,b) => b.duration - a.duration).slice(0, 20);
+function ResourceTable({ resources }: { resources: PerformanceMetrics['resourceLoading'] }) {
+  const sortedResources = [...resources].sort((a, b) => b.duration - a.duration).slice(0, 20);
   return (
     <div className="overflow-x-auto mt-6">
       <table className="min-w-full text-sm">
@@ -325,24 +324,22 @@ function ResourceTable({ resources }: { resources: PerformanceMetrics['resourceL
                 {resource.name.split('/').pop() || resource.name}
               </td>
               <td className="px-4 py-2">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  resource.category === 'js' ? 'bg-purple-100 text-purple-700' :
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${resource.category === 'js' ? 'bg-purple-100 text-purple-700' :
                   resource.category === 'css' ? 'bg-pink-100 text-pink-700' :
-                  resource.category === 'image' ? 'bg-cyan-100 text-cyan-700' :
-                  resource.category === 'api' ? 'bg-amber-100 text-amber-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
+                    resource.category === 'image' ? 'bg-cyan-100 text-cyan-700' :
+                      resource.category === 'api' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-700'
+                  }`}>
                   {resource.category}
                 </span>
               </td>
               <td className="px-4 py-2 text-right">
                 {(resource.size / 1024).toFixed(1)}
               </td>
-              <td className={`px-4 py-2 text-right font-medium ${
-                resource.duration > 500 ? 'text-red-500' : 
-                resource.duration > 200 ? 'text-amber-500' : 
-                'text-green-600'
-              }`}>
+              <td className={`px-4 py-2 text-right font-medium ${resource.duration > 500 ? 'text-red-500' :
+                resource.duration > 200 ? 'text-amber-500' :
+                  'text-green-600'
+                }`}>
                 {resource.duration.toFixed(0)}
               </td>
             </tr>

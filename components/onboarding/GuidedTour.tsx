@@ -1,9 +1,9 @@
 'use client';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 // import { Button } from '@/components/ds/atoms/Button'; // Placeholder
-import { trackOnboardingStep, OnboardingStepName } from '@/lib/analytics/userJourney'; // Import OnboardingStepName
 import { useLocalStorage } from '@/hooks/useLocalStorage'; // Placeholder hook
+import { OnboardingStepName, trackOnboardingStep } from '@/lib/analytics/userJourney'; // Import OnboardingStepName
 // import { useFocusTrap } from '@/lib/accessibility/focus-trap'; // Placeholder hook
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // X was unused
@@ -25,13 +25,18 @@ const useFocusTrap = (ref: React.RefObject<HTMLElement>, active: boolean) => {
 };
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown> ;: unknown) => (
-  <button 
-    onClick={onClick} 
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', ...props }: {
+  onClick?: () => void;
+  children: React.ReactNode;
+  variant?: 'primary' | 'ghost' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  [key: string]: any;
+}) => (
+  <button
+    onClick={onClick}
     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-60 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-    {...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>;
+    {...props}
   >
     {children}
   </button>
@@ -85,7 +90,7 @@ export function GuidedTour({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [tourCompleted, setTourCompleted] = useLocalStorage(`tour_completed_${tourId}`, false);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
-  
+
   const tooltipRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   useFocusTrap(tooltipRef, isOpen && !!targetElement); // Activeer focus trap als open en target gevonden
@@ -113,7 +118,7 @@ export function GuidedTour({
       setTargetElement(null);
       return;
     }
-    
+
     const element = document.querySelector(currentStep.target) as HTMLElement | null;
     setTargetElement(element);
 
@@ -149,11 +154,11 @@ export function GuidedTour({
           top = innerHeight / 2 - tooltipNode.offsetHeight / 2;
           left = innerWidth / 2 - tooltipNode.offsetWidth / 2;
       }
-      
+
       // Boundary checks
       tooltipNode.style.top = `${Math.max(tooltipOffset, Math.min(top + scrollY, innerHeight + scrollY - tooltipNode.offsetHeight - tooltipOffset))}px`;
       tooltipNode.style.left = `${Math.max(tooltipOffset, Math.min(left + scrollX, innerWidth + scrollX - tooltipNode.offsetWidth - tooltipOffset))}px`;
-      
+
       if (debug) console.log(`[Tour ${tourId}] Step ${currentStepIndex}: Target found, tooltip positioned.`, element);
     } else {
       if (debug) console.warn(`[Tour ${tourId}] Step ${currentStepIndex}: Target "${currentStep.target}" not found.`);
@@ -166,8 +171,9 @@ export function GuidedTour({
       const timeoutId = setTimeout(updateTargetAndPosition, 100); // Kleine delay voor dynamische content
       return () => clearTimeout(timeoutId);
     }
+    return undefined; // Explicit return for the else case
   }, [isOpen, currentStep, updateTargetAndPosition]);
-  
+
   // Event handlers
   const handleNext = async () => {
     if (currentStep?.onNext) await currentStep.onNext();
@@ -219,6 +225,7 @@ export function GuidedTour({
         targetElement.classList.remove('guided-tour-highlight');
       };
     }
+    return undefined; // Explicit return for the else case
   }, [isOpen, targetElement, steps]);
 
 
@@ -226,7 +233,7 @@ export function GuidedTour({
 
   return createPortal(
     <>
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-30 z-[1000]" // Overlay
         onClick={handleSkip} // Klik buiten de tooltip om over te slaan
       />
@@ -247,7 +254,7 @@ export function GuidedTour({
 
         {currentStep.action && (
           <div className="mb-4">
-            <Button variant="outline" size="sm" onClick={currentStep.action.onClick}>
+            <Button variant="secondary" size="sm" onClick={currentStep.action.onClick}>
               {currentStep.action.text}
             </Button>
           </div>
@@ -259,7 +266,7 @@ export function GuidedTour({
           </Button>
           <div className="flex items-center space-x-2">
             {currentStepIndex > 0 && (
-              <Button variant="outline" size="sm" onClick={handlePrev}>
+              <Button variant="secondary" size="sm" onClick={handlePrev}>
                 <ChevronLeft size={16} className="mr-1" /> Vorige
               </Button>
             )}
@@ -269,8 +276,8 @@ export function GuidedTour({
             </Button>
           </div>
         </div>
-         <div className="text-center text-xs text-gray-400 mt-3">
-            Stap {currentStepIndex + 1} van {steps.length}
+        <div className="text-center text-xs text-gray-400 mt-3">
+          Stap {currentStepIndex + 1} van {steps.length}
         </div>
       </div>
       <style jsx global>{`

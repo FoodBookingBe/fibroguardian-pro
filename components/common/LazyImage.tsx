@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useState, useEffect, useRef } from 'react';
 import Image, { ImageProps } from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 interface LazyImageProps extends Omit<ImageProps, 'src' | 'onLoad'> {
@@ -38,9 +38,8 @@ export default function LazyImage({
   loadingComponent,
   onLoad,
   onError,
-  ...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>
-;: LazyImageProps) {
+  ...props
+}: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [imgSrc, setImgSrc] = useState(lowQualitySrc || src);
   const [hasError, setHasError] = useState(false);
@@ -89,10 +88,10 @@ const typedProps = props as Record<string, unknown>
 
   // Use the CSS class defined in globals.css
   const dimensionClasses = `${props.className || ''}`;
-  
+
   // Create a ref to store the div element
   const divRef = useRef<HTMLDivElement>(null);
-  
+
   // Set CSS variables using CSS custom properties
   useEffect(() => {
     if (divRef.current) {
@@ -103,16 +102,12 @@ const typedProps = props as Record<string, unknown>
 
   return (
     <div
-      ref={(node: unknown) => {
+      ref={(node: HTMLDivElement | null) => {
         // This handles both the IntersectionObserver ref and our local ref
         if (typeof ref === 'function') ref(node);
-        // Safe way to set the ref without modifying read-only property
-        if (node && divRef.current !== node) {
-          // Using a non-direct assignment approach
-          Object.defineProperty(divRef, 'current', {
-            value: node,
-            writable: true
-          });
+        // Set our local ref
+        if (divRef.current !== node) {
+          (divRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }}
       className={`lazy-image-container relative ${dimensionClasses}`}
@@ -132,8 +127,7 @@ const typedProps = props as Record<string, unknown>
           onLoad={handleImageLoad}
           onError={handleImageError}
           className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          {...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>;
+          {...props}
         />
       )}
 

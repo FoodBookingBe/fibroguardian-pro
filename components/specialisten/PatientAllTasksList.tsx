@@ -1,15 +1,13 @@
-import React from 'react';
-
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation'; // Importeer useSearchParams
-import { TaskLog, Task as TaskType } from '@/types';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import TaskItemCard, { TaskWithStatusAndFeedbackForCard } from '@/components/tasks/TaskItemCard';
+
 import TaskFilters from '@/components/tasks/TaskFilters'; // Importeer TaskFilters
+import TaskItemCard, { TaskWithStatusAndFeedbackForCard } from '@/components/tasks/TaskItemCard';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
-import { Task } from '@/types';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Task, TaskLog } from '@/types';
+import { useSearchParams } from 'next/navigation'; // Importeer useSearchParams
+import { useEffect, useMemo, useState } from 'react';
 
 // Definieer GroupedTasks interface (kan later naar een gedeeld types bestand)
 export interface GroupedTasksSpecialist {
@@ -58,7 +56,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
     });
 
     const patternOrder: Task['herhaal_patroon'][] = ['dagelijks', 'wekelijks', 'maandelijks', 'eenmalig', 'aangepast'];
-    
+
     return patternOrder
       .map(pattern => ({
         pattern,
@@ -89,7 +87,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
 
         if (!tasksData || tasksData.length === 0) {
           setTasksWithDetails([]);
-          return; 
+          return;
         }
 
         const taskIds = tasksData.map(t => t.id);
@@ -104,7 +102,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
           .order('created_at', { ascending: false });
 
         if (allLogsError) {
-          consol(e as any).warn(`Error fetching all_logs for PatientAllTasksList (patient: ${patientId}): ${allLogsError.message}`);
+          console.warn(`Error fetching all_logs for PatientAllTasksList (patient: ${patientId}): ${allLogsError.message}`);
         }
         if (allLogsData) {
           allLogsForTasks = allLogsData as TaskLog[];
@@ -124,7 +122,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
           return {
             ...task,
             status,
-            voltooid_op: voltooidOpDatum, 
+            voltooid_op: voltooidOpDatum,
             feedback: taskLog ? {
               pijn_score: taskLog.pijn_score,
               vermoeidheid_score: taskLog.vermoeidheid_score,
@@ -138,15 +136,15 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
         setTasksWithDetails(processedTasks as TaskWithStatusAndFeedbackForCard[]);
 
       } catch (e: unknown) { // ESLint zal hier nog steeds klagen, maar functioneel ok voor nu
-        consol(e as any).error(`Error fetching all task details for patient ${patientId}:`, e);
+        console.error(`Error fetching all task details for patient ${patientId}:`, e);
         setError((e as any).message || 'Kon taakdetails niet laden.');
       } finally {
         setIsLoading(false);
       }
-    }; 
+    };
 
-    fetchTaskDetails(); 
-  }, [patientId, specialistId, supabase, refreshKey]); 
+    fetchTaskDetails();
+  }, [patientId, specialistId, supabase, refreshKey]);
 
   if (isLoading) {
     return <SkeletonLoader type="list" count={5} className="h-20 mb-3" />;
@@ -157,7 +155,7 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
   }
 
   // De empty state wordt nu beter afgehandeld door de combinatie van groupedAndFilteredTasks en de map
-  // if (!groupedAndFilteredTasks || groupedAndFilteredTasks.length === 0) { 
+  // if (!groupedAndFilteredTasks || groupedAndFilteredTasks.length === 0) {
   //   return <p className="text-gray-500">Er zijn nog geen taken toegewezen aan deze patiënt door u, of geen die voldoen aan de filters.</p>;
   // }
 
@@ -173,10 +171,10 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
           {isLoading ? 'Laden...' : 'Ververs Taken'}
         </button>
       </div>
-      
+
       {groupedAndFilteredTasks.length > 0 ? (
-        <div className="space-y-10"> 
-          {groupedAndFilteredTasks.map((group: GroupedTasksSpecialist) => ( 
+        <div className="space-y-10">
+          {groupedAndFilteredTasks.map((group: GroupedTasksSpecialist) => (
             <section key={group.pattern} className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
               <h3 className="text-lg font-semibold text-purple-700 mb-3 border-b border-gray-200 pb-2">
                 {group.title}
@@ -184,20 +182,20 @@ export default function PatientAllTasksList({ patientId, specialistId }: Patient
                   ({group.tasks.length} {group.tasks.length === 1 ? 'item' : 'items'})
                 </span>
               </h3>
-              {/* Deze check is dubbelop, want groupedAndFilteredTasks bevat al alleen groepen met taken, 
+              {/* Deze check is dubbelop, want groupedAndFilteredTasks bevat al alleen groepen met taken,
                   en binnen de map-logica filteren we ook nog. Maar het is niet schadelijk. */}
-              {group.tasks.length > 0 ? ( 
+              {group.tasks.length > 0 ? (
                 <ul className="space-y-4">
-                  {group.tasks.map((task: TaskWithStatusAndFeedbackForCard) => ( 
-                    <TaskItemCard 
-                      key={task.id} 
-                      task={task} 
+                  {group.tasks.map((task: TaskWithStatusAndFeedbackForCard) => (
+                    <TaskItemCard
+                      key={task.id}
+                      task={task}
                     />
                   ))}
                 </ul>
               ) : (
                 // Deze P zou idealiter niet bereikt moeten worden als de filterlogica in useMemo correct is
-                <p className="text-sm text-gray-500 italic">Geen {group.pattern}e taken die voldoen aan de filters.</p> 
+                <p className="text-sm text-gray-500 italic">Geen {group.pattern}e taken die voldoen aan de filters.</p>
               )}
             </section>
           ))}

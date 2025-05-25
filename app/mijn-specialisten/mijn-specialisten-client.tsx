@@ -1,16 +1,15 @@
-import React from 'react';
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import AddSpecialistButtonContainer from '@/containers/specialisten/AddSpecialistButtonContainer'; // Updated import
+
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import SpecialistLoadingSkeleton from '@/components/specialisten/SpecialistLoadingSkeleton';
 import EmptySpecialistState from '@/components/specialisten/EmptySpecialistState';
+import SpecialistLoadingSkeleton from '@/components/specialisten/SpecialistLoadingSkeleton';
 import SpecialistsList from '@/components/specialisten/SpecialistsList';
+import AddSpecialistButtonContainer from '@/containers/specialisten/AddSpecialistButtonContainer'; // Updated import
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { Profile as Specialist } from '@/types'; // Use Profile and alias as Specialist for minimal changes
+import { User } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
 
 interface MijnSpecialistenClientProps {
   user: User;
@@ -18,7 +17,7 @@ interface MijnSpecialistenClientProps {
   userProfile: unknown;
 }
 
-export default function MijnSpecialistenClient({ user: serverUser, specialists, userProfile }: MijnSpecialistenClientProps) {
+export default function MijnSpecialistenClient({ user: _serverUser, specialists, userProfile: _userProfile }: MijnSpecialistenClientProps) {
   // Use the authenticated user from context to ensure consistency
   const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
@@ -30,11 +29,11 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
 
   useEffect(() => {
     setIsClient(true);
-  return undefined; // Add default return
+    return undefined; // Add default return
   }, []);
-  
+
   // Remove debug logging for production
-  
+
   // If auth is loading or not yet client-side, show a generic loading state
   if (authLoading || !isClient) {
     return (
@@ -45,7 +44,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
       </div>
     );
   }
-  
+
   // After client has mounted and auth is no longer loading
   if (!user) { // Rely on the user from AuthProvider once client-side
     return (
@@ -66,7 +65,7 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
     setIsLoading(true); // Set loading true for this specific operation
     try {
       const supabase = getSupabaseBrowserClient();
-      
+
       const { error: deleteError } = await supabase // Renamed error to avoid conflict
         .from('specialist_patienten')
         .delete()
@@ -85,25 +84,25 @@ export default function MijnSpecialistenClient({ user: serverUser, specialists, 
   };
 
   return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Mijn Specialisten</h1>
-          <AddSpecialistButtonContainer /> {/* Updated component */}
-        </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
-            {error}
-          </div>
-        )}
-
-        {isLoading && <SpecialistLoadingSkeleton /> } 
-        
-        {!isLoading && localSpecialists.length === 0 && <EmptySpecialistState />}
-        
-        {!isLoading && localSpecialists.length > 0 && (
-          <SpecialistsList specialists={localSpecialists} onRemove={handleRemoveSpecialist} />
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Mijn Specialisten</h1>
+        <AddSpecialistButtonContainer /> {/* Updated component */}
       </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
+          {error}
+        </div>
+      )}
+
+      {isLoading && <SpecialistLoadingSkeleton />}
+
+      {!isLoading && localSpecialists.length === 0 && <EmptySpecialistState />}
+
+      {!isLoading && localSpecialists.length > 0 && (
+        <SpecialistsList specialists={localSpecialists} onRemove={handleRemoveSpecialist} />
+      )}
+    </div>
   );
 }

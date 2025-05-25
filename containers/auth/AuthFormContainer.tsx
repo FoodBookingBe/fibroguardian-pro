@@ -1,3 +1,6 @@
+'use client';
+
+import React, { FormEvent, useState } from 'react';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -5,10 +8,6 @@ declare module "react" {
     addNotification?: unknown;
   }
 }
-import React from 'react';
-
-'use client';
-import { useState, FormEvent } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -100,7 +99,7 @@ export default function AuthFormContainer({ initialIsLoginMode = true }: { initi
     if (isLogin) {
       signIn({ email: formData.email, password: formData.password }, {
         onSuccess: (user: unknown) => {
-          if (user && user.id) {
+          if (user && (user as any).id) {
             addNotification({ type: 'success', message: 'Succesvol ingelogd! U wordt doorverwezen...' });
             // router.push('/dashboard'); // Or appropriate redirect
           } else {
@@ -128,7 +127,7 @@ export default function AuthFormContainer({ initialIsLoginMode = true }: { initi
         }
       }, {
         onSuccess: (data: unknown) => {
-          if (data.user) {
+          if ((data as any).user) {
             addNotification({ type: 'success', message: 'Registratie succesvol! Controleer uw e-mail voor de bevestigingslink.' });
           } else {
             addNotification({ type: 'info', message: 'Verzoek tot registratie ontvangen. Als u al een account heeft, probeer in te loggen. Anders, controleer uw e-mail.' });

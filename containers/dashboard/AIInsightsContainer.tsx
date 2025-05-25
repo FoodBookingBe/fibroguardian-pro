@@ -1,3 +1,4 @@
+'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -8,15 +9,13 @@ declare module "react" {
 import React from 'react';
 
 // containers/dashboard/AIInsightsContainer.tsx
-'use client';
-import { useState, useMemo } from 'react'; // Added useMemo
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { useInsights, useRecentLogs, RecentLogWithTaskTitle } from '@/hooks/useSupabaseQuery';
-import { ConditionalRender } from '@/components/ui/ConditionalRender';
-import { useNotification } from '@/context/NotificationContext';
 import AIInsightsPresentational from '@/components/dashboard/AIInsightsPresentational'; // New presentational component
-import { Inzicht, TaskLog } from '@/types';
-import { ErrorMessage } from '@/lib/error-handler'; 
+import { ConditionalRender } from '@/components/ui/ConditionalRender';
+import { useInsights, useRecentLogs } from '@/hooks/useSupabaseQuery';
+import { ErrorMessage } from '@/lib/error-handler';
+import { Inzicht } from '@/types';
+import { useMemo, useState } from 'react'; // Added useMemo
 
 // Define an EmptyState component or use inline JSX for emptyFallback
 const EmptyInsightsState = () => (
@@ -32,31 +31,31 @@ interface AIInsightsContainerProps {
   limit?: number;
 }
 
-export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsightsContainerProps) {
+export function AIInsightsContainer({ limit = 3 }: AIInsightsContainerProps) {
   const { user } = useAuth();
   const userId = user?.id;
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
-  const { addNotification } = useNotification();
+  // const { addNotification } = useNotification(); // Commented out as unused
 
   // Data fetching for insights
-  const { 
-    data: insights, 
-    isLoading: isLoadingInsights, 
-    error: insightsError, 
-    isError: isInsightsError 
+  const {
+    data: insights,
+    isLoading: isLoadingInsights,
+    error: insightsError,
+    isError: isInsightsError
   } = useInsights(userId, limit);
-  
+
   // Data fetching for logs, enabled only when an insight is expanded
   // Fetch a larger set of recent logs; filtering will happen based on insight period
-  const { 
-    data: recentLogs, 
+  const {
+    data: recentLogs,
     isLoading: isLoadingLogs,
     error: logsError, // Capture error for logs
     isError: isLogsError // Capture isError for logs
   } = useRecentLogs(userId, 50, { // Fetch more logs (e.g., last 50) to cover potential insight periods
     enabled: !!userId && !!expandedInsightId, // Only fetch if user and an insight is expanded
   });
-  
+
   const handleToggleExpand = (id: string) => {
     const newExpandedId = expandedInsightId === id ? null : id;
     setExpandedInsightId(newExpandedId);
@@ -65,12 +64,12 @@ export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsigh
       // addNotification('info', 'Inzicht details en gerelateerde logs worden geladen...');
     }
   };
-  
+
   // Memoized calculation for logs relevant to the currently expanded insight
   const logsForExpandedInsight = useMemo(() => {
     if (!expandedInsightId || !insights || !recentLogs) return [];
-    
-    const currentInsight = insights.find(i => i.id === expandedInsightId);
+
+    const currentInsight = insights.find((i: any) => i.id === expandedInsightId);
     if (!currentInsight) return [];
 
     const insightDate = new Date(currentInsight.created_at); // Assuming insight's date is its creation date
@@ -91,13 +90,13 @@ export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsigh
       default:
         startDate.setDate(insightDate.getDate() - 7); // Default to a week
     }
-    
-    return recentLogs.filter(log => {
+
+    return recentLogs.filter((log: any) => {
       const logDate = new Date(log.start_tijd);
       return logDate >= startDate && logDate <= insightDate; // Filter logs within the period
     });
   }, [expandedInsightId, insights, recentLogs]);
-  
+
   return (
     <ConditionalRender
       isLoading={isLoadingInsights && !insights} // Show loading only if no initial/cached insights
@@ -109,12 +108,12 @@ export function AIInsightsContainer({ initialInsightsProp, limit = 3 }: AIInsigh
     >
       {(insightsData: unknown) => (
         <AIInsightsPresentational
-          insights={insightsData}
+          insights={insightsData as Inzicht[]}
           expandedInsightId={expandedInsightId}
           onToggleExpand={handleToggleExpand}
           isLoadingLogs={isLoadingLogs && !!expandedInsightId} // Logs are loading only if an insight is expanded
           logsForInsight={logsForExpandedInsight}
-          logsError={isLogsError ? (logsError as ErrorMessage) : null} // Pass log specific error
+          logsError={isLogsError ? (logsError as unknown as ErrorMessage) : null} // Pass log specific error
         />
       )}
     </ConditionalRender>

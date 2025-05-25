@@ -1,0 +1,73 @@
+[2025-05-22T18:08:31.668Z] Starting Fix Type Assertions Script
+[2025-05-22T18:08:31.901Z] Found 233 TypeScript files to check
+[2025-05-22T18:08:31.902Z] Processing batch 1 of 12
+[2025-05-22T18:08:31.919Z] Processing batch 2 of 12
+[2025-05-22T18:08:31.930Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\overzicht\page.tsx
+[2025-05-22T18:08:31.939Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\rapporten\page.tsx
+[2025-05-22T18:08:31.941Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\rapporten\page.tsx
+[2025-05-22T18:08:31.943Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\reflecties\page.tsx
+[2025-05-22T18:08:31.945Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\reflecties\page.tsx
+[2025-05-22T18:08:31.946Z] Processing batch 3 of 12
+[2025-05-22T18:08:31.954Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\specialisten\page.tsx
+[2025-05-22T18:08:31.956Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\specialisten\page.tsx
+[2025-05-22T18:08:31.961Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\edit\page.tsx
+[2025-05-22T18:08:31.962Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\edit\page.tsx
+[2025-05-22T18:08:31.974Z] Processing batch 4 of 12
+[2025-05-22T18:08:31.977Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:08:31.979Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:08:31.998Z] Processing batch 5 of 12
+[2025-05-22T18:08:32.004Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\common\ErrorBoundary.tsx
+[2025-05-22T18:08:32.006Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:08:32.013Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:08:32.017Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:08:32.022Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:08:32.024Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:08:32.026Z] Processing batch 6 of 12
+[2025-05-22T18:08:32.051Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:08:32.053Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:08:32.061Z] Processing batch 7 of 12
+[2025-05-22T18:08:32.064Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:08:32.067Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:08:32.069Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:08:32.071Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:08:32.072Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:08:32.073Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:08:32.079Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\subscription\withFeatureAccess.tsx
+[2025-05-22T18:08:32.082Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:08:32.083Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:08:32.090Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\ui\ConditionalRender.tsx
+[2025-05-22T18:08:32.094Z] Processing batch 8 of 12
+[2025-05-22T18:08:32.102Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\settings\ProfileFormContainer.tsx
+[2025-05-22T18:08:32.105Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\PatientDetailsContainer.tsx
+[2025-05-22T18:08:32.106Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:08:32.108Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskFormContainer.tsx
+[2025-05-22T18:08:32.113Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:08:32.115Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:08:32.116Z] Processing batch 9 of 12
+[2025-05-22T18:08:32.121Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\tests\LazyImage.spec.tsx
+[2025-05-22T18:08:32.127Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:08:32.129Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:08:32.131Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\auth\callback\route.ts
+[2025-05-22T18:08:32.161Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\auth\callback\route.ts
+[2025-05-22T18:08:32.171Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\auth\[...supabase]\route.ts
+[2025-05-22T18:08:32.174Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\auth\[...supabase]\route.ts
+[2025-05-22T18:08:32.184Z] Processing batch 10 of 12
+[2025-05-22T18:08:32.188Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\tasks\[id]\route.ts
+[2025-05-22T18:08:32.200Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\analytics\eventTracking.ts
+[2025-05-22T18:08:32.202Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:08:32.203Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:08:32.206Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:08:32.208Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:08:32.209Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\logger.ts
+[2025-05-22T18:08:32.212Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\logger.ts
+[2025-05-22T18:08:32.214Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\performance-metrics.ts
+[2025-05-22T18:08:32.219Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\performance-metrics.ts
+[2025-05-22T18:08:32.222Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:08:32.224Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:08:32.227Z] Processing batch 11 of 12
+[2025-05-22T18:08:32.266Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\supabase-server.ts
+[2025-05-22T18:08:32.272Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\tests\task-logs.spec.ts
+[2025-05-22T18:08:32.282Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\utils\accessibility.ts
+[2025-05-22T18:08:32.282Z] Processing batch 12 of 12
+[2025-05-22T18:08:32.297Z] Applied 26 fixes in total
+[2025-05-22T18:08:32.298Z] Fix Type Assertions Script completed

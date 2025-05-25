@@ -15,24 +15,24 @@ export interface ErrorMessage { // Added export
  * @returns Gestructureerd foutbericht
  */
 export const _handleSupabaseError = (
-  error: PostgrestError | Error | unknown, 
+  error: PostgrestError | Error | unknown,
   context: string = 'algemeen'
 ): ErrorMessage => {
   console.error(`Fout in context ${context}:`, error);
-  
+
   // Standaard foutbericht
   let errorMessage: ErrorMessage = {
     userMessage: 'Er is een fout opgetreden. Probeer het later opnieuw.',
     action: 'Vernieuw de pagina of probeer het later opnieuw.'
   };
-  
+
   // Controleer of het een PostgrestError is
   if (typeof error === 'object' && error !== null && 'code' in error && 'message' in error) { // More robust check for PostgrestError like objects
     const pgError = error as PostgrestError; // Cast after check
-    
+
     if (pgError.code) {
       errorMessage.errorCode = pgError.code;
-      
+
       // Categoriseer veelvoorkomende fouten
       switch (pgError.code) {
         case 'PGRST116':
@@ -44,7 +44,7 @@ export const _handleSupabaseError = (
             action: 'Log opnieuw in of neem contact op met support als dit probleem aanhoudt.'
           };
           break;
-          
+
         case '23505':
           // Unique constraint violation
           errorMessage = {
@@ -54,7 +54,7 @@ export const _handleSupabaseError = (
             action: 'Probeer een andere waarde of wijzig de bestaande.'
           };
           break;
-          
+
         case '23503':
           // Foreign key constraint
           errorMessage = {
@@ -64,7 +64,7 @@ export const _handleSupabaseError = (
             action: 'Controleer gerelateerde gegevens voordat u deze actie uitvoert.'
           };
           break;
-          
+
         case '23514':
           // Check constraint
           errorMessage = {
@@ -74,7 +74,7 @@ export const _handleSupabaseError = (
             action: 'Controleer of uw invoer voldoet aan de criteria.'
           };
           break;
-          
+
         case '22P02':
           // Invalid text representation
           errorMessage = {
@@ -86,12 +86,12 @@ export const _handleSupabaseError = (
           break;
       }
     }
-    
+
     // Voeg Supabase-specifieke foutberichten toe indien beschikbaar
     if (pgError.message) { // Check if message exists
       errorMessage.technicalMessage = pgError.message;
     }
-    
+
     // Voeg hint toe indien beschikbaar
     if ('hint' in pgError && pgError.hint) { // Check if hint exists
       errorMessage.action = pgError.hint as string;
@@ -104,30 +104,30 @@ export const _handleSupabaseError = (
       action: 'Vernieuw de pagina of probeer het later opnieuw.'
     };
   }
-  
+
   // Context-specifieke foutberichten
   switch (context) {
     case 'authenticatie':
       errorMessage.userMessage = 'Er is een probleem met het inloggen. ' + errorMessage.userMessage;
       break;
-      
+
     case 'taak-opslaan':
       errorMessage.userMessage = 'De taak kon niet worden opgeslagen. ' + errorMessage.userMessage;
       break;
-      
+
     case 'profiel-bijwerken':
       errorMessage.userMessage = 'Uw profiel kon niet worden bijgewerkt. ' + errorMessage.userMessage;
       break;
-      
+
     case 'reflectie-opslaan':
       errorMessage.userMessage = 'Uw reflectie kon niet worden opgeslagen. ' + errorMessage.userMessage;
       break;
-      
+
     case 'specialist-patienten':
       errorMessage.userMessage = 'Er is een fout opgetreden bij het beheren van patiënten. ' + errorMessage.userMessage;
       break;
   }
-  
+
   return errorMessage;
 };
 
@@ -146,3 +146,7 @@ export const _formatApiError = (statusCode: number, message: string) => {
     }
   };
 };
+
+// Export without underscore for easier usage
+export const handleSupabaseError = _handleSupabaseError;
+export const formatApiError = _formatApiError;

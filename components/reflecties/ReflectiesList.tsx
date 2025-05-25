@@ -1,9 +1,8 @@
-import React from 'react';
-
 'use client';
-import { useState } from 'react';
-import Link from 'next/link';
+
 import { Reflectie } from '@/types';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface ReflectiesListProps {
   reflecties: Reflectie[];
@@ -14,7 +13,7 @@ interface ReflectiesListProps {
 export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: ReflectiesListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  
+
   // Helper om datum te formatteren
   const formatDate = (dateString: Date | string | undefined) => {
     if (!dateString) return 'Onbekende datum';
@@ -26,11 +25,11 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
       year: 'numeric'
     });
   };
-  
+
   // Helper om stemming te visualiseren
   const getStemmingBadge = (stemming?: string) => {
     if (!stemming) return <></>; // Empty fragment instead of null
-    
+
     const stemmingLower = stemming.toLowerCase();
     let style = { bg: 'bg-gray-200', text: 'text-gray-700' }; // Default
 
@@ -40,19 +39,19 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
     else if (stemmingLower.includes('matig')) style = { bg: 'bg-yellow-400', text: 'text-black' }; // Contrast
     else if (stemmingLower.includes('slecht') && !stemmingLower.includes('zeer slecht')) style = { bg: 'bg-orange-500', text: 'text-white' };
     else if (stemmingLower.includes('zeer slecht')) style = { bg: 'bg-red-500', text: 'text-white' };
-    
+
     return (
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
         {stemming.charAt(0).toUpperCase() + stemming.slice(1)}
       </span>
     );
   };
-  
+
   // Toggle reflectie detail weergave
   const toggleExpand = (id: string) => {
     setExpandedId(prevId => (prevId === id ? null : id));
   };
-  
+
   if (!reflecties || reflecties.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center"> {/* Increased padding */}
@@ -61,8 +60,8 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
         </svg>
         <h2 className="text-xl font-semibold text-gray-700 mb-2">Geen reflecties gevonden</h2>
         <p className="text-gray-500 mb-6">Deel uw dagelijkse ervaringen en houd bij hoe u zich voelt.</p>
-        <Link 
-          href="/reflecties/nieuw" 
+        <Link
+          href="/reflecties/nieuw"
           className="btn-primary inline-flex items-center" // Used global style
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,12 +72,12 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-3"> {/* Adjusted spacing */}
       {reflecties.map(reflectie => (
-        <div 
-          key={reflectie.id} 
+        <div
+          key={reflectie.id}
           className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out"
         >
           <button // Changed div to button for better accessibility
@@ -93,18 +92,18 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
               {getStemmingBadge(reflectie.stemming)}
             </div>
             <span className="text-gray-500" aria-hidden="true">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className={`h-5 w-5 transition-transform duration-200 ${expandedId === reflectie.id ? 'transform rotate-180' : ''}`} 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`h-5 w-5 transition-transform duration-200 ${expandedId === reflectie.id ? 'transform rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </span>
           </button>
-          
+
           {expandedId === reflectie.id && (
             <div id={`reflectie-details-${reflectie.id}`} className="px-4 pb-4 pt-3 border-t border-gray-200 bg-gray-50"> {/* Added bg-gray-50 */}
               {reflectie.notitie ? (
@@ -112,7 +111,7 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
               ) : (
                 <div className="mb-3 text-sm text-gray-500 italic">Geen notitie toegevoegd.</div>
               )}
-              
+
               {reflectie.ai_validatie && (
                 <div className="bg-purple-50 border border-purple-200 p-3 rounded-md mb-3 text-sm">
                   <div className="flex items-center text-purple-700 mb-1 font-medium">
@@ -124,7 +123,7 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
                   <p className="text-purple-800">{reflectie.ai_validatie}</p>
                 </div>
               )}
-              
+
               <div className="flex justify-end space-x-2 mt-2">
                 <Link
                   href={`/reflecties/${reflectie.id}/bewerken`} // Assuming an edit route
@@ -145,11 +144,10 @@ export default function ReflectiesList({ reflecties, onDelete, isDeletingId }: R
                       }
                     }}
                     disabled={isDeletingId === 'pending' || (typeof isDeletingId === 'string' && isDeletingId === reflectie.id)}
-                    className={`px-3 py-1 text-xs rounded-md transition-colors focus:outline-none focus:ring-1 ${
-                      confirmDeleteId === reflectie.id 
-                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400' 
+                    className={`px-3 py-1 text-xs rounded-md transition-colors focus:outline-none focus:ring-1 ${confirmDeleteId === reflectie.id
+                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400'
                         : 'bg-gray-200 text-gray-700 hover:bg-red-100 hover:text-red-700 focus:ring-gray-400'
-                    } ${(isDeletingId === 'pending' || (typeof isDeletingId === 'string' && isDeletingId === reflectie.id)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      } ${(isDeletingId === 'pending' || (typeof isDeletingId === 'string' && isDeletingId === reflectie.id)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     aria-label={confirmDeleteId === reflectie.id ? `Bevestig verwijderen` : `Verwijder reflectie`}
                   >
                     {isDeletingId === reflectie.id ? (

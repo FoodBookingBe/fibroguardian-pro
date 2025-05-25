@@ -1,11 +1,10 @@
-import React from 'react';
 
+import PatientList from '@/components/specialisten/PatientList';
+import { Profile } from '@/types';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import PatientList from '@/components/specialisten/PatientList';
 import Link from 'next/link';
-import { Profile } from '@/types';
+import { redirect } from 'next/navigation';
 
 export default async function SpecialistenDashboardPage() {
   const cookieStore = cookies();
@@ -18,12 +17,10 @@ export default async function SpecialistenDashboardPage() {
           return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options} // Type assertion fixed
-const typedOptions = options as Record<string, unknown> ;);
+          cookieStore.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options} // Type assertion fixed
-const typedOptions = options as Record<string, unknown> ;);
+          cookieStore.set({ name, value: '', ...options, maxAge: 0 });
         },
       },
     }
@@ -45,7 +42,7 @@ const typedOptions = options as Record<string, unknown> ;);
   if (profileError || !profile) {
     console.error('Error fetching specialist profile:', profileError?.message);
     // Redirect to general dashboard or an error page if profile is crucial and not found
-    redirect('/dashboard?error=profile_not_found'); 
+    redirect('/dashboard?error=profile_not_found');
   }
 
   if (profile.type !== 'specialist') {
@@ -92,7 +89,7 @@ const typedOptions = options as Record<string, unknown> ;);
         {patientsError && <p className="text-red-500">Fout bij het laden van patiënten: {patientsError.message}</p>}
         {patients.length === 0 && !patientsError && <p>Geen patiënten gevonden.</p>}
       </section>
-      
+
       {/* Placeholder for other specialist modules */}
       <section id="therapy-adherence-stats" className="mt-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-3">Therapietrouw Statistieken</h2>

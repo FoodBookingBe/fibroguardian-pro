@@ -1,19 +1,20 @@
 
+'use client';
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-'use client';
-import React, { useState, FormEvent } from 'react';
-import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
-import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
-import { ErrorMessage } from '@/lib/error-handler';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import AddSpecialistButtonPresentational from '@/components/specialisten/AddSpecialistButtonPresentational';
 import { useNotification } from '@/context/NotificationContext';
+import { useAddSpecialistPatientRelation } from '@/hooks/useMutations';
+import { ErrorMessage } from '@/lib/error-handler';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useQueryClient } from '@tanstack/react-query';
+import React, { FormEvent, useState } from 'react';
 
 export default function AddSpecialistButtonContainer(): JSX.Element {
   const { user } = useAuth();
@@ -23,13 +24,13 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  
-  const { 
-    mutate: addRelation, 
+
+  const {
+    mutate: addRelation,
     isPending: isAddingRelation,
     // Error from mutation hook will be handled by global notification via onError in addRelation call
   } = useAddSpecialistPatientRelation();
-  
+
   const handleOpenModal = () => {
     setEmail('');
     setFormError(null);
@@ -47,7 +48,7 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
     if (formError) setFormError(null); // Clear form error when user types
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 
@@ -91,7 +92,7 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
       addRelation({ specialist_id_to_add: specialistIdToAdd }, {
         onSuccess: () => {
           addNotification({ type: 'success', message: 'Specialist succesvol toegevoegd!' });
-          queryClient.invalidateQueries({ queryKey: ['mySpecialists', user.id] }); 
+          queryClient.invalidateQueries({ queryKey: ['mySpecialists', user.id] });
           // Potentially invalidate other related queries if necessary
           // queryClient.invalidateQueries({ queryKey: ['profiles'] });
           setTimeout(() => {
@@ -111,7 +112,7 @@ export default function AddSpecialistButtonContainer(): JSX.Element {
       addNotification({ type: 'error', message: userMessage });
     }
   };
-  
+
   // This button might be conditionally rendered by its parent if only patients can see it.
   // If not, add a check here based on user's profile type.
   // const { data: profile } = useProfile(user?.id);

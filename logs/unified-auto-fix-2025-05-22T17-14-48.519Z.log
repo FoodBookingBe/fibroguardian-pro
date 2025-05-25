@@ -1,0 +1,48 @@
+Starting Unified TypeScript Auto-Fix at 22/5/2025, 19:14:48
+Configuration: {
+  "rootDir": "C:\\Users\\nick\\Desktop\\FibroGuardian",
+  "logDir": "C:\\Users\\nick\\Desktop\\FibroGuardian\\logs",
+  "excludeDirs": [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "coverage"
+  ],
+  "fileExtensions": [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx"
+  ],
+  "maxFilesToFix": 100,
+  "dryRun": false
+}
+Found 264 TypeScript files
+Found 287 TypeScript errors
+Processing app\api\auth\callback\route.ts with 8 errors
+Processing app\api\tasks\[id]\route.ts with 1 errors
+Processing app\overzicht\page.tsx with 9 errors
+Processing app\rapporten\page.tsx with 14 errors
+Processing app\reflecties\page.tsx with 14 errors
+Processing app\specialisten\page.tsx with 14 errors
+Processing app\taken\[taskId]\edit\page.tsx with 14 errors
+Processing components\admin\EditUserForm.tsx with 2 errors
+Processing components\common\ErrorBoundary.tsx with 11 errors
+Processing components\common\LazyImage.tsx with 11 errors
+Processing components\dev\PerformanceDashboard.tsx with 7 errors
+Processing components\onboarding\GuidedTour.tsx with 11 errors
+Processing components\specialisten\CreateTaskAssignmentForm.tsx with 1 errors
+Processing components\subscription\PricingTables.tsx with 22 errors
+Processing components\subscription\SubscriptionManagement.tsx with 16 errors
+Processing components\subscription\UpgradePrompt.tsx with 22 errors
+Processing components\subscription\withFeatureAccess.tsx with 18 errors
+Processing components\support\SupportWidget.tsx with 11 errors
+Processing lib\analytics\userJourney.ts with 7 errors
+Processing lib\onboarding\onboardingEngine.ts with 2 errors
+Processing lib\performance\imageLazyOptimizer.tsx with 17 errors
+Processing lib\supabase-server.ts with 17 errors
+Processing tests\LazyImage.spec.tsx with 36 errors
+Processing utils\accessibility.ts with 2 errors
+Auto-fix completed: Fixed 0 errors in 0 files
+Log file: C:\Users\nick\Desktop\FibroGuardian\logs\unified-auto-fix-2025-05-22T17-14-48.519Z.log

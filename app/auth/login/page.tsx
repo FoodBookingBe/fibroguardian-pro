@@ -1,5 +1,3 @@
-import React from 'react';
-
 'use client';
 
 import Image from 'next/image'; // Import Next.js Image component
@@ -29,7 +27,7 @@ export default function LoginPage(): JSX.Element {
         <AuthFormContainer initialIsLoginMode={true} /> {/* Use container and updated prop name */}
         <div className="mt-6 text-sm text-center">
           <Link href="/auth/forgot-password" className="font-medium text-purple-600 hover:text-purple-500 hover:underline">
-              Wachtwoord vergeten?
+            Wachtwoord vergeten?
           </Link>
         </div>
       </div>

@@ -1,0 +1,35 @@
+[2025-05-22T18:15:38.368Z] Starting Enhanced Type Assertions Fix Script
+[2025-05-22T18:15:38.864Z] Found 233 TypeScript files to check
+[2025-05-22T18:15:38.866Z] Processing batch 1 of 12
+[2025-05-22T18:15:38.973Z] Processing batch 2 of 12
+[2025-05-22T18:15:39.064Z] Processing batch 3 of 12
+[2025-05-22T18:15:39.136Z] Processing batch 4 of 12
+[2025-05-22T18:15:39.159Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:15:39.193Z] Processing batch 5 of 12
+[2025-05-22T18:15:39.199Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:15:39.232Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:15:39.241Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:15:39.245Z] Processing batch 6 of 12
+[2025-05-22T18:15:39.258Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:15:39.270Z] Processing batch 7 of 12
+[2025-05-22T18:15:39.273Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:15:39.276Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:15:39.283Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:15:39.288Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:15:39.307Z] Processing batch 8 of 12
+[2025-05-22T18:15:39.332Z] Processing batch 9 of 12
+[2025-05-22T18:15:39.344Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:15:39.361Z] Processing batch 10 of 12
+[2025-05-22T18:15:39.368Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\app\api\tasks\[id]\route.ts
+[2025-05-22T18:15:39.378Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\hooks\useSupabaseQuery.ts
+[2025-05-22T18:15:39.383Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\analytics\eventTracking.ts
+[2025-05-22T18:15:39.388Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:15:39.396Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:15:39.399Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\logger.ts
+[2025-05-22T18:15:39.405Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\performance-metrics.ts
+[2025-05-22T18:15:39.408Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:15:39.409Z] Processing batch 11 of 12
+[2025-05-22T18:15:39.431Z] Fixed type assertions with comments in C:\Users\nick\Desktop\FibroGuardian\tests\task-logs.spec.ts
+[2025-05-22T18:15:39.445Z] Processing batch 12 of 12
+[2025-05-22T18:15:39.463Z] Applied 19 fixes in total
+[2025-05-22T18:15:39.463Z] Enhanced Type Assertions Fix Script completed

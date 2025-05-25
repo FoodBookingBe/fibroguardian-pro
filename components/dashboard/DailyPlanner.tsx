@@ -1,3 +1,4 @@
+'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -5,17 +6,17 @@ declare module "react" {
     addNotification?: unknown;
   }
 }
-'use client';
-import React from 'react'; // Keep useState for confirmDelete if needed locally in TaskCard
-import Link from 'next/link';
-import { Task } from '@/types';
+
 import TaskCard from '@/components/tasks/TaskCard';
-import { useDeleteTask } from '@/hooks/useMutations';
+import { EnrichedTask } from '@/containers/dashboard/DailyPlannerContainer'; // Updated import
 import { useNotification } from '@/context/NotificationContext';
+import { useDeleteTask } from '@/hooks/useMutations';
 import { ErrorMessage } from '@/lib/error-handler'; // For typing error from hook
+import Link from 'next/link';
+import React from 'react'; // Keep useState for confirmDelete if needed locally in TaskCard
 
 interface DailyPlannerProps {
-  tasks: Task[]; // This will be pre-filtered tasks from the container
+  tasks: EnrichedTask[]; // Changed from Task[] to EnrichedTask[]
   userId: string; // Needed for context or if actions are user-specific
   activeFilter: string;
   onFilterChange: (filter: string) => void;
@@ -28,15 +29,15 @@ function DailyPlanner({
   activeFilter,
   onFilterChange,
 }: DailyPlannerProps) {
-  
-  const { 
-    mutate: deleteTask, 
+
+  const {
+    mutate: deleteTask,
     isPending: isDeletingTask, // This is a general deleting state for any task
     // error: deleteTaskError, // Handled by addNotification
     // isError: isDeleteError // Handled by addNotification
   } = useDeleteTask();
   const { addNotification } = useNotification();
-  
+
   const handleDeleteTask = (taskId: string) => {
     deleteTask(taskId, {
       onSuccess: () => {
@@ -49,7 +50,7 @@ function DailyPlanner({
       }
     });
   };
-  
+
   // tasks prop is now the already filtered list from DailyPlannerContainer
   const tasksToDisplay = tasks;
 
@@ -57,15 +58,14 @@ function DailyPlanner({
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex flex-wrap items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Dagplanning</h2>
-        
+
         <div className="flex space-x-2 mt-2 sm:mt-0">
           <button
             onClick={() => onFilterChange('all')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
-              activeFilter === 'all'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`px-3 py-1 text-sm rounded-md transition-colors ${activeFilter === 'all'
+              ? 'bg-purple-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
             aria-pressed={activeFilter === 'all'}
             aria-label="Toon alle taken"
           >
@@ -73,11 +73,10 @@ function DailyPlanner({
           </button>
           <button
             onClick={() => onFilterChange('taak')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
-              activeFilter === 'taak'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`px-3 py-1 text-sm rounded-md transition-colors ${activeFilter === 'taak'
+              ? 'bg-purple-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
             aria-pressed={activeFilter === 'taak'}
             aria-label="Toon alleen taken"
           >
@@ -85,11 +84,10 @@ function DailyPlanner({
           </button>
           <button
             onClick={() => onFilterChange('opdracht')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
-              activeFilter === 'opdracht'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`px-3 py-1 text-sm rounded-md transition-colors ${activeFilter === 'opdracht'
+              ? 'bg-purple-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
             aria-pressed={activeFilter === 'opdracht'}
             aria-label="Toon alleen opdrachten"
           >
@@ -97,29 +95,29 @@ function DailyPlanner({
           </button>
         </div>
       </div>
-      
+
       {tasksToDisplay.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
           {tasksToDisplay.map(task => (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
+            <TaskCard
+              key={task.id}
+              task={task}
               onDelete={handleDeleteTask}
               // Pass isDeletingTask if TaskCard should show a global deleting indicator.
               // If TaskCard handles its own confirm/delete spinner, this might not be needed,
               // or it could be `isDeleting={isDeletingTask && deletingTaskId === task.id}` if we track specific ID.
               // For simplicity, TaskCard's internal confirm/delete spinner is often sufficient.
               // The `isDeleting` prop was added to TaskCard to show a spinner on its delete button.
-              isDeleting={isDeletingTask} 
+              isDeleting={isDeletingTask}
             />
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">
-            {activeFilter === 'all' ? 'Geen taken gepland voor vandaag' : 
-             activeFilter === 'taak' ? 'Geen taken van het type "Taak" gepland voor vandaag' :
-             'Geen taken van het type "Opdracht" gepland voor vandaag'}
+            {activeFilter === 'all' ? 'Geen taken gepland voor vandaag' :
+              activeFilter === 'taak' ? 'Geen taken van het type "Taak" gepland voor vandaag' :
+                'Geen taken van het type "Opdracht" gepland voor vandaag'}
           </p>
           <Link
             href="/taken/nieuw"

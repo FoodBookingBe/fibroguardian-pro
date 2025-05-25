@@ -20,7 +20,7 @@ export const _queryClient = new QueryClient({
       gcTime: 5 * 60 * 1000, // Default 5 minuten cache time (gcTime is de nieuwe naam voor cacheTime in v5)
       refetchOnWindowFocus: false, // Kan per query worden overschreven indien nodig
       retry: 1, // Probeer een gefaalde query 1 keer opnieuw
-      retryDelay: (attemptIndex: unknown) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponentiële backoff
+      retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponentiële backoff
     },
     mutations: {
       onError: (error: unknown) => {
@@ -35,3 +35,6 @@ export const _queryClient = new QueryClient({
     }
   }
 });
+
+// Export without underscore for easier usage
+export const queryClient = _queryClient;

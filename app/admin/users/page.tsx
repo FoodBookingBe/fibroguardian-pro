@@ -1,10 +1,8 @@
-import React from 'react';
-
 // app/admin/users/pag(e as any).tsx
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 // AdminUsersList and UserManagementControls are now part of UsersPageClientView
-import UsersPageClientView from '@/components/admin/UsersPageClientView'; 
-import { Profile } from '@/types'; 
+import UsersPageClientView from '@/components/admin/UsersPageClientView';
+import { Profile } from '@/types';
 
 export const dynamic = 'force-dynamic'; // Ensures fresh data on each request
 
@@ -20,13 +18,13 @@ export default async function AdminUsersPage() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      consol(e as any).error("Error fetching users for admin page:", error);
+      console.error("Error fetching users for admin page:", error);
       fetchError = error.message;
     } else {
       users = data || [];
     }
   } catch (e: unknown) {
-    consol(e as any).error("Unexpected error fetching users:", e);
+    console.error("Unexpected error fetching users:", e);
     fetchError = (e as any).message || "An unexpected error occurred.";
   }
 

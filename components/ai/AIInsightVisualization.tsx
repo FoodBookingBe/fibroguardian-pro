@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Inzicht, TaskLog } from '@/types';
+import React, { useEffect, useState } from 'react';
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface AIInsightVisualizationProps {
   insight: Inzicht;
@@ -37,15 +37,15 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
         vermoeidheid_score: log.vermoeidheid_score,
         energie_na: log.energie_na,
         // Convert stemming string to a numerical value if you want to plot it
-        stemming: log.stemming ? stringToSentimentScore(log.stemming) : null, 
+        stemming: log.stemming ? stringToSentimentScore(log.stemming) : null,
       };
     }).sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
-    
+
     setChartData(processedData);
   }, [insight, logs]);
 
   const stringToSentimentScore = (sentiment?: string): number | null => {
-    if (!sentiment) return <></>; // Empty fragment instead of null
+    if (!sentiment) return null; // Return null instead of empty fragment
     const sentimentMap: Record<string, number> = {
       'zeer goed': 18, 'goed': 15, 'neutraal': 10, 'redelijk': 12, // Added redelijk
       'matig': 8, 'slecht': 5, 'zeer slecht': 2,
@@ -63,7 +63,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
     'energie_na': { label: 'Energie (na)', color: '#10b981', domain: [0, 20] },
     'stemming': { label: 'Stemming (score)', color: '#6366f1', domain: [0, 20] } // Assuming stemming is converted to 0-20 scale
   };
-  
+
   const currentMetricInfo = metricsInfo[metric] || metricsInfo['pijn_score'];
 
   const renderTrendIcon = () => {
@@ -101,9 +101,9 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
           <span>AI Gegenereerd</span>
         </div>
       </div>
-      
+
       <p className="text-sm text-gray-700 mb-4 leading-relaxed">{insight.beschrijving}</p>
-      
+
       {chartData.length > 0 ? (
         <div className="mt-2">
           <div className="mb-2 flex items-center justify-end space-x-1">
@@ -117,7 +117,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
               </button>
             ))}
           </div>
-          
+
           <div className="h-56 md:h-64"> {/* Adjusted height */}
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
@@ -125,7 +125,7 @@ const AIInsightVisualization: React.FC<AIInsightVisualizationProps> = ({ insight
                 <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                 <YAxis domain={currentMetricInfo.domain} tick={{ fontSize: 9 }} />
                 <Tooltip formatter={(value: number) => [`${value} /20`, currentMetricInfo.label]} labelFormatter={(label: string) => `Datum: ${label}`} />
-                <Legend verticalAlign="top" height={25} wrapperStyle={{fontSize: "10px"}}/>
+                <Legend verticalAlign="top" height={25} wrapperStyle={{ fontSize: "10px" }} />
                 <Line type="monotone" dataKey={metric} stroke={currentMetricInfo.color} strokeWidth={1.5} activeDot={{ r: 4 }} name={currentMetricInfo.label} dot={false} />
               </LineChart>
             </ResponsiveContainer>

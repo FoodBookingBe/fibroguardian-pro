@@ -1,8 +1,7 @@
 'use client';
-import React, { FormEvent } from 'react';
-import { Profile } from '@/types';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { ErrorMessage } from '@/lib/error-handler';
+import React, { FormEvent } from 'react';
 
 export interface ProfileFormData {
   voornaam: string;
@@ -23,7 +22,7 @@ interface ProfileFormPresentationalProps {
   isUpdateProfileSuccess: boolean;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: FormEvent) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }
 
@@ -48,7 +47,7 @@ export default function ProfileFormPresentational({
       {isUpdateProfileError && updateProfileError && !isUpdateProfileSuccess && (
         <AlertMessage type="error" title="Opslaan Mislukt" message={updateProfileError.userMessage} className="mb-4" />
       )}
-      
+
       <form onSubmit={onSubmit}>
         <div className="mb-6 flex flex-col items-center">
           <div className="mb-4 relative">
@@ -79,7 +78,7 @@ export default function ProfileFormPresentational({
           </div>
           {uploadingAvatar && <p className="text-sm text-gray-500 animate-pulse">Profielfoto uploaden...</p>}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label htmlFor="voornaam" className="block text-sm font-medium text-gray-700 mb-1">Voornaam</label>
@@ -92,7 +91,7 @@ export default function ProfileFormPresentational({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label htmlFor="postcode" className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
@@ -105,21 +104,21 @@ export default function ProfileFormPresentational({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" />
           </div>
         </div>
-        
+
         <div className="mb-6">
           <label htmlFor="geboortedatum" className="block text-sm font-medium text-gray-700 mb-1">Geboortedatum</label>
           <input id="geboortedatum" name="geboortedatum" type="date" value={formData.geboortedatum} onChange={onFormChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" />
         </div>
-        
+
         {profileType && (
-            <div className="mb-6">
-                <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">Account type</label>
-                <input id="accountType" type="text" value={profileType.charAt(0).toUpperCase() + profileType.slice(1)} readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 focus:outline-none" aria-label="Account type (niet wijzigbaar)" />
-            </div>
+          <div className="mb-6">
+            <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">Account type</label>
+            <input id="accountType" type="text" value={profileType.charAt(0).toUpperCase() + profileType.slice(1)} readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 focus:outline-none" aria-label="Account type (niet wijzigbaar)" />
+          </div>
         )}
-        
+
         <div className="flex justify-end space-x-3">
           <button type="button" onClick={onCancel}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
@@ -127,9 +126,8 @@ export default function ProfileFormPresentational({
             Annuleren
           </button>
           <button type="submit" disabled={isUpdatingProfile || uploadingAvatar}
-            className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${
-              (isUpdatingProfile || uploadingAvatar) ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            }`}
+            className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${(isUpdatingProfile || uploadingAvatar) ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+              }`}
           >
             {(isUpdatingProfile || uploadingAvatar) ? 'Bezig met opslaan...' : 'Profiel Opslaan'}
           </button>

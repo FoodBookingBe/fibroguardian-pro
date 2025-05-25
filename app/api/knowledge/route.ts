@@ -40,7 +40,7 @@ const UpdateKnowledgeSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get and validate query parameters
   const url = new URL(request.url);
   const queryParams = {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     offset: url.searchParams.get('offset') ? parseInt(url.searchParams.get('offset')!) : 0,
     searchTerm: url.searchParams.get('searchTerm') || undefined
   };
-  
+
   const queryParamsResult = GetKnowledgeQuerySchema.safeParse(queryParams);
   if (!queryParamsResult.success) {
     return NextResponse.json(
@@ -68,77 +68,77 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   try {
     // Start building the query
     let query = supabase
       .from('expert_knowledge')
       .select('*, profiles:specialist_id(name, type, avatar_url)');
-    
+
     // Apply filters
     if (queryParamsResult.data.specialistId) {
       query = query.eq('specialist_id', queryParamsResult.data.specialistId);
     }
-    
+
     if (queryParamsResult.data.contentType !== 'all') {
       query = query.eq('content_type', queryParamsResult.data.contentType);
     }
-    
+
     if (queryParamsResult.data.isApproved !== 'all') {
       query = query.eq('is_approved', queryParamsResult.data.isApproved === 'true');
     }
-    
+
     // If user is not an admin or specialist, only show approved content
     if (profile.type !== 'admin' && profile.type !== 'specialist') {
       query = query.eq('is_approved', true);
     }
-    
+
     // Apply search term if provided
     if (queryParamsResult.data.searchTerm) {
       query = query.or(`title.ilike.%${queryParamsResult.data.searchTerm}%,content.ilike.%${queryParamsResult.data.searchTerm}%`);
     }
-    
+
     // Apply pagination
     query = query
       .order('created_at', { ascending: false })
       .range(
-        queryParamsResult.data.offset, 
+        queryParamsResult.data.offset,
         queryParamsResult.data.offset + queryParamsResult.data.limit - 1
       );
-    
+
     // Execute the query
-    const { data: knowledgeEntries, error: knowledgeError, count } = await query;
-    
+    const { data: knowledgeEntries, error: knowledgeError } = await query;
+
     if (knowledgeError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error fetching knowledge entries', details: knowledgeError.message },
         { status: 500 }
       );
     }
-    
+
     // Get total count for pagination
     const { count: totalCount, error: countError } = await supabase
       .from('expert_knowledge')
       .select('*', { count: 'exact', head: true });
-    
+
     if (countError) {
       console.error('Error getting total count:', countError);
     }
-    
+
     return NextResponse.json({
       knowledgeEntries,
       pagination: {
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -171,21 +171,21 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   // Only specialists and admins can create knowledge entries
   if (profile.type !== 'specialist' && profile.type !== 'admin') {
     return NextResponse.json(
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       { status: 403 }
     );
   }
-  
+
   // Parse and validate request body
   let body;
   try {
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   const bodyResult = CreateKnowledgeSchema.safeParse(body);
   if (!bodyResult.success) {
     return NextResponse.json(
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   // If user is not an admin, they can only create entries for themselves
   if (profile.type !== 'admin' && bodyResult.data.specialistId !== user.id) {
     return NextResponse.json(
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
       { status: 403 }
     );
   }
-  
+
   try {
     // Insert the knowledge entry into the database
     const { data: knowledgeEntry, error: insertError } = await supabase
@@ -236,14 +236,14 @@ export async function POST(request: NextRequest) {
       })
       .select()
       .single();
-    
+
     if (insertError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error creating knowledge entry', details: insertError.message },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({ knowledgeEntry }, { status: 201 });
   } catch (error) {
     console.error('Error creating knowledge entry:', error);
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -269,21 +269,21 @@ export async function PATCH(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   // Parse and validate request body
   let body;
   try {
@@ -294,7 +294,7 @@ export async function PATCH(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   const bodyResult = UpdateKnowledgeSchema.safeParse(body);
   if (!bodyResult.success) {
     return NextResponse.json(
@@ -302,7 +302,7 @@ export async function PATCH(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   try {
     // Get the knowledge entry to check ownership
     const { data: knowledgeEntry, error: getError } = await supabase
@@ -310,18 +310,18 @@ export async function PATCH(request: NextRequest) {
       .select('specialist_id, is_approved')
       .eq('id', bodyResult.data.id)
       .single();
-    
+
     if (getError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error fetching knowledge entry', details: getError.message },
         { status: 500 }
       );
     }
-    
+
     // Check permissions
     const isOwner = knowledgeEntry.specialist_id === user.id;
     const isAdmin = profile.type === 'admin';
-    
+
     // Only the owner or an admin can update the entry
     if (!isOwner && !isAdmin) {
       return NextResponse.json(
@@ -329,7 +329,7 @@ export async function PATCH(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Only admins can approve entries
     if (bodyResult.data.isApproved !== undefined && !isAdmin) {
       return NextResponse.json(
@@ -337,22 +337,22 @@ export async function PATCH(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Prepare update data
     const updateData: Record<string, any> = {};
-    
+
     if (bodyResult.data.contentType !== undefined) updateData.content_type = bodyResult.data.contentType;
     if (bodyResult.data.title !== undefined) updateData.title = bodyResult.data.title;
     if (bodyResult.data.content !== undefined) updateData.content = bodyResult.data.content;
     if (bodyResult.data.tags !== undefined) updateData.tags = bodyResult.data.tags;
     if (bodyResult.data.metadata !== undefined) updateData.metadata = bodyResult.data.metadata;
     if (bodyResult.data.isApproved !== undefined) updateData.is_approved = bodyResult.data.isApproved;
-    
+
     // If non-admin is updating an approved entry, set it back to unapproved
     if (!isAdmin && knowledgeEntry.is_approved && Object.keys(updateData).length > 0) {
       updateData.is_approved = false;
     }
-    
+
     // Update the knowledge entry
     const { data: updatedEntry, error: updateError } = await supabase
       .from('expert_knowledge')
@@ -360,14 +360,14 @@ export async function PATCH(request: NextRequest) {
       .eq('id', bodyResult.data.id)
       .select()
       .single();
-    
+
     if (updateError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error updating knowledge entry', details: updateError.message },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({ knowledgeEntry: updatedEntry });
   } catch (error) {
     console.error('Error updating knowledge entry:', error);
@@ -384,7 +384,7 @@ export async function PATCH(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -393,32 +393,32 @@ export async function DELETE(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   // Get the knowledge entry ID from the URL
   const url = new URL(request.url);
   const id = url.searchParams.get('id');
-  
+
   if (!id) {
     return NextResponse.json(
       { error: 'Bad Request', message: 'Knowledge entry ID is required' },
       { status: 400 }
     );
   }
-  
+
   try {
     // Get the knowledge entry to check ownership
     const { data: knowledgeEntry, error: getError } = await supabase
@@ -426,18 +426,18 @@ export async function DELETE(request: NextRequest) {
       .select('specialist_id')
       .eq('id', id)
       .single();
-    
+
     if (getError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error fetching knowledge entry', details: getError.message },
         { status: 500 }
       );
     }
-    
+
     // Check permissions
     const isOwner = knowledgeEntry.specialist_id === user.id;
     const isAdmin = profile.type === 'admin';
-    
+
     // Only the owner or an admin can delete the entry
     if (!isOwner && !isAdmin) {
       return NextResponse.json(
@@ -445,20 +445,20 @@ export async function DELETE(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Delete the knowledge entry
     const { error: deleteError } = await supabase
       .from('expert_knowledge')
       .delete()
       .eq('id', id);
-    
+
     if (deleteError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error deleting knowledge entry', details: deleteError.message },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting knowledge entry:', error);

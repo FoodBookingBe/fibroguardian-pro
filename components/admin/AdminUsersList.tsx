@@ -1,8 +1,8 @@
 'use client'; // Mark as a Client Component
 
 // components/admin/AdminUsersList.tsx
-import React from 'react';
 import { Profile } from '@/types';
+import React from 'react';
 
 interface AdminUsersListProps {
   users: Profile[];
@@ -32,7 +32,7 @@ const AdminUsersList: React.FC<AdminUsersListProps> = ({ users, onEditUser, onDe
           </tr>
         </thead>
         <tbody className="text-gray-700 dark:text-gray-300 text-sm font-light">
-          {users.map((user: unknown) => (
+          {users.map((user: any) => (
             <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               <td className="py-3 px-6 whitespace-nowrap">{user.id}</td>
               {/* <td className="py-3 px-6">{user.email || 'N/A'}</td> */}
@@ -56,13 +56,13 @@ const AdminUsersList: React.FC<AdminUsersListProps> = ({ users, onEditUser, onDe
                 {user.created_at ? new Date(user.created_at).toLocaleDateString('nl-NL') : 'N/A'}
               </td>
               <td className="py-3 px-6">
-                <button 
+                <button
                   onClick={() => onEditUser(user)}
                   className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200 mr-3"
                 >
                   Bewerken
                 </button>
-                <button 
+                <button
                   onClick={() => onDeleteUser(user.id)}
                   className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
                 >

@@ -1,7 +1,7 @@
 'use client';
-import React, { ReactElement } from 'react';
-import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
+import Link from 'next/link';
+import { ReactElement } from 'react';
 
 export interface MenuItemP {
   href: string;
@@ -47,14 +47,13 @@ export default function SidebarPresentational({
           {isOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
         </svg>
       </button>
-      
+
       {isOpen && <div className="fixed inset-0 bg-black bg-opacity-25 z-30 md:hidden" onClick={onToggleSidebar} aria-hidden="true"></div>}
-      
+
       <aside
         id="sidebar"
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         aria-label="Hoofdnavigatie"
       >
         <div className="h-full flex flex-col">
@@ -64,18 +63,17 @@ export default function SidebarPresentational({
               <span className="text-lg font-semibold text-purple-700 group-hover:text-purple-800 transition-colors">FibroGuardian</span>
             </Link>
           </div>
-          
+
           <nav className="flex-1 overflow-y-auto py-3">
             <ul className="space-y-1 px-3">
-              {menuItems.map((item: unknown) => {
+              {menuItems.map((item: MenuItemP) => {
                 const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ease-in-out group ${
-                        isActive ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                      }`}
+                      className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ease-in-out group ${isActive ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        }`}
                       aria-current={isActive ? 'page' : undefined}
                     >
                       <span className={`mr-3 w-5 h-5 ${isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-500'}`}>
@@ -88,7 +86,7 @@ export default function SidebarPresentational({
               })}
             </ul>
           </nav>
-          
+
           <div className="p-3 border-t border-gray-200 mt-auto">
             <button
               onClick={onLogout}

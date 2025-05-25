@@ -1,11 +1,11 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
+import TopbarPresentational, { TopbarProfileData } from '@/components/layout/TopbarPresentational';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
 import { useProfile } from '@/hooks/useSupabaseQuery';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
-import TopbarPresentational, { TopbarProfileData } from '@/components/layout/TopbarPresentational';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
+import { useCallback, useEffect, useState } from 'react';
 
 export default function TopbarContainer(): JSX.Element {
   const { user } = useAuth();
@@ -14,7 +14,6 @@ export default function TopbarContainer(): JSX.Element {
 
   const { data: fullProfile, isLoading: isLoadingProfile } = useProfile(user?.id, {
     enabled: !!user,
-      queryKey: ["profile", userId],
     // select option removed, will derive TopbarProfileData from fullProfile
   });
 
@@ -37,7 +36,7 @@ export default function TopbarContainer(): JSX.Element {
     closeMenu(); // Close menu first
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.push('/'); 
+    router.push('/');
   };
 
   // Close menu on outside click
@@ -62,20 +61,20 @@ export default function TopbarContainer(): JSX.Element {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [menuOpen, closeMenu]);
-  
+
   // Don't render Topbar if user is not available or profile is still loading initially
   // This prevents a flash of unstyled content or missing user data
   if (!user || (isLoadingProfile && !fullProfile)) {
     // Render a minimal placeholder or null during critical loading
     // This matches the behavior of the original Topbar which wouldn't have profileData yet
     return (
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-            <div className="flex justify-end items-center px-4 py-2">
-                <div className="h-8 w-24"> {/* Placeholder for profile button area */}
-                    <SkeletonLoader type="card" count={1} className="h-full w-full" />
-                </div>
-            </div>
-        </header>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="flex justify-end items-center px-4 py-2">
+          <div className="h-8 w-24"> {/* Placeholder for profile button area */}
+            <SkeletonLoader type="card" count={1} className="h-full w-full" />
+          </div>
+        </div>
+      </header>
     );
   }
 

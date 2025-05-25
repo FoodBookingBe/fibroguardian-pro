@@ -1,38 +1,38 @@
-import React from 'react';
-
 'use client';
-import { useState, ReactElement } from 'react';
+
+
 import Link from 'next/link';
+import { ReactElement, useState } from 'react';
 // Task wordt nu EnrichedTask uit de container
-// import { Task } from '@/types'; 
+// import { Task } from '@/types';
 import { EnrichedTask } from '@/containers/dashboard/DailyPlannerContainer'; // Importeer EnrichedTask
 
 interface TaskCardProps {
   task: EnrichedTask; // Gebruik EnrichedTask
-  onDelete?: (taskId: string) => void | Promise<void>; 
-  onUpdateStatus?: (taskId: string, newStatus: string) => void | Promise<void>; 
-  isDeleting?: boolean; 
+  onDelete?: (taskId: string) => void | Promise<void>;
+  onUpdateStatus?: (taskId: string, newStatus: string) => void | Promise<void>;
+  isDeleting?: boolean;
 }
 
-export default function TaskCard({ task, onDelete, onUpdateStatus, isDeleting }: TaskCardProps) {
+export default function TaskCard({ task, onDelete, isDeleting }: TaskCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // DEBUG LOG
   console.log(`[TaskCard] Rendering task "${task.titel}", specialist_id:`, task.specialist_id, "Full task object:", task);
-  
+
   // Helper voor het formatteren van datum
-const formatDate = (dateString: Date | string | undefined) => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleString('nl-BE', {
-    day: '2-digit',
-    month: 'short', // Using short month name
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-  
+  const formatDate = (dateString: Date | string | undefined) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('nl-BE', {
+      day: '2-digit',
+      month: 'short', // Using short month name
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // Helper voor het bepalen van het taakicoon
   const getTaskIcon = (): ReactElement => {
     if (task.type === 'taak') {
@@ -49,7 +49,7 @@ const formatDate = (dateString: Date | string | undefined) => {
       );
     }
   };
-  
+
   // Handler voor delete bevestiging
   const handleDeleteClick = async () => {
     if (confirmDelete && onDelete) {
@@ -66,7 +66,7 @@ const formatDate = (dateString: Date | string | undefined) => {
       setTimeout(() => setConfirmDelete(false), 3000);
     }
   };
-  
+
   return (
     <div className="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-shadow duration-200 ease-in-out">
       <div className="flex items-start mb-3">
@@ -78,7 +78,7 @@ const formatDate = (dateString: Date | string | undefined) => {
           <div className="flex flex-wrap gap-2 text-xs">
             <span className={`px-2 py-0.5 rounded-full font-medium ${ // Adjusted padding
               task.type === 'taak' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-            }`}>
+              }`}>
               {task.type === 'taak' ? 'Taak' : 'Opdracht'}
             </span>
             {task.herhaal_patroon && (
@@ -93,20 +93,19 @@ const formatDate = (dateString: Date | string | undefined) => {
             )}
             {/* Toon status badge */}
             {task.status && (
-              <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-full ${
-                task.status === 'voltooid' ? 'bg-green-200 text-green-800' : 'bg-orange-200 text-orange-800'
-              }`}>
+              <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-full ${task.status === 'voltooid' ? 'bg-green-200 text-green-800' : 'bg-orange-200 text-orange-800'
+                }`}>
                 {task.status}
               </span>
             )}
           </div>
         </div>
       </div>
-      
+
       {task.beschrijving && (
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{task.beschrijving}</p>
       )}
-      
+
       {task.labels && task.labels.length > 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
@@ -118,7 +117,7 @@ const formatDate = (dateString: Date | string | undefined) => {
           </div>
         </div>
       )}
-      
+
       <div className="flex flex-wrap text-xs text-gray-500 mb-4 items-center">
         <span className="mr-3">Aangemaakt: {formatDate(task.created_at)}</span>
         {task.status === 'voltooid' && task.voltooid_op && (
@@ -133,10 +132,10 @@ const formatDate = (dateString: Date | string | undefined) => {
           </span>
         )}
       </div>
-      
+
       <div className="flex justify-between items-center pt-3 border-t border-gray-100"> {/* Adjusted padding */}
         <div className="flex space-x-3"> {/* Increased space */}
-          <Link 
+          <Link
             href={`/taken/${task.id}`} // Assuming this is the view details page
             className="text-gray-500 hover:text-purple-600 transition-colors"
             aria-label={`Bekijk details van taak ${task.titel}`}
@@ -146,8 +145,8 @@ const formatDate = (dateString: Date | string | undefined) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </Link>
-          
-          <Link 
+
+          <Link
             href={`/taken/${task.id}/edit`} // Aangepast naar /edit
             className="text-gray-500 hover:text-blue-600 transition-colors"
             aria-label={`Bewerk taak ${task.titel}`}
@@ -156,14 +155,13 @@ const formatDate = (dateString: Date | string | undefined) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </Link>
-          
+
           {onDelete && ( // Only show delete if handler is provided
             <button
               type="button"
               onClick={handleDeleteClick}
-              className={`transition-colors ${
-                confirmDelete ? 'text-red-600 hover:text-red-700' : 'text-gray-500 hover:text-red-600'
-              } ${isDeleting && task.id === (confirmDelete ? task.id : undefined) ? 'opacity-50 cursor-not-allowed' : ''}`} // Visual cue for deleting
+              className={`transition-colors ${confirmDelete ? 'text-red-600 hover:text-red-700' : 'text-gray-500 hover:text-red-600'
+                } ${isDeleting && task.id === (confirmDelete ? task.id : undefined) ? 'opacity-50 cursor-not-allowed' : ''}`} // Visual cue for deleting
               aria-label={confirmDelete ? `Bevestig verwijderen van taak ${task.titel}` : `Verwijder taak ${task.titel}`}
               aria-live={confirmDelete ? "assertive" : "off"} // Announce confirmation
               disabled={isDeleting && task.id === (confirmDelete ? task.id : undefined)} // Disable button during delete
@@ -185,7 +183,7 @@ const formatDate = (dateString: Date | string | undefined) => {
             </button>
           )}
         </div>
-        
+
         <Link
           href={`/taken/${task.id}/start`} // Assuming this route exists
           className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-md hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" // Adjusted padding and added focus styles

@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { logger } from '@/lib/monitoring/logger';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -17,28 +17,28 @@ interface ErrorBoundaryState {
 /**
  * ErrorBoundary component to catch JavaScript errors anywhere in the child component tree
  * and display a fallback UI instead of crashing the whole app
- * 
+ *
  * Features:
  * - Custom fallback UI (component or render function)
  * - Error logging
  * - Optional error callback
  * - Reset on props change option
- * 
+ *
  * @example
  * // Basic usage
  * <ErrorBoundary>
  *   <MyComponent />
  * </ErrorBoundary>
- * 
+ *
  * @example
  * // With custom fallback
  * <ErrorBoundary fallback={<p>Something went wrong</p>}>
  *   <MyComponent />
  * </ErrorBoundary>
- * 
+ *
  * @example
  * // With render function fallback
- * <ErrorBoundary 
+ * <ErrorBoundary
  *   fallback={(error, errorInfo) => (
  *     <div>
  *       <h2>Something went wrong</h2>
@@ -125,7 +125,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="p-4 border border-red-300 rounded bg-red-50 text-red-800">
           <h2 className="text-lg font-semibold mb-2">Er is iets misgegaan</h2>
           <p className="mb-4">
-            Er is een fout opgetreden bij het weergeven van deze component. 
+            Er is een fout opgetreden bij het weergeven van deze component.
             Probeer de pagina te vernieuwen of neem contact op met ondersteuning als het probleem aanhoudt.
           </p>
           {process.env.NODE_ENV === 'development' && (
@@ -148,11 +148,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 /**
  * Higher-order component that wraps a component with an ErrorBoundary
- * 
+ *
  * @param Component The component to wrap
  * @param errorBoundaryProps Props for the ErrorBoundary
  * @returns The wrapped component
- * 
+ *
  * @example
  * const _SafeComponent = withErrorBoundary(MyComponent, {
  *   fallback: <p>Something went wrong</p>
@@ -163,16 +163,14 @@ export function withErrorBoundary<P extends object>(
   errorBoundaryProps: Omit<ErrorBoundaryProps, 'children'> = {}
 ): React.FC<P> {
   const displayName = Component.displayName || Component.name || 'Component';
-  
-  const WrappedComponent: React.FC<P> = (props: unknown) => (
-    <ErrorBoundary {...errorBoundaryProps} // Type assertion fixed
-const _typedErrorBoundaryProps = errorBoundaryProps as Record<string, unknown>;>
-      <Component {...props} // Type assertion fixed
-const _typedProps = props as Record<string, unknown>; />
+
+  const WrappedComponent: React.FC<P> = (props: P) => (
+    <ErrorBoundary {...errorBoundaryProps}>
+      <Component {...props} />
     </ErrorBoundary>
   );
-  
+
   WrappedComponent.displayName = `withErrorBoundary(${displayName})`;
-  
+
   return WrappedComponent;
 }

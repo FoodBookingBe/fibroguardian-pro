@@ -1,3 +1,4 @@
+'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -7,16 +8,14 @@ declare module "react" {
 }
 import React from 'react';
 
-'use client';
-
-import { useState, useEffect } from 'react'; // useEffect terug toegevoegd
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // Voor laadstatus
+import { useNotification } from '@/context/NotificationContext'; // Voor notificaties
+import { useDeleteTask } from '@/hooks/useMutations'; // Importeer delete hook
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { Profile, Task } from '@/types';
 import Link from 'next/link';
+import { useEffect, useState } from 'react'; // useEffect terug toegevoegd
 import CreateTaskAssignmentForm from './CreateTaskAssignmentForm';
-import { useTasksForUserBySpecialist } from '@/hooks/useSupabaseQuery'; // Gebruik de nieuwe hook
-import { useDeleteTask } from '@/hooks/useMutations'; // Importeer delete hook
-import { useNotification } from '@/context/NotificationContext'; // Voor notificaties
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // Voor laadstatus
 
 interface SpecialistTaskCreatorProps {
   patients: Profile[];
@@ -24,88 +23,81 @@ interface SpecialistTaskCreatorProps {
 }
 
 export default function SpecialistTaskCreator({ patients, specialistId }: SpecialistTaskCreatorProps) {
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null); // State voor de taak die bewerkt wordt
-
-  const { 
-    data: assignedTasks, 
-    isLoading: isLoadingTasks, 
-    error: tasksError,
-    refetch: refetchTasks // Functie om taken opnieuw op te halen
-  } = useTasksForUserBySpecialist(selectedPatientId, specialistId, { 
-    enabled: !!selectedPatientId,
-      queryKey: ["profile", userId], // Alleen fetchen als een patiënt is geselecteerd
-  });
+  const [selectedPatientId, setSelectedPatientId] = useState<string>('');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { addNotification } = useNotification();
-  const { mutate: deleteTask, isPending: isDeletingTask } = useDeleteTask();
+
+  // Fetch tasks when patient is selected
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!selectedPatientId) {
+        setTasks([]);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', selectedPatientId)
+          .eq('specialist_id', specialistId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setTasks(data || []);
+      } catch (err: unknown) {
+        setError((err as any).message || 'Fout bij ophalen taken');
+        console.error('Error fetching tasks:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [selectedPatientId, specialistId]);
 
   const handlePatientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedPatientId(e.target.value || null);
-  };
-  
-  // Callback voor na het aanmaken of bijwerken van een taak
-  const handleTaskUpserted = () => {
-    if (selectedPatientId) {
-      refetchTasks(); // Haal de takenlijst opnieuw op
-    }
-    setEditingTask(null); // Verlaat edit mode
+    setSelectedPatientId(e.target.value);
   };
 
-  const handleEditTask = (task: Task) => {
-    // Zorg ervoor dat de geselecteerde patiënt overeenkomt met de user_id van de taak
-    if (task.user_id === selectedPatientId) {
-      setEditingTask(task);
-      // Scroll naar het formulier (optioneel)
-      // document.getElementById('task-assignment-form')?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      addNotification({ type: 'warning', message: 'Kan taak niet bewerken, selecteer eerst de juiste patiënt.'});
+  const handleTaskUpserted = () => {
+    // Refresh tasks after create/update
+    if (selectedPatientId) {
+      const event = new Event('tasks-updated');
+      window.dispatchEvent(event);
     }
+  };
+
+  const { mutate: deleteTask, isPending: isDeletingTask } = useDeleteTask();
+
+  const handleEditTask = (task: Task) => {
+    // Handle edit task - could open a modal or navigate to edit page
+    console.log('Edit task:', task);
+    // You could emit an event or call a callback prop here
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (!selectedPatientId) return; 
-
-    if (!window.confirm(`Weet u zeker dat u deze taak wilt verwijderen?`)) { // Duidelijkere bevestigingstekst
+    if (!window.confirm('Weet u zeker dat u deze taak wilt verwijderen?')) {
       return;
     }
 
     deleteTask(taskId, {
       onSuccess: () => {
         addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
-        refetchTasks(); 
-        if (editingTask?.id === taskId) { // Als de bewerkte taak is verwijderd
-          setEditingTask(null);
-        }
+        // Refresh tasks
+        setTasks(prev => prev.filter(task => task.id !== taskId));
       },
-      onError: (error: unknown) => {
-        addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
+      onError: (error: any) => {
+        addNotification({ type: 'error', message: error?.userMessage || 'Fout bij verwijderen taak.' });
       }
     });
   };
-
-  // Wanneer de geselecteerde patiënt verandert, reset de editingTask state
-  useEffect(() => {
-    setEditingTask(null);
-  return undefined; // Add default return
-  }, [selectedPatientId]);
-
-  // Verwijder het gedupliceerde blok hieronder
-  // if (patients.length === 0) {
-  //   if (!window.confirm(`Weet u zeker dat u taak ${taskId} wilt verwijderen?`)) {
-  //     return;
-  //   }
-
-  //   deleteTask(taskId, {
-  //     onSuccess: () => {
-  //       addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
-  //       refetchTasks(); // Ververs de lijst
-  //     },
-  //     onError: (error: unknown) => {
-  //       addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
-  //     }
-  //   });
-  // };
 
   if (patients.length === 0) {
     return (
@@ -129,7 +121,7 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
         <select
           id="patient-select"
           name="patient-select"
-          value={selectedPatientId || ''}
+          value={selectedPatientId}
           onChange={handlePatientSelect}
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
         >
@@ -143,25 +135,24 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
       </div>
 
       <div id="task-assignment-form"> {/* ID voor scroll target */}
-        <CreateTaskAssignmentForm 
+        <CreateTaskAssignmentForm
           selectedPatientId={selectedPatientId}
           specialistId={specialistId}
-          onTaskUpserted={handleTaskUpserted} 
-          initialData={editingTask} // Geef de te bewerken taak mee
+          onTaskUpserted={handleTaskUpserted}
         />
       </div>
-      
+
       {selectedPatientId && (
         <div className="mt-8 border-t pt-6">
           <h3 className="text-lg font-medium leading-6 text-gray-900 mb-3">
             Toegewezen Taken aan Geselecteerde Patiënt
           </h3>
-          {isLoadingTasks && <SkeletonLoader type="list" count={3} />}
-          {tasksError && <p className="text-red-500">Fout bij het laden van taken: {tasksError.userMessage}</p>}
-          {!isLoadingTasks && !tasksError && (!assignedTasks || assignedTasks.length === 0) && (
+          {isLoading && <SkeletonLoader type="list" count={3} />}
+          {error && <p className="text-red-500">Fout bij het laden van taken: {error}</p>}
+          {!isLoading && !error && (!tasks || tasks.length === 0) && (
             <p className="text-gray-500">Nog geen taken toegewezen aan deze patiënt door u.</p>
           )}
-          {!isLoadingTasks && !tasksError && assignedTasks && assignedTasks.length > 0 && (
+          {!isLoading && !error && tasks && tasks.length > 0 && (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -170,15 +161,13 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Herhaling</th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aangemaakt op</th>
-                    {/* <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patiënt</th> */}
                     <th scope="col" className="relative px-4 py-3">
                       <span className="sr-only">Acties</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {assignedTasks.map((task: Task) => {
-                    // const patient = patients.find(p => p.id === task.user_id); // Niet nodig, lijst is al per patiënt
+                  {tasks.map((task: Task) => {
                     return (
                       <tr key={task.id}>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{task.titel}</td>
@@ -187,17 +176,16 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                           {new Date(task.created_at).toLocaleString('nl-BE', { dateStyle: 'short', timeStyle: 'short' })}
                         </td>
-                        {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{patient ? `${patient.voornaam} ${patient.achternaam}` : 'N/B'}</td> */}
                         <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
                           <button
                             onClick={() => handleEditTask(task)}
                             className="text-indigo-600 hover:text-indigo-800 disabled:text-gray-400"
-                            disabled={isDeletingTask} // Kan ook een aparte isEditingFormLoading state gebruiken
+                            disabled={isDeletingTask}
                           >
                             Bewerk
                           </button>
-                          <button 
-                            onClick={() => handleDeleteTask(task.id)} 
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
                             className="text-red-600 hover:text-red-800 disabled:text-gray-400"
                             disabled={isDeletingTask}
                           >
@@ -213,8 +201,6 @@ export default function SpecialistTaskCreator({ patients, specialistId }: Specia
           )}
         </div>
       )}
-      {/* Debug log - kan verwijderd worden */}
-      {/* {selectedPatientId && <p className="mt-2 text-xs text-gray-500">Debug: Geselecteerde Patiënt ID: {selectedPatientId} | Specialist ID: {specialistId}</p>} */}
     </>
   );
 }

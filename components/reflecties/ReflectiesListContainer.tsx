@@ -1,13 +1,12 @@
-import React from 'react';
-
 'use client';
 
-import { useReflecties } from '@/hooks/useSupabaseQuery';
-import { useDeleteReflectie } from '@/hooks/useMutations';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
-import ReflectiesList from './ReflectiesList'; // Assuming ReflectiesList is in the same directory
+import { useDeleteReflectie } from '@/hooks/useMutations';
+import { useReflecties } from '@/hooks/useSupabaseQuery';
 import { ErrorMessage } from '@/lib/error-handler';
+import { Reflectie } from '@/types';
 import Link from 'next/link'; // For the empty state button
+import ReflectiesList from './ReflectiesList'; // Assuming ReflectiesList is in the same directory
 
 // Define an EmptyState component or use inline JSX for emptyFallback
 const EmptyReflectiesState = () => (
@@ -17,8 +16,8 @@ const EmptyReflectiesState = () => (
     </svg>
     <h2 className="text-xl font-semibold text-gray-700 mb-2">Geen reflecties gevonden</h2>
     <p className="text-gray-500 mb-6">Deel uw dagelijkse ervaringen en houd bij hoe u zich voelt.</p>
-    <Link 
-      href="/reflecties/nieuw" 
+    <Link
+      href="/reflecties/nieuw"
       className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors inline-flex items-center"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -30,17 +29,17 @@ const EmptyReflectiesState = () => (
 );
 
 export function ReflectiesListContainer({ userId }: { userId: string }) {
-  const { 
-    data: reflecties, 
-    isLoading, 
+  const {
+    data: reflecties,
+    isLoading,
     error, // This will be ErrorMessage type
     isError, // Boolean flag from React Query
     // refetch // Can be used for pull-to-refresh or manual refresh
   } = useReflecties(userId); // Default limit is 10
-  
-  const { 
-    mutate: deleteReflectie, 
-    isPending: isDeleting, 
+
+  const {
+    mutate: deleteReflectie,
+    isPending: isDeleting,
     // error: deleteError, // Error for delete can be handled via onSuccess/onError or a separate state
     // isError: isDeleteError
   } = useDeleteReflectie();
@@ -58,7 +57,7 @@ export function ReflectiesListContainer({ userId }: { userId: string }) {
       }
     });
   };
-  
+
   return (
     <ConditionalRender
       isLoading={isLoading}
@@ -68,10 +67,10 @@ export function ReflectiesListContainer({ userId }: { userId: string }) {
       skeletonType="reflecties" // This type needs to be defined in SkeletonLoader
       emptyFallback={<EmptyReflectiesState />}
     >
-      {(data: unknown) => (
-        <ReflectiesList 
-          reflecties={data} 
-          onDelete={handleDelete} 
+      {(data: Reflectie[]) => (
+        <ReflectiesList
+          reflecties={data}
+          onDelete={handleDelete}
           isDeletingId={isDeleting ? 'pending' : null} // Pass a generic deleting indicator or specific ID if hook provides it
         />
       )}

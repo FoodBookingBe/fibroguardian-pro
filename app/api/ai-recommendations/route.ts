@@ -238,7 +238,6 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
     }
 
     const { id, ...updateData } = validationResult.data;
-    const _typedUpdateData = updateData as Record<string, unknown>;
 
     // Check if the recommendation exists and belongs to the user
     const { data: recommendation, error: getError } = await supabase

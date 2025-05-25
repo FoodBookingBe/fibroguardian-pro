@@ -1,15 +1,14 @@
 import { z, ZodError, ZodSchema } from 'zod';
-import { ReflectieFormData, TaskLog } from '@/types';
 
 /**
  * Validates and sanitizes API input data using Zod schemas.
  * This function provides a consistent way to validate and sanitize input data
  * across all API routes, with detailed error messages.
- * 
+ *
  * @param data The unknown input data to validate
  * @param schema The Zod schema to validate against
  * @returns An object with either the validated data or an error message
- * 
+ *
  * @example
  * // Define a schema
  * const userSchema = z.object({
@@ -17,7 +16,7 @@ import { ReflectieFormData, TaskLog } from '@/types';
  *   email: z.string().email(),
  *   age: z.number().int().positive().optional()
  * });
- * 
+ *
  * // Validate input
  * const { data, error } = validateAndSanitizeApiInput(req.body, userSchema);
  * if (error) {
@@ -27,7 +26,7 @@ import { ReflectieFormData, TaskLog } from '@/types';
  * const _user = data;
  */
 export function validateAndSanitizeApiInput<T>(
-  data: unknown, 
+  data: unknown,
   schema: ZodSchema<T>
 ): { data: T | null; error: string | null } {
   try {
@@ -35,7 +34,7 @@ export function validateAndSanitizeApiInput<T>(
     return { data: validatedData, error: null };
   } catch (error) {
     if (error instanceof ZodError) {
-      const errorMessage = error.errors.map(e => 
+      const errorMessage = error.errors.map(e =>
         `${e.path.join('.') || 'input'}: ${e.message}`
       ).join('; ');
       return { data: null, error: errorMessage };
@@ -119,7 +118,7 @@ export const _apiSchemas = {
     hartslag: z.number().int().positive().optional(),
     notitie: z.string().optional()
   }),
-  
+
   /**
    * Schema for validating task log creation (minimal required fields)
    */
@@ -131,3 +130,6 @@ export const _apiSchemas = {
     energie_voor: commonSchemas.scoreRange.optional()
   })
 };
+
+// Export without underscore for easier usage
+export const apiSchemas = _apiSchemas;

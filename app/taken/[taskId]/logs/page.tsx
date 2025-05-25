@@ -1,13 +1,12 @@
-import React from 'react';
-
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Corrected import path
-import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer'; 
+
 import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton';
+import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Corrected import path
 import { Task } from '@/types';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 export default function TaskSpecificLogsPage(): JSX.Element {
   const params = useParams();
@@ -15,37 +14,37 @@ export default function TaskSpecificLogsPage(): JSX.Element {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchTask = async () => {
       if (!params.id) return;
-      
+
       try {
         const supabaseClient = getSupabaseBrowserClient();
         const { data: { user } } = await supabaseClient.auth.getUser();
-        
+
         if (!user) {
           router.push('/auth/login');
           return;
         }
-        
+
         const { data, error: fetchError } = await supabaseClient
           .from('tasks')
           .select('*')
           .eq('id', params.id)
           .single();
-        
+
         if (fetchError) throw fetchError;
-        
+
         if (!data) {
           throw new Error('Taak niet gevonden');
         }
-        
+
         // Check if user has access to this task
         if (data.user_id !== user.id && data.specialist_id !== user.id) {
           throw new Error('U heeft geen toegang tot deze taak');
         }
-        
+
         setTask(data as Task);
       } catch (error: unknown) {
         console.error('Fout bij ophalen taak:', error);
@@ -54,10 +53,10 @@ export default function TaskSpecificLogsPage(): JSX.Element {
         setLoading(false);
       }
     };
-    
+
     fetchTask();
   }, [params.id, router]);
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -68,14 +67,14 @@ export default function TaskSpecificLogsPage(): JSX.Element {
       </div>
     );
   }
-  
+
   if (error || !task) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-xl font-semibold text-red-600 mb-4">Fout</h1>
           <p className="text-gray-700 mb-6">{error || 'Taak niet gevonden'}</p>
-          <Link 
+          <Link
             href="/taken"
             className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors"
           >
@@ -85,13 +84,13 @@ export default function TaskSpecificLogsPage(): JSX.Element {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Logs voor {task.titel}</h1>
         <div className="flex space-x-4">
-          <Link 
+          <Link
             href={`/taken/${task.id}`}
             className="text-purple-600 hover:text-purple-800 flex items-center"
           >
@@ -101,7 +100,7 @@ export default function TaskSpecificLogsPage(): JSX.Element {
             </svg>
             Bekijk taak
           </Link>
-          <Link 
+          <Link
             href="/taken"
             className="text-purple-600 hover:text-purple-800 flex items-center"
           >
@@ -112,7 +111,7 @@ export default function TaskSpecificLogsPage(): JSX.Element {
           </Link>
         </div>
       </div>
-      
+
       <div className="mb-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-4">Taak Details</h2>
@@ -145,13 +144,13 @@ export default function TaskSpecificLogsPage(): JSX.Element {
           </div>
         </div>
       </div>
-      
+
       <Suspense fallback={<TaskLogsLoadingSkeleton />}>
         <TaskLogsContainer taskId={task.id} limit={100} title={`Logs voor ${task.titel}`} />
       </Suspense>
-      
+
       <div className="mt-6 flex justify-center">
-        <Link 
+        <Link
           href={`/taken/${task.id}/start`}
           className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
         >

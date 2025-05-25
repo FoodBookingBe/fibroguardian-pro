@@ -1,9 +1,9 @@
-import React from 'react';
-
 'use client';
 
-import { Profile } from '@/types'; // Assuming Profile type is in @/types
+
 import Link from 'next/link';
+
+import { Profile } from '@/types'; // Assuming Profile type is in @/types
 
 interface RecentUsersTableProps {
   users: Profile[]; // Expects an array of Profile objects
@@ -55,13 +55,13 @@ export default function RecentUsersTable({ users }: RecentUsersTableProps) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users.map((user: unknown) => (
+          {users.map((user: Profile) => (
             <tr key={user.id}>
               <td className="whitespace-nowrap px-6 py-4">
                 <div className="flex items-center">
                   {user.avatar_url && (
-                    <div className="mr-4 h-10 w-10 flex-shrink-0">
-                      <img className="h-10 w-10 rounded-full" src={user.avatar_url} alt="" />
+                    <div className="mr-4 size-10 shrink-0">
+                      <img className="size-10 rounded-full" src={user.avatar_url} alt="" />
                     </div>
                   )}
                   <div>
@@ -72,9 +72,9 @@ export default function RecentUsersTable({ users }: RecentUsersTableProps) {
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                 {/* Email is typically in auth.users, not profiles. This column might need adjustment or data enrichment. */}
-                N/A 
+                N/A
               </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 capitalize">{user.type}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm capitalize text-gray-500">{user.type}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                 {formatDate(user.created_at)}
               </td>

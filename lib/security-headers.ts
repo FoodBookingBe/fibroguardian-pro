@@ -62,3 +62,6 @@ export const _securityHeaders = [
     value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()'
   }
 ];
+
+// Export without underscore for easier usage
+export const securityHeaders = _securityHeaders;

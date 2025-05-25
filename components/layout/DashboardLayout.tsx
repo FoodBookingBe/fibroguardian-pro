@@ -1,14 +1,14 @@
+'use client';
+
 import React from 'react';
 
-'use client';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import SidebarContainer from '@/containers/layout/SidebarContainer';
 import TopbarContainer from '@/containers/layout/TopbarContainer'; // Updated import
 import { useEffect, useState } from 'react';
-import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, loadingAuth, loadingProfile } = useAuth(); // Use more specific loading states from AuthProvider
+  const { user, loadingAuth, loadingProfile } = useAuth(); // Removed unused 'loading' variable
   // const _router = useRouter(); // No longer needed for redirection here
   const [mounted, setMounted] = useState(false);
 
@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Voorkomen van hydration mismatch
   useEffect(() => {
     setMounted(true);
-  return undefined; // Add default return
+    return undefined; // Add default return
   }, []);
 
   // Redirection logic is now primarily handled by AuthProvider.
@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
- 
+
   // If still loading, AuthProvider hasn't finished. If not loading and no user,
   // AuthProvider should have redirected if this is a protected route.
   // So, if we reach here and there's no user, it implies this might be a brief moment before redirect,
@@ -49,15 +49,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // console.log('[Client DashboardLayout] User is null after loading, AuthProvider should handle redirect.');
     return <></>; // Empty fragment instead of null // Or a more graceful "unauthorized" message if this layout can be on public pages
   }
- 
+
   // console.log('[Client DashboardLayout] Rendering main layout');
   return (
     <div className="flex h-screen bg-gray-50">
       <SidebarContainer /> {/* Updated component */}
-      
+
       <div className="flex-1 flex flex-col md:ml-64">
         <TopbarContainer /> {/* Updated component */}
-        
+
         <main className="flex-1 overflow-y-auto p-4">
           {children}
         </main>

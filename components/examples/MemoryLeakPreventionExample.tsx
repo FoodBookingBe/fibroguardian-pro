@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+
 
 import { useEffect } from 'react';
 
@@ -22,10 +23,10 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
   const { signal } = useAbortController();
 
   // 3. Safe timers
-  const { setTimeout, setInterval, clearTimeout, clearInterval } = useTimers();
+  const { setTimeout, setInterval } = useTimers();
 
   // 4. Safe event listeners
-  const { addEventListener, removeEventListener } = useEventListener();
+  const { addEventListener } = useEventListener();
 
   // Example of fetching data safely
   const fetchData = async () => {
@@ -35,13 +36,13 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
 
       // Using AbortController signal with fetch
       const response = await fetch('/api/data', { signal });
-      
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
-      
+
       const result = await response.json();
-      
+
       // Safe state update - won't cause memory leak if component unmounts
       setData(result);
     } catch (err) {
@@ -57,16 +58,13 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
   // Example of using safe timers
   useEffect(() => {
     // This timer will be automatically cleared when the component unmounts
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       console.log('Timer completed');
       fetchData();
     }, 2000);
 
-    // You can still clear the timer manually if needed
-    // clearTimeout(timer);
-
     // Example of using safe interval
-    const _intervalId = setInterval(() => {
+    setInterval(() => {
       console.log('Interval tick');
     }, 5000);
 
@@ -84,7 +82,7 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
   return (
     <div className="rounded-lg border p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold">Memory Leak Prevention Example</h2>
-      
+
       <div className="mb-4">
         <button
           onClick={fetchData}
@@ -94,13 +92,13 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
           {loading ? 'Loading...' : 'Fetch Data'}
         </button>
       </div>
-      
+
       {error && (
         <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
           Error: {error}
         </div>
       )}
-      
+
       <div>
         <h3 className="mb-2 font-semibold">Data:</h3>
         {data.length > 0 ? (
@@ -113,7 +111,7 @@ export default function MemoryLeakPreventionExample(): JSX.Element {
           <p className="text-gray-500">No data available</p>
         )}
       </div>
-      
+
       <div className="mt-6 rounded bg-yellow-50 p-3">
         <h3 className="mb-2 font-semibold">How This Prevents Memory Leaks:</h3>
         <ul className="list-disc space-y-1 pl-5 text-sm">

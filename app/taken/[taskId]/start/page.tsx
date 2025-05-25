@@ -1,13 +1,13 @@
-import React from 'react';
-
 'use client';
+
+
 // import { useState, useEffect } from 'react'; // Unused imports
 import { useParams } from 'next/navigation'; // useRouter removed as it's unused
 // import { getSupabaseBrowserClient } from '@/lib/supabase'; // No longer needed for task fetching
 import TaskExecutionContainer from '@/containers/tasks/TaskExecutionContainer'; // Updated import
 // import { Task } from '@/types'; // Task type might not be needed here if not passing initialTask
-import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout'; // Assuming this page uses DashboardLayout
+import Link from 'next/link';
 
 // This page can become simpler as the container handles loading/error states for the task itself.
 // Server-side auth check is removed as this is a client component.
@@ -17,7 +17,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout'; // Assuming t
 // import { redirect } from 'next/navigation'; // Server-side redirect
 
 
-export default function TaskStartPage(): JSX.Element { 
+export default function TaskStartPage(): JSX.Element {
   const params = useParams();
   const taskId = params.taskId as string; // Moet overeenkomen met de mapnaam [taskId]
 
@@ -43,7 +43,7 @@ export default function TaskStartPage(): JSX.Element {
       </DashboardLayout>
     );
   }
-  
+
   return (
     <DashboardLayout> {/* Wrap with DashboardLayout */}
       <div className="container mx-auto px-4 py-8">
@@ -58,10 +58,10 @@ export default function TaskStartPage(): JSX.Element {
             Terug naar taken
           </Link>
         </div>
-        
+
         <TaskExecutionContainer
           taskId={taskId}
-          // onComplete can be handled within the container or passed differently if needed from server
+        // onComplete can be handled within the container or passed differently if needed from server
         />
       </div>
     </DashboardLayout>

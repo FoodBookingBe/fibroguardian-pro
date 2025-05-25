@@ -1,5 +1,5 @@
-import React, { ComponentType } from 'react'; // Import React, useState was unused
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; // Correct pad
+import React, { ComponentType } from 'react'; // Import React, useState was unused
 import { UpgradePrompt } from './UpgradePrompt'; // Importeer de UpgradePrompt component
 
 interface WithFeatureAccessOptions { // Hernoemd van WithFeatureAccessProps voor duidelijkheid
@@ -10,9 +10,9 @@ interface WithFeatureAccessOptions { // Hernoemd van WithFeatureAccessProps voor
   upgradePromptDescription?: string;
   // Fallback UI als de gebruiker geen toegang heeft en de prompt niet getoond wordt (bv. na dismiss)
   // of als er geen prompt getoond moet worden maar de content wel verborgen moet zijn.
-  fallbackUI?: React.ReactNode; 
+  fallbackUI?: React.ReactNode;
   // Bepaalt of de prompt getoond moet worden, of alleen de fallbackUI / niets
-  showPromptIfNoAccess?: boolean; 
+  showPromptIfNoAccess?: boolean;
 }
 
 /**
@@ -26,11 +26,11 @@ export function withFeatureAccess<P extends object>( // P extends object is een 
   WrappedComponent: ComponentType<P>,
   options: WithFeatureAccessOptions
 ): ComponentType<P> { // De geretourneerde component accepteert dezelfde props P
-  
-  const { 
-    featureId, 
-    upgradePromptVariant = 'inline', 
-    upgradePromptTitle, 
+
+  const {
+    featureId,
+    upgradePromptVariant = 'inline',
+    upgradePromptTitle,
     upgradePromptDescription,
     fallbackUI = null, // Default naar niets renderen als geen fallback is gespecificeerd
     showPromptIfNoAccess = true, // Default naar het tonen van de prompt
@@ -52,12 +52,11 @@ export function withFeatureAccess<P extends object>( // P extends object is een 
       // Voor nu, render niets of een minimale loader.
       return <div aria-live="polite" aria-busy="true">Checking feature access...</div>; // Of een Skeleton
     }
-    
+
     const canAccessFeature = hasAccess(featureId);
-    
+
     if (canAccessFeature) {
-      return <WrappedComponent {...props} // Type assertion fixed
-const _typedProps = props as Record<string, unknown>; />;
+      return <WrappedComponent {...props} />;
     }
 
     // Gebruiker heeft geen toegang
@@ -68,22 +67,21 @@ const _typedProps = props as Record<string, unknown>; />;
           variant={upgradePromptVariant}
           title={upgradePromptTitle}
           description={upgradePromptDescription}
-          // onClose={handleClosePrompt} // onClose wordt nu intern afgehandeld door UpgradePrompt
-          // De UpgradePrompt heeft zijn eigen dismiss logica.
-          // Als de HOC de prompt moet verbergen na dismiss, dan moet de state hier beheerd worden.
-          // Voor nu, laat UpgradePrompt zijn eigen zichtbaarheid beheren.
+        // onClose={handleClosePrompt} // onClose wordt nu intern afgehandeld door UpgradePrompt
+        // De UpgradePrompt heeft zijn eigen dismiss logica.
+        // Als de HOC de prompt moet verbergen na dismiss, dan moet de state hier beheerd worden.
+        // Voor nu, laat UpgradePrompt zijn eigen zichtbaarheid beheren.
         />
       );
     }
-    
+
     return fallbackUI; // Toon fallback UI of null (niets)
   };
-  
+
   // Kopieer displayName van de gewikkelde component voor betere debugging
-  ComponentWithFeatureAccess.displayName = `withFeatureAccess(${
-    WrappedComponent.displayName || WrappedComponent.name || 'Component'
-  })`;
-  
+  ComponentWithFeatureAccess.displayName = `withFeatureAccess(${WrappedComponent.displayName || WrappedComponent.name || 'Component'
+    })`;
+
   return ComponentWithFeatureAccess;
 }
 

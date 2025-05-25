@@ -1,5 +1,3 @@
-import React from 'react';
-
 'use client';
 
 import Image from 'next/image'; // Import Next.js Image component

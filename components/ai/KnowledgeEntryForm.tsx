@@ -1,4 +1,3 @@
-
 'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
@@ -62,7 +61,7 @@ export default function KnowledgeEntryForm({
       const supabase = getSupabaseBrowserClient();
 
       // Create knowledge entry
-      const { data, error: insertError } = await supabase
+      const { data: _data, error: insertError } = await supabase
         .from('expert_knowledge')
         .insert({
           specialist_id: user.id,

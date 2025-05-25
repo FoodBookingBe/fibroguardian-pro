@@ -1,14 +1,14 @@
-import React from 'react';
+'use client';
+
 
 // containers/dashboard/DailyPlannerContainer.tsx
-'use client';
-import { useState, useMemo, useEffect } from 'react'; // Added useEffect
-import { useTasks } from '@/hooks/useSupabaseQuery';
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { ConditionalRender } from '@/components/ui/ConditionalRender';
 import DailyPlanner from '@/components/dashboard/DailyPlanner';
-import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
+import { ConditionalRender } from '@/components/ui/ConditionalRender';
+import { useTasks } from '@/hooks/useSupabaseQuery';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'; // Voor logs
+import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
+import { useEffect, useMemo, useState } from 'react'; // Added useEffect
 
 // Definieer een interface voor de verrijkte taak
 export interface EnrichedTask extends Task {
@@ -32,17 +32,17 @@ const EmptyTasksState = () => (
 export function DailyPlannerContainer(): JSX.Element {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState<string>('all'); // 'all', 'taak', 'opdracht'
-  
+
   // Fetch taken voor de huidige gebruiker
   // Assuming useTasks fetches all tasks; filtering for "today" might need to happen here or in DailyPlanner
   // Or useTasks could accept a date filter. For now, fetching all and filtering client-side.
   const { data: allTasks, isLoading, error, isError } = useTasks(user?.id);
-  
+
   // Filter functie - verplaatst van component naar container
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
   };
-  
+
   // Gefilterde taken berekenen
   const [enrichedTasks, setEnrichedTasks] = useState<EnrichedTask[]>([]);
   const supabase = getSupabaseBrowserClient(); // Client voor logs
@@ -54,7 +54,7 @@ export function DailyPlannerContainer(): JSX.Element {
         return;
       }
 
-      const taskIds = allTasks.map(t => t.id);
+      const taskIds = allTasks.map((t: any) => t.id);
       let completedTaskIds: Set<string> = new Set();
       let taskLogsMap: Map<string, TaskLog> = new Map();
 
@@ -90,8 +90,8 @@ export function DailyPlannerContainer(): JSX.Element {
           });
         }
       }
-      
-      const processed = allTasks.map(task => {
+
+      const processed = allTasks.map((task: any) => {
         const status: 'voltooid' | 'openstaand' = completedTaskIds.has(task.id) ? 'voltooid' : 'openstaand';
         const relevantLog = taskLogsMap.get(task.id);
         return {
@@ -115,7 +115,7 @@ export function DailyPlannerContainer(): JSX.Element {
 
     processTasks();
   }, [allTasks, user?.id, supabase]);
-  
+
   const filteredTasks = useMemo(() => {
     if (!enrichedTasks) return [];
 
@@ -170,7 +170,7 @@ export function DailyPlannerContainer(): JSX.Element {
       return task.type === activeFilter;
     });
   }, [enrichedTasks, activeFilter]);
-  
+
   return (
     <ConditionalRender
       isLoading={isLoading}
@@ -180,12 +180,12 @@ export function DailyPlannerContainer(): JSX.Element {
       skeletonType="tasks" // Or a more specific "planner" skeleton
       emptyFallback={<EmptyTasksState />} // This shows if allTasks is empty
     >
-      {() => ( 
-        <DailyPlanner 
+      {() => (
+        <DailyPlanner
           tasks={filteredTasks} // Pass the enriched and filtered tasks
           activeFilter={activeFilter}
           onFilterChange={handleFilterChange}
-          userId={user?.id || ''} 
+          userId={user?.id || ''}
         />
       )}
     </ConditionalRender>

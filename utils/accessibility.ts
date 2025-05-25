@@ -1,21 +1,20 @@
-import React from 'react';
 // utils/accessibility.ts
-import { useRef, useEffect } from 'react'; // React import verwijderd
+import { useEffect, useRef } from 'react';
 
 // Helper voor correcte ARIA attributen
 export const _ariaProps = {
   button: (expanded: boolean) => ({
-    'aria-expanded': expanded.toString(), 
+    'aria-expanded': expanded.toString(),
     'role': 'button',
   }),
-  
+
   checkbox: (checked: boolean) => ({
-    'aria-checked': checked, 
+    'aria-checked': checked,
     'role': 'checkbox',
   }),
-  
+
   liveRegion: (atomic: boolean = true, relevant?: 'additions' | 'removals' | 'text' | 'all', busy?: boolean) => ({
-    'aria-live': 'polite' as 'polite' | 'assertive' | 'off', 
+    'aria-live': 'polite' as 'polite' | 'assertive' | 'off',
     'aria-atomic': atomic.toString(),
     ...(relevant && { 'aria-relevant': relevant }),
     ...(busy !== undefined && { 'aria-busy': busy.toString() }),
@@ -31,7 +30,7 @@ export const _ariaProps = {
     'role': 'tabpanel',
     'aria-labelledby': labelledByTabId,
   }),
-  
+
   dialog: (isOpen: boolean, titleId: string, describedById?: string) => ({
     'role': 'dialog',
     'aria-modal': isOpen.toString(),
@@ -39,7 +38,7 @@ export const _ariaProps = {
     ...(describedById && { 'aria-describedby': describedById }),
     'aria-hidden': (!isOpen).toString(),
   }),
-  
+
   menuButton: (isOpen: boolean, controlsMenuId: string) => ({
     'aria-haspopup': 'true' as 'true' | 'false' | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog',
     'aria-expanded': isOpen.toString(),
@@ -50,13 +49,13 @@ export const _ariaProps = {
     'role': 'menu',
     'aria-labelledby': labelledByButtonId,
   }),
-  
+
   sortableItem: (isDragging: boolean) => ({
     'role': 'option',
     'aria-grabbed': isDragging.toString() as 'true' | 'false',
     'tabIndex': 0,
   }),
-  
+
   progress: (value: number, max: number = 100, min: number = 0, valueText?: string) => ({
     'role': 'progressbar',
     'aria-valuenow': value,
@@ -64,34 +63,14 @@ export const _ariaProps = {
     'aria-valuemax': max,
     ...(valueText && { 'aria-valuetext': valueText }),
   }),
-  
-  alert: () => ({ 
+
+  alert: () => ({
     'role': 'alert',
     'aria-live': 'assertive', // Type assertion verwijderd, 'assertive' is een geldige waarde
     'aria-atomic': 'true',
   }),
 };
 
-// Icon button helper
-// interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-//   icon: ReactNode;
-//   label: string; 
-// }
-
-// export function IconButton({ 
-//   icon, 
-//   label,
-//   className,
-//   ...rest
-// }: IconButtonProps): JSX.Element {
-//   return (
-//     <button type="button" aria-label={label} className={className} {...rest} // Type assertion fixed
-const _typedRest = rest as Record<string, unknown>;>
-//       {icon}
-//       <span className="sr-only">{label}</span>
-//     </button>
-//   );
-// }
 
 // Screen reader only tekst
 // export function SROnly({ children }: { children: ReactNode }): JSX.Element {
@@ -101,13 +80,13 @@ const _typedRest = rest as Record<string, unknown>;>
 // Focus management hook
 export function useFocusManagement<T extends HTMLElement>(shouldFocus: boolean) {
   const elementRef = useRef<T>(null);
-  
+
   useEffect(() => {
     if (shouldFocus && elementRef.current) {
       elementRef.current.focus();
     }
   }, [shouldFocus]);
-  
+
   return elementRef;
 }
 
@@ -123,3 +102,6 @@ export function useFocusManagement<T extends HTMLElement>(shouldFocus: boolean) 
 
 //   return <div ref={containerRef} tabIndex={-1}>{children}</div>;
 // }
+
+// Export without underscore for easier usage
+export const ariaProps = _ariaProps;

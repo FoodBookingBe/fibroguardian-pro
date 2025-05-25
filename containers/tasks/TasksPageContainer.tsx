@@ -1,3 +1,4 @@
+'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -7,21 +8,20 @@ declare module "react" {
 }
 import React from 'react';
 
-'use client';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
-import TaskList from '@/components/tasks/TaskList'; 
-import TaskFilters from '@/components/tasks/TaskFilters'; 
-import AddTaskButton from '@/components/tasks/AddTaskButton'; 
-import { useTasks } from '@/hooks/useSupabaseQuery';
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
+import AddTaskButton from '@/components/tasks/AddTaskButton';
+import TaskFilters from '@/components/tasks/TaskFilters';
+import TaskList from '@/components/tasks/TaskList';
 import { ConditionalRender } from '@/components/ui/ConditionalRender';
-import { useState, useEffect, useMemo } from 'react';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { useDeleteTask } from '@/hooks/useMutations'; // Importeer useDeleteTask
 import { useNotification } from '@/context/NotificationContext'; // Importeer useNotification
+import { useDeleteTask } from '@/hooks/useMutations'; // Importeer useDeleteTask
+import { useTasks } from '@/hooks/useSupabaseQuery';
 import { ErrorMessage } from '@/lib/error-handler'; // Voor typing error
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Task, TaskLog } from '@/types'; // TaskLog toegevoegd
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 // Hergebruik EnrichedTask interface
 export interface EnrichedTask extends Task {
@@ -36,21 +36,21 @@ export interface GroupedTasks {
 }
 
 interface TasksPageContainerProps {
-  initialTasks?: Task[]; 
+  initialTasks?: Task[];
 }
 
-export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProps) { 
+export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProps) {
   const searchParams = useSearchParams();
   const typeFilter = searchParams.get('type');
   const patternFilter = searchParams.get('pattern');
-  
+
   const { user } = useAuth();
   const userId = user?.id;
   const supabase = getSupabaseBrowserClient();
   const { addNotification } = useNotification(); // Hook bovenaan
-  const { 
-    mutate: deleteTaskMutate, 
-    isPending: isDeletingTask, 
+  const {
+    mutate: deleteTaskMutate,
+    isPending: isDeletingTask,
   } = useDeleteTask(); // Hook bovenaan
 
   const handleDeleteTask = async (taskId: string) => { // Functie bovenaan
@@ -58,7 +58,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
       onSuccess: () => {
         addNotification({ type: 'success', message: 'Taak succesvol verwijderd.' });
       },
-      onError: (error: ErrorMessage) => { 
+      onError: (error: ErrorMessage) => {
         addNotification({ type: 'error', message: error.userMessage || 'Fout bij verwijderen taak.' });
       }
     });
@@ -66,12 +66,12 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
 
   // useTasks haalt de basis taken op
   const { data: baseTasks, isLoading, error, isError } = useTasks(
-    userId, 
-    { 
-      type: typeFilter || undefined, 
-      pattern: patternFilter || undefined 
+    userId,
+    {
+      type: typeFilter || undefined,
+      pattern: patternFilter || undefined
     },
-    { 
+    {
       initialData: initialTasks.length > 0 ? initialTasks : undefined,
     }
   );
@@ -109,7 +109,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
           });
         }
       }
-      
+
       const processed = baseTasks.map(task => {
         const status: 'voltooid' | 'openstaand' = completedTaskIds.has(task.id) ? 'voltooid' : 'openstaand';
         const relevantLog = taskLogsMap.get(task.id);
@@ -124,7 +124,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
 
     processTasks();
   }, [baseTasks, userId, supabase]); // userId en supabase toegevoegd als dependencies
-  
+
   // De data prop voor ConditionalRender moet de originele data zijn die loading state bepaalt
   // De data voor TaskList zijn de enrichedTasks
   const groupedAndFilteredTasks = useMemo(() => {
@@ -143,7 +143,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
     });
 
     const patternOrder: Task['herhaal_patroon'][] = ['dagelijks', 'wekelijks', 'maandelijks', 'eenmalig', 'aangepast'];
-    
+
     const result: GroupedTasks[] = patternOrder
       .map(pattern => ({
         pattern,
@@ -152,30 +152,30 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
       }))
       .filter(group => group.tasks.length > 0); // Toon alleen groepen met taken
 
-      if (typeFilter) {
-        return result.map(group => ({
-          ...group,
-          tasks: group.tasks.filter(task => task.type === typeFilter)
-        })).filter(group => group.tasks.length > 0);
-      }
-      return result;
+    if (typeFilter) {
+      return result.map(group => ({
+        ...group,
+        tasks: group.tasks.filter(task => task.type === typeFilter)
+      })).filter(group => group.tasks.length > 0);
+    }
+    return result;
 
   }, [enrichedTasks, typeFilter]); // typeFilter is al in de useTasks hook, maar we filteren hier de gegroepeerde lijst
-  
+
   return (
     <div className="container mx-auto px-4 py-6">
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Mijn Taken</h1>
         <AddTaskButton />
       </header>
-      
+
       <TaskFilters /> {/* TaskFilters beïnvloedt 'typeFilter' en 'patternFilter' die door useTasks worden gebruikt */}
-      
+
       <ConditionalRender
         isLoading={isLoading}
         isError={isError}
-        error={isError ? error as ErrorMessage : null} 
-        data={baseTasks} 
+        error={isError ? error as ErrorMessage : null}
+        data={baseTasks}
         skeletonType="tasks"
         emptyFallback={
           <div className="text-center p-8 bg-white rounded-lg shadow-md">
@@ -190,7 +190,7 @@ export function TasksPageContainer({ initialTasks = [] }: TasksPageContainerProp
           </div>
         }
       >
-        {() => <TaskList groupedTasks={groupedAndFilteredTasks} onDeleteTask={handleDeleteTask} isDeletingTask={isDeletingTask} />} 
+        {() => <TaskList groupedTasks={groupedAndFilteredTasks} onDeleteTask={handleDeleteTask} isDeletingTask={isDeletingTask} />}
       </ConditionalRender>
     </div>
   );

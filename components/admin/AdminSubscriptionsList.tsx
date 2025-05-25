@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { Abonnement, Profile } from '@/types'; // Assuming Abonnement and Profile types are correct
+import React from 'react';
 
 // Define a type for the subscription data that includes user profile information
 export type SubscriptionWithUserProfile = Abonnement & {
@@ -43,7 +43,7 @@ const AdminSubscriptionsList: React.FC<AdminSubscriptionsListProps> = ({ subscri
           </tr>
         </thead>
         <tbody className="text-gray-700 dark:text-gray-300 text-sm font-light">
-          {subscriptions.map((sub: unknown) => {
+          {subscriptions.map((sub: any) => {
             const userName = `${sub.profiles?.voornaam || ''} ${sub.profiles?.achternaam || ''}`.trim() || 'N/A';
             const userEmail = sub.profiles?.email || 'N/A'; // Assuming email might be on the joined profile data
             const isActive = sub.verloopt_op ? new Date(sub.verloopt_op) > new Date() : true; // Basic status check

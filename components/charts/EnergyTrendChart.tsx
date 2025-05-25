@@ -1,21 +1,20 @@
-import React from 'react';
-
 'use client';
 
+
+import { TaskLog } from '@/types';
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
+  TimeScale,
   Title,
   Tooltip,
-  Legend,
-  TimeScale,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2'; // react-chartjs-2 na chart.js
 import 'chartjs-adapter-date-fns';
-import { TaskLog } from '@/types';
+import { Line } from 'react-chartjs-2'; // react-chartjs-2 na chart.js
 
 ChartJS.register(
   CategoryScale,
@@ -83,7 +82,7 @@ export default function EnergyTrendChart({ taskLogs }: EnergyTrendChartProps) {
         type: 'time' as const,
         time: {
           tooltipFormat: 'dd MMM yyyy HH:mm' as const,
-          displayFormats: { 
+          displayFormats: {
             millisecond: 'HH:mm:ss.SSS',
             second: 'HH:mm:ss',
             minute: 'HH:mm',

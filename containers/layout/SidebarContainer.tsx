@@ -1,13 +1,12 @@
-import React from 'react';
-
 'use client';
-import { useState, useEffect, ReactElement } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { useProfile } from '@/hooks/useSupabaseQuery'; // To get profile type
 import SidebarPresentational, { MenuItemP } from '@/components/layout/SidebarPresentational';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'; // For loading state
+import { useProfile } from '@/hooks/useSupabaseQuery'; // To get profile type
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { usePathname, useRouter } from 'next/navigation';
+import { ReactElement, useEffect, useState } from 'react';
 
 export default function SidebarContainer(): JSX.Element {
   const pathname = usePathname();
@@ -17,7 +16,6 @@ export default function SidebarContainer(): JSX.Element {
 
   const { data: profile, isLoading: isLoadingProfile } = useProfile(user?.id, {
     enabled: !!user,
-      queryKey: ["profile", userId], // Only fetch if user is available
   });
 
   const profileType = profile?.type as 'patient' | 'specialist' | 'admin' | null | undefined;
@@ -45,14 +43,14 @@ export default function SidebarContainer(): JSX.Element {
     if (isOpen) {
       setIsOpen(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const handleLogout = async () => {
     setIsOpen(false);
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.push('/'); 
+    router.push('/');
   };
 
   const patientMenuItems: MenuItemP[] = [
@@ -64,7 +62,7 @@ export default function SidebarContainer(): JSX.Element {
     { href: '/mijn-specialisten', label: 'Mijn Specialisten', iconName: 'users' },
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
   ];
-  
+
   const specialistMenuItems: MenuItemP[] = [
     { href: '/dashboard', label: 'Dashboard', iconName: 'home' },
     { href: '/specialisten/patienten', label: 'Mijn Patiënten', iconName: 'users' },
@@ -72,7 +70,7 @@ export default function SidebarContainer(): JSX.Element {
     { href: '/specialisten/inzichten', label: 'Patiënt Inzichten', iconName: 'chart' },
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
   ];
-  
+
   const adminMenuItems: MenuItemP[] = [
     { href: '/admin', label: 'Admin Dashboard', iconName: 'home' }, // Changed href to /admin and label
     { href: '/admin/users', label: 'Gebruikersbeheer', iconName: 'users' },
@@ -80,7 +78,7 @@ export default function SidebarContainer(): JSX.Element {
     { href: '/admin/statistics', label: 'Statistieken', iconName: 'chart' },
     { href: '/instellingen', label: 'Instellingen', iconName: 'settings' },
   ];
-  
+
   // Select menu items based on user role
   let menuItems: MenuItemP[];
   if (profileType === 'specialist') {
@@ -90,7 +88,7 @@ export default function SidebarContainer(): JSX.Element {
   } else {
     menuItems = patientMenuItems;
   }
-  
+
   const renderIcon = (iconName: string): ReactElement => {
     switch (iconName) {
       case 'home': return <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -121,9 +119,8 @@ export default function SidebarContainer(): JSX.Element {
         </button>
         <aside
           id="sidebar"
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-            isOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
           <div className="p-4 border-b border-gray-200">
             <SkeletonLoader type="list" count={1} />
@@ -135,7 +132,7 @@ export default function SidebarContainer(): JSX.Element {
       </>
     );
   }
-  
+
   // If user is loaded but profileType is still null (e.g., error fetching profile or new user without profile type yet)
   // We default to patient menu items or could show a specific state.
   // For now, it defaults to patientMenuItems if profileType is not 'specialist'.

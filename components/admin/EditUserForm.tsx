@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Profile, Abonnement } from '@/types';
+import React, { useEffect, useState } from 'react';
+
+import { Abonnement, Profile } from '@/types';
 
 // Define a type for the form data, similar to AddUserFormData
 // Omitting id, created_at, updated_at, avatar_url as they are not directly edited here
@@ -10,7 +11,7 @@ type EditUserFormData = Omit<Partial<Profile>, 'id' | 'avatar_url' | 'created_at
   email?: string; // Usually non-editable or shown for reference
   // Password change is typically a separate flow for existing users
   // For admin edits, we might allow setting a new password directly.
-  new_password?: string; 
+  new_password?: string;
   geboortedatum?: string; // Keep as string for form input 'YYYY-MM-DD'
   plan_type?: Abonnement['plan_type'];
   max_patienten?: number;
@@ -49,10 +50,10 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: unknown) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -72,18 +73,17 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onClose, onUserUpdate
       //    - If formData.new_password is set, call supabase.auth.admin.updateUserById(user.id, { password: formData.new_password })
       //    - If type is 'specialist', update or insert into 'abonnementen' table.
 
-      console.log('Form data to submit for update:', { userId: user.id, ...formData} // Type assertion fixed
-const _typedFormData = formData as Record<string, unknown> ;);
+      console.log('Form data to submit for update:', { userId: user.id, ...formData });
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
-      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       const updatedUser: Profile = {
         ...user, // Spread existing user data
         ...formData, // Spread form data (overwrites common fields)
         geboortedatum: formData.geboortedatum ? new Date(formData.geboortedatum) : undefined,
         updated_at: new Date(), // Update timestamp
       };
-      
+
       onUserUpdated(updatedUser);
       alert('Gebruiker (simulatie) bijgewerkt! Implementeer de daadwerkelijke API call.');
       onClose();
@@ -101,10 +101,10 @@ const _typedFormData = formData as Record<string, unknown> ;);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      
-      {/* Email field removed as it's not on the Profile type. 
-          To show email, it would need to be fetched from Supabase Auth user data. 
+      {error && <p className="text-sm text-red-500">{error}</p>}
+
+      {/* Email field removed as it's not on the Profile type.
+          To show email, it would need to be fetched from Supabase Auth user data.
       */}
       {/* <div>
         <label htmlFor="email" className={labelClassName}>Email (ter info, niet bewerkbaar via profiel)</label>
@@ -145,8 +145,8 @@ const _typedFormData = formData as Record<string, unknown> ;);
 
       {formData.type === 'specialist' && (
         <>
-          <hr className="my-6 border-gray-300 dark:border-gray-600"/>
-          <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-white">Specialist Details</h3>
+          <hr className="my-6 border-gray-300 dark:border-gray-600" />
+          <h3 className="text-md mb-2 font-semibold text-gray-800 dark:text-white">Specialist Details</h3>
           <div>
             <label htmlFor="plan_type" className={labelClassName}>Abonnement Type</label>
             <select name="plan_type" id="plan_type" value={formData.plan_type} onChange={handleChange} className={inputClassName}>
@@ -167,14 +167,14 @@ const _typedFormData = formData as Record<string, unknown> ;);
           type="button"
           onClick={onClose}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none disabled:opacity-50"
+          className="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 focus:outline-none disabled:opacity-50 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
         >
           Annuleren
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none disabled:opacity-50"
+          className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none disabled:opacity-50"
         >
           {isLoading ? 'Bijwerken...' : 'Bijwerken'}
         </button>

@@ -1,19 +1,20 @@
 
+"use client";
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-import React from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 
-"use client";
+import { NotificationList } from '@/components/ui/NotificationList';
+
 /* Notification Context: Manages global notifications for success, error, warning, and info messages.
    Provides addNotification and removeNotification functions.
    Updated: 5/19/2025.
 */
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { NotificationList } from '@/components/ui/NotificationList';
 
 // Definieer typen voor notificaties
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -47,16 +48,16 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 // Provider component
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  
+
   const addNotification = (notificationDetails: Omit<Notification, 'id'>): string => {
     const id = Date.now().toString() + Math.random().toString(36).substring(2, 7);
-    const newNotification: Notification = { 
-      id, 
+    const newNotification: Notification = {
+      id,
       ...notificationDetails,
       duration: notificationDetails.duration === undefined ? 5000 : notificationDetails.duration, // Default duration
     };
     setNotifications(prev => [...prev, newNotification]);
-    
+
     if (newNotification.duration && newNotification.duration > 0) {
       setTimeout(() => {
         removeNotification(id);
@@ -64,26 +65,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
     return id; // Return the ID so it can be programmatically removed if needed
   };
-  
+
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
-  
+
   return (
     <NotificationContext.Provider value={{ notifications, addNotification, removeNotification }}>
       {children}
       {/* NotificationList wordt hier gerenderd om globaal beschikbaar te zijn */}
       {/* De import zal werken zodra NotificationList.tsx is aangemaakt */}
-      <NotificationList 
-        notifications={notifications} 
-        onDismiss={removeNotification} 
+      <NotificationList
+        notifications={notifications}
+        onDismiss={removeNotification}
       />
     </NotificationContext.Provider>
   );
 }
 
 // Hook voor gebruik in componenten
-export function useNotification(): JSX.Element {
+export function useNotification(): NotificationContextType {
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error('useNotification moet binnen een NotificationProvider gebruikt worden');

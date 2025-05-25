@@ -1,7 +1,7 @@
 'use client';
 
+import { Abonnement, Profile } from '@/types';
 import React, { useState } from 'react';
-import { Profile, Abonnement } from '@/types';
 
 // Define a type for the form data
 // Omit Date types from Profile that will be handled as strings in the form
@@ -18,7 +18,7 @@ interface AddUserFormProps {
   onUserAdded: (newUser: Profile) => void; // Callback after user is successfully added
 }
 
-const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
+const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded: _onUserAdded }) => {
   const [formData, setFormData] = useState<AddUserFormData>({
     type: 'patient', // Default role
     voornaam: '',
@@ -36,10 +36,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: unknown) => ({ ...prev, [name]: value }));
+    setFormData((prev: AddUserFormData) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -52,42 +52,22 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
     }
 
     try {
-      // TODO: Implement API call to create user in Supabase Auth and then in 'profiles' table
-      // This will involve:
-      // 1. Calling a server action or API route to handle Supabase admin operations.
-      //    - supabase.auth.admin.createUser({ email, password, user_metadata: { name: `${formData.voornaam} ${formData.achternaam}` } })
-      //    - Then, insert into 'profiles' table with the new user's ID and other form data.
-      //    - If type is 'specialist', insert into 'abonnementen' table.
+      // TODO: Implement actual user creation logic here
+      // This would typically involve:
+      // 1. Creating a user in Supabase Auth
+      // 2. Creating a profile record in the profiles table
+      // 3. Handling any errors appropriately
 
-      console.log('Form data to submit:', formData);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
-      
-      // Dummy user created for now
-      // Note: The actual Profile type expects Date objects for date fields.
-      // The email is not part of the Profile type from types/index.ts.
-      const dummyUser: Profile = {
-        id: new Date().toISOString(), // Placeholder ID
-        voornaam: formData.voornaam || '',
-        achternaam: formData.achternaam || '',
-        // Ensure formData.type is one of 'patient' | 'specialist' | 'admin'
-        type: formData.type as Profile['type'] || 'patient', 
-        postcode: formData.postcode || undefined,
-        gemeente: formData.gemeente || undefined,
-        // Convert form string to Date object; ensure empty string becomes undefined
-        geboortedatum: formData.geboortedatum ? new Date(formData.geboortedatum) : undefined,
-        created_at: new Date(), // Placeholder
-        updated_at: new Date(), // Placeholder
-        avatar_url: undefined, // Placeholder
-      };
-      
-      // onUserAdded(dummyUser); // Call this when API call is successful with the actual created user profile
-      alert('Gebruiker (simulatie) aangemaakt! Implementeer de daadwerkelijke API call.');
+      console.log('Creating user with data:', formData);
+
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // For now, just close the form
       onClose();
-
-    } catch (apiError: unknown) {
-      setError((apiError as any).message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker.');
-      console.error("Error creating user:", apiError);
+    } catch (error) {
+      setError((error as any).message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker.');
+      console.error("Error creating user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +79,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      
+
       <div>
         <label htmlFor="email" className={labelClassName}>Email *</label>
         <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className={inputClassName} required />
@@ -139,7 +119,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
 
       {formData.type === 'specialist' && (
         <>
-          <hr className="my-6 border-gray-300 dark:border-gray-600"/>
+          <hr className="my-6 border-gray-300 dark:border-gray-600" />
           <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-white">Specialist Details</h3>
           <div>
             <label htmlFor="plan_type" className={labelClassName}>Abonnement Type</label>
@@ -149,14 +129,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, onUserAdded }) => {
               <option value="enterprise">Enterprise</option>
             </select>
           </div>
-      <div>
-        <label htmlFor="max_patienten" className={labelClassName}>Max. Patiënten</label>
-        <input type="number" name="max_patienten" id="max_patienten" value={formData.max_patienten || 0} onChange={handleChange} className={inputClassName} min="0" />
-      </div>
-    </>
-  )}
+          <div>
+            <label htmlFor="max_patienten" className={labelClassName}>Max. Patiënten</label>
+            <input type="number" name="max_patienten" id="max_patienten" value={formData.max_patienten || 0} onChange={handleChange} className={inputClassName} min="0" />
+          </div>
+        </>
+      )}
 
-  <div className="mt-6 flex justify-end space-x-3">
+      <div className="mt-6 flex justify-end space-x-3">
         <button
           type="button"
           onClick={onClose}

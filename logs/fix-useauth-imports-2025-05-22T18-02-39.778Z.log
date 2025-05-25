@@ -1,0 +1,164 @@
+[2025-05-22T18:02:39.789Z] Starting Fix useAuth Imports Script
+[2025-05-22T18:02:40.004Z] Found 233 TypeScript files to check
+[2025-05-22T18:02:40.004Z] Processing batch 1 of 12
+[2025-05-22T18:02:40.015Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\app\admin\subscriptions\page.tsx
+[2025-05-22T18:02:40.018Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\app\admin\users\page.tsx
+[2025-05-22T18:02:40.024Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\auth\login\page.tsx
+[2025-05-22T18:02:40.028Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\auth\register\page.tsx
+[2025-05-22T18:02:40.038Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\dashboard\dashboard-client.tsx
+[2025-05-22T18:02:40.042Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\dashboard\error.tsx
+[2025-05-22T18:02:40.058Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\inzichten\page.tsx
+[2025-05-22T18:02:40.060Z] Processing batch 2 of 12
+[2025-05-22T18:02:40.067Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\mijn-specialisten\mijn-specialisten-client.tsx
+[2025-05-22T18:02:40.069Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\mijn-specialisten\mijn-specialisten-client.tsx
+[2025-05-22T18:02:40.075Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\offline\help\page.tsx
+[2025-05-22T18:02:40.081Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\layout.tsx
+[2025-05-22T18:02:40.084Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\layout.tsx
+[2025-05-22T18:02:40.087Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\profile\page.tsx
+[2025-05-22T18:02:40.091Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\profile\page.tsx
+[2025-05-22T18:02:40.093Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\welcome\page.tsx
+[2025-05-22T18:02:40.097Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\welcome\page.tsx
+[2025-05-22T18:02:40.104Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\overzicht\overzicht-client.tsx
+[2025-05-22T18:02:40.108Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\overzicht\overzicht-client.tsx
+[2025-05-22T18:02:40.119Z] Processing batch 3 of 12
+[2025-05-22T18:02:40.128Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\logs\page.tsx
+[2025-05-22T18:02:40.135Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\logs\page.tsx
+[2025-05-22T18:02:40.140Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\start\page.tsx
+[2025-05-22T18:02:40.142Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\app\voortgang\page.tsx
+[2025-05-22T18:02:40.144Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\voortgang\page.tsx
+[2025-05-22T18:02:40.147Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AddUserForm.tsx
+[2025-05-22T18:02:40.153Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminStatsCards.tsx
+[2025-05-22T18:02:40.156Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminSubscriptionsList.tsx
+[2025-05-22T18:02:40.160Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminUsersList.tsx
+[2025-05-22T18:02:40.161Z] Processing batch 4 of 12
+[2025-05-22T18:02:40.163Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\ChangelogViewer.tsx
+[2025-05-22T18:02:40.166Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\admin\ChangelogViewer.tsx
+[2025-05-22T18:02:40.170Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\charts\TaskCompletionChart.tsx
+[2025-05-22T18:02:40.173Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\charts\UserSignupsChart.tsx
+[2025-05-22T18:02:40.176Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\DynamicAdminComponents.tsx
+[2025-05-22T18:02:40.178Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:02:40.183Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\RecentUsersTable.tsx
+[2025-05-22T18:02:40.190Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\UserManagementControls.tsx
+[2025-05-22T18:02:40.194Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\UsersPageClientView.tsx
+[2025-05-22T18:02:40.200Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIAssistant.tsx
+[2025-05-22T18:02:40.203Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIAssistant.tsx
+[2025-05-22T18:02:40.206Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIInsightVisualization.tsx
+[2025-05-22T18:02:40.209Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIRecommendationCard.tsx
+[2025-05-22T18:02:40.212Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\ai\KnowledgeEntryForm.tsx
+[2025-05-22T18:02:40.217Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\KnowledgeEntryForm.tsx
+[2025-05-22T18:02:40.221Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\SpecialistIntelligenceDashboard.tsx
+[2025-05-22T18:02:40.226Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\auth\AuthForm.tsx
+[2025-05-22T18:02:40.228Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\auth\AuthProvider.tsx
+[2025-05-22T18:02:40.232Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\EnergyTrendChart.tsx
+[2025-05-22T18:02:40.235Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\FatigueTrendChart.tsx
+[2025-05-22T18:02:40.238Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\HeartRateTrendChart.tsx
+[2025-05-22T18:02:40.242Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\PainTrendChart.tsx
+[2025-05-22T18:02:40.245Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\charts\ProgressVisualization.tsx
+[2025-05-22T18:02:40.246Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\ProgressVisualization.tsx
+[2025-05-22T18:02:40.248Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\charts\ProgressVisualization.tsx
+[2025-05-22T18:02:40.249Z] Processing batch 5 of 12
+[2025-05-22T18:02:40.253Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:02:40.255Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\common\OfflineIndicator.tsx
+[2025-05-22T18:02:40.257Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\common\ServiceWorkerInitializer.tsx
+[2025-05-22T18:02:40.262Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\AIInsightsPresentational.tsx
+[2025-05-22T18:02:40.265Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\DailyPlanner.tsx
+[2025-05-22T18:02:40.267Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\HealthMetrics.tsx
+[2025-05-22T18:02:40.281Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\HealthMetricsChart.tsx
+[2025-05-22T18:02:40.285Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\QuickActions.tsx
+[2025-05-22T18:02:40.355Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\debug\SessionStatus.tsx
+[2025-05-22T18:02:40.510Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\debug\SessionStatus.tsx
+[2025-05-22T18:02:40.525Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:02:40.594Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\DashboardLayout.tsx
+[2025-05-22T18:02:40.603Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\SidebarPresentational.tsx
+[2025-05-22T18:02:40.607Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\TopbarPresentational.tsx
+[2025-05-22T18:02:40.609Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:02:40.611Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:02:40.616Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\ProgressIndicator.tsx
+[2025-05-22T18:02:40.620Z] Processing batch 6 of 12
+[2025-05-22T18:02:40.624Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\StepNavigation.tsx
+[2025-05-22T18:02:40.628Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\rapporten\RapportGeneratorPresentational.tsx
+[2025-05-22T18:02:40.634Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectieFormPresentational.tsx
+[2025-05-22T18:02:40.640Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectiesList.tsx
+[2025-05-22T18:02:40.643Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectiesListContainer.tsx
+[2025-05-22T18:02:40.646Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\settings\ProfileFormPresentational.tsx
+[2025-05-22T18:02:40.657Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\AddPatientButtonPresentational.tsx
+[2025-05-22T18:02:40.661Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\AddSpecialistButtonPresentational.tsx
+[2025-05-22T18:02:40.672Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:02:40.677Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\DynamicSpecialistComponents.tsx
+[2025-05-22T18:02:40.685Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientAllTasksList.tsx
+[2025-05-22T18:02:40.688Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientAllTasksList.tsx
+[2025-05-22T18:02:40.694Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientDetailsPresentational.tsx
+[2025-05-22T18:02:40.705Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientInsightCard.tsx
+[2025-05-22T18:02:40.709Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientInsightCard.tsx
+[2025-05-22T18:02:40.713Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientList.tsx
+[2025-05-22T18:02:40.720Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientList.tsx
+[2025-05-22T18:02:40.724Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistCard.tsx
+[2025-05-22T18:02:40.730Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistsListContainer.tsx
+[2025-05-22T18:02:40.738Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistsListContainer.tsx
+[2025-05-22T18:02:40.739Z] Processing batch 7 of 12
+[2025-05-22T18:02:40.743Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistTaskCreator.tsx
+[2025-05-22T18:02:40.746Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:02:40.751Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:02:40.753Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:02:40.756Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:02:40.757Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:02:40.760Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:02:40.763Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:02:40.769Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:02:40.770Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:02:40.774Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\AddTaskButton.tsx
+[2025-05-22T18:02:40.777Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskCard.tsx
+[2025-05-22T18:02:40.910Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskExecutionPresentational.tsx
+[2025-05-22T18:02:40.923Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskFilters.tsx
+[2025-05-22T18:02:40.933Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskFormPresentational.tsx
+[2025-05-22T18:02:41.020Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskItemCard.tsx
+[2025-05-22T18:02:41.024Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskList.tsx
+[2025-05-22T18:02:41.030Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskLogsPresentational.tsx
+[2025-05-22T18:02:41.058Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\AIAssistantContainer.tsx
+[2025-05-22T18:02:41.069Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\AIRecommendationsContainer.tsx
+[2025-05-22T18:02:41.072Z] Processing batch 8 of 12
+[2025-05-22T18:02:41.075Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\KnowledgeManagementContainer.tsx
+[2025-05-22T18:02:41.079Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\SpecialistIntelligenceDashboardContainer.tsx
+[2025-05-22T18:02:41.097Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\auth\AuthFormContainer.tsx
+[2025-05-22T18:02:41.113Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\AIInsightsContainer.tsx
+[2025-05-22T18:02:41.122Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\AIInsightsContainer.tsx
+[2025-05-22T18:02:41.125Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\DailyPlannerContainer.tsx
+[2025-05-22T18:02:41.128Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\DailyPlannerContainer.tsx
+[2025-05-22T18:02:41.132Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\layout\SidebarContainer.tsx
+[2025-05-22T18:02:41.141Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\layout\TopbarContainer.tsx
+[2025-05-22T18:02:41.145Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\rapporten\RapportGeneratorContainer.tsx
+[2025-05-22T18:02:41.150Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\reflecties\ReflectieFormContainer.tsx
+[2025-05-22T18:02:41.161Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\reflecties\ReflectieFormContainer.tsx
+[2025-05-22T18:02:41.169Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\settings\ProfileFormContainer.tsx
+[2025-05-22T18:02:41.176Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\settings\ProfileFormContainer.tsx
+[2025-05-22T18:02:41.179Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddPatientButtonContainer.tsx
+[2025-05-22T18:02:41.196Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddPatientButtonContainer.tsx
+[2025-05-22T18:02:41.269Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddSpecialistButtonContainer.tsx
+[2025-05-22T18:02:41.277Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddSpecialistButtonContainer.tsx
+[2025-05-22T18:02:41.292Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\PatientDetailsContainer.tsx
+[2025-05-22T18:02:41.296Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\PatientDetailsContainer.tsx
+[2025-05-22T18:02:41.314Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:02:41.324Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:02:41.337Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:02:41.387Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskFormContainer.tsx
+[2025-05-22T18:02:41.487Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskFormContainer.tsx
+[2025-05-22T18:02:41.611Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskLogsContainer.tsx
+[2025-05-22T18:02:41.668Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TasksPageContainer.tsx
+[2025-05-22T18:02:41.728Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\context\OnboardingContext.tsx
+[2025-05-22T18:02:41.758Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\context\OnboardingContext.tsx
+[2025-05-22T18:02:41.788Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:02:41.821Z] Processing batch 9 of 12
+[2025-05-22T18:02:41.963Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\react-query-provider.tsx
+[2025-05-22T18:02:42.146Z] Processing batch 10 of 12
+[2025-05-22T18:02:42.190Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\hooks\useFeatureAccess.ts
+[2025-05-22T18:02:42.384Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\hooks\useLocalStorage.ts
+[2025-05-22T18:02:42.418Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\hooks\useProfile.ts
+[2025-05-22T18:02:42.424Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\hooks\useProfile.ts
+[2025-05-22T18:02:42.439Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\hooks\useTypedSupabase.ts
+[2025-05-22T18:02:42.446Z] Fixed unknown event type in C:\Users\nick\Desktop\FibroGuardian\hooks\useTypedSupabase.ts
+[2025-05-22T18:02:42.525Z] Fixed _useAuth import in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:02:42.527Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:02:42.639Z] Processing batch 11 of 12
+[2025-05-22T18:02:42.802Z] Processing batch 12 of 12
+[2025-05-22T18:02:42.872Z] Applied 148 fixes in total
+[2025-05-22T18:02:42.888Z] Fix useAuth Imports Script completed

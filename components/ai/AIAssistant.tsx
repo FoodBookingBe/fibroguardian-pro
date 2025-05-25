@@ -1,4 +1,3 @@
-
 'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
@@ -80,10 +79,10 @@ export default function AIAssistant({
 }: AIAssistantProps): JSX.Element {
   const { user } = useAuth();
   const { addNotification } = useNotification();
-  const [assistantMode, setAssistantMode] = useState<AssistantMode>('adaptive');
+  const [_assistantMode, _setAssistantMode] = useState<AssistantMode>('adaptive');
   const [nudges, setNudges] = useState<Nudge[]>([]);
-  const [userContext, setUserContext] = useState<UserContext | null>(null);
-  const [behaviorPatterns, setBehaviorPatterns] = useState<UserBehaviorPattern | null>(null);
+  const [_userContext, _setUserContext] = useState<UserContext | null>(null);
+  const [_behaviorPatterns, _setBehaviorPatterns] = useState<UserBehaviorPattern | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,7 +112,6 @@ export default function AIAssistant({
 
     try {
       setIsLoading(true);
-      const _targetUserId = userId || user?.id;
 
       // If context is provided, use it, otherwise fetch from API
       if (currentContext && Object.keys(currentContext).length > 0) {
@@ -152,7 +150,7 @@ export default function AIAssistant({
   }, [user?.id, userId, currentContext, determineTimeContext]);
 
   // Analyze user behavior patterns
-  const analyzeUserBehavior = useCallback(async (targetUserId: string): Promise<UserBehaviorPattern | null> => {
+  const analyzeUserBehavior = useCallback(async (_targetUserId: string): Promise<UserBehaviorPattern | null> => {
     try {
       // This would be an actual API call in a real implementation
       // For now, we'll simulate the behavior pattern
@@ -207,7 +205,7 @@ export default function AIAssistant({
     }
 
     // Set the new mode
-    setAssistantMode(newMode);
+    _setAssistantMode(newMode);
 
     // Generate appropriate nudges based on context and patterns
     generateNudges(patterns, context, newMode);
@@ -301,13 +299,13 @@ export default function AIAssistant({
       try {
         // Fetch user context
         const context = await fetchUserContext();
-        setUserContext(context as UserContext);
+        _setUserContext(context as UserContext);
 
         if (context) {
           // Analyze user behavior
           const _targetUserId = userId || user?.id as string;
           const patterns = await analyzeUserBehavior(_targetUserId);
-          setBehaviorPatterns(patterns);
+          _setBehaviorPatterns(patterns);
 
           // Adjust assistant behavior
           if (patterns) {

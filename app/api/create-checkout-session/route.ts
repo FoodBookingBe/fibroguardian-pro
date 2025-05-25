@@ -1,19 +1,30 @@
-import { NextResponse, NextRequest } from 'next/server';
-import Stripe from 'stripe';
 import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server'; // Corrected import path
-import { patientPlans, specialistPlans, SubscriptionPlan } from '@/types/subscription'; 
+import { patientPlans, specialistPlans, SubscriptionPlan } from '@/types/subscription';
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
 // Instantieer Stripe met de secret key
 // Zorg dat STRIPE_SECRET_KEY is ingesteld in je environment variabelen
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeSecretKey) {
+  // During build time, use a placeholder to prevent build errors
+  console.warn('STRIPE_SECRET_KEY is not set - using build-time placeholder');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+
+const stripe = new Stripe(stripeSecretKey || 'sk_test_placeholder_for_build', {
   apiVersion: '2025-04-30.basil', // Updated to the version expected by the installed Stripe package
 });
 
 export async function POST(request: NextRequest) {
   try {
+    // Runtime check for Stripe key
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder_for_build') {
+      return NextResponse.json(
+        { error: 'Stripe is niet geconfigureerd. Neem contact op met support.' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { planId, userId, billingCycle, userEmail, userType } = body;
 
@@ -36,7 +47,7 @@ export async function POST(request: NextRequest) {
         .select('email, voornaam, achternaam') // Selecteer email als die niet is meegegeven
         .eq('id', userId)
         .single();
-      
+
       if (profileError || !profile) {
         console.error(`User profile not found for ID: ${userId}`, profileError);
         return NextResponse.json(
@@ -47,11 +58,11 @@ export async function POST(request: NextRequest) {
       emailToUse = profile.email;
       userName = `${profile.voornaam || ''} ${profile.achternaam || ''}`.trim() || 'Nieuwe Gebruiker';
     }
-    
+
     // Bepaal het juiste plan op basis van userType
     const plans: SubscriptionPlan[] = userType === 'specialist' ? specialistPlans : patientPlans;
     const plan = plans.find(p => p.id === planId);
-    
+
     if (!plan) {
       return NextResponse.json(
         { error: 'Ongeldig abonnementsplan geselecteerd.' },
@@ -59,15 +70,15 @@ export async function POST(request: NextRequest) {
       );
     }
     if (plan.price.monthly === 0 && plan.price.yearly === 0 && plan.id === 'free') {
-        return NextResponse.json(
-            { error: 'Gratis plannen vereisen geen checkout.'},
-            { status: 400}
-        );
+      return NextResponse.json(
+        { error: 'Gratis plannen vereisen geen checkout.' },
+        { status: 400 }
+      );
     }
 
     // Haal of maak Stripe Customer
     let customerId: string;
-    
+
     const { data: subscriptionRecord, error: fetchSubError } = await supabase
       .from('subscriptions') // Hernoemd naar 'subscriptions' ipv 'abonnementen' voor consistentie
       .select('stripe_customer_id')
@@ -75,8 +86,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (fetchSubError && fetchSubError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Error fetching subscription record:', fetchSubError);
-        throw fetchSubError;
+      console.error('Error fetching subscription record:', fetchSubError);
+      throw fetchSubError;
     }
 
     if (subscriptionRecord?.stripe_customer_id) {
@@ -88,7 +99,7 @@ export async function POST(request: NextRequest) {
         metadata: { userId, userType },
       });
       customerId = customer.id;
-      
+
       // Sla de nieuwe klant-ID op in je database (bv. in 'subscriptions' tabel)
       // Dit gebeurt idealiter via een webhook na succesvolle betaling,
       // maar voor nu direct om de customer ID te koppelen.
@@ -96,13 +107,13 @@ export async function POST(request: NextRequest) {
       // Voorbeeld:
       // await supabase.from('user_profiles_or_subscriptions_table').upsert({ user_id: userId, stripe_customer_id: customerId });
     }
-    
+
     // Bepaal prijs-ID op basis van plan en factureringsperiode
     // De Price IDs moeten exact overeenkomen met die in je Stripe Dashboard
     // Voorbeeld: STRIPE_PRICE_PATIENT_BASIC_MONTHLY, STRIPE_PRICE_SPECIALIST_PREMIUM_YEARLY
     const priceIdEnvVar = `STRIPE_PRICE_${userType.toUpperCase()}_${plan.id.toUpperCase()}_${billingCycle.toUpperCase()}`;
     const priceId = process.env[priceIdEnvVar];
-    
+
     if (!priceId) {
       console.error(`Stripe Price ID not found for env var: ${priceIdEnvVar}`);
       return NextResponse.json(
@@ -110,7 +121,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     // Maak Checkout sessie
@@ -140,7 +151,7 @@ export async function POST(request: NextRequest) {
       //   },
       // },
     });
-    
+
     return NextResponse.json({ sessionId: session.id });
 
   } catch (error: unknown) {

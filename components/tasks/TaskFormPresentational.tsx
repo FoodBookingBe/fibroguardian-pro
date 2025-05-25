@@ -1,7 +1,7 @@
 'use client';
-import React, { FormEvent } from 'react';
 import { AlertMessage } from '@/components/common/AlertMessage';
-import { Task } from '@/types'; // Assuming Task type is defined
+import React, { FormEvent } from 'react';
+// import { Task } from '@/types'; // Assuming Task type is defined
 import { ErrorMessage } from '@/lib/error-handler';
 
 // This defines the shape of the data the form inputs will manage
@@ -27,7 +27,7 @@ interface TaskFormPresentationalProps {
   onDayToggle: (day: string) => void;
   onMeasurementToggle: (measurement: string) => void;
   onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: FormEvent) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }
 
@@ -60,22 +60,20 @@ export default function TaskFormPresentational({
             <button
               type="button"
               onClick={() => onFormChange({ target: { name: 'type', value: 'taak' } } as any)} // Simulate event
-              className={`px-4 py-2 rounded-md transition ${
-                formState.type === 'taak'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-4 py-2 rounded-md transition ${formState.type === 'taak'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               Taak
             </button>
             <button
               type="button"
               onClick={() => onFormChange({ target: { name: 'type', value: 'opdracht' } } as any)} // Simulate event
-              className={`px-4 py-2 rounded-md transition ${
-                formState.type === 'opdracht'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-4 py-2 rounded-md transition ${formState.type === 'opdracht'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               Opdracht
             </button>
@@ -147,11 +145,10 @@ export default function TaskFormPresentational({
               ].map(day => (
                 <button
                   key={day.key} type="button" onClick={() => onDayToggle(day.key)}
-                  className={`px-3 py-1 rounded-md ${
-                    (formState.dagen_van_week || []).includes(day.key)
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-3 py-1 rounded-md ${(formState.dagen_van_week || []).includes(day.key)
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   {day.label}
                 </button>
@@ -210,13 +207,12 @@ export default function TaskFormPresentational({
           >
             Annuleren
           </button>
-          
+
           <button
             type="submit"
             disabled={isUpserting}
-            className={`px-4 py-2 rounded-md text-white font-medium ${
-              isUpserting ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            } transition-colors`}
+            className={`px-4 py-2 rounded-md text-white font-medium ${isUpserting ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+              } transition-colors`}
           >
             {isUpserting ? 'Bezig met opslaan...' : 'Opslaan'}
           </button>

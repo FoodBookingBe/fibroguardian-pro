@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'; // Ensure the route is always dynamic
 export async function GET(request: NextRequest) {
@@ -30,8 +30,12 @@ export async function GET(request: NextRequest) {
             });
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options} // Type assertion fixed
-const _typedOptions = options as Record<string, unknown> ;);
+            cookieStore.set({
+              name,
+              value: '',
+              ...options,
+              maxAge: 0
+            });
           },
         },
       }
@@ -39,11 +43,11 @@ const _typedOptions = options as Record<string, unknown> ;);
     try {
       console.log("Auth callback: exchanging code for session");
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-      
+
       if (error) throw error;
-      
+
       console.log("Auth callback: session exchange successful, user:", !!data?.user);
-      
+
       // Voeg een kleine debug component toe aan de redirect URL
       return NextResponse.redirect(new URL('/dashboard?auth=success', requestUrl.origin));
     } catch (error) {

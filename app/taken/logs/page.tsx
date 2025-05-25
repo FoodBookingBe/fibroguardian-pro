@@ -1,14 +1,13 @@
-import React from 'react';
-
 'use client';
+
 // This page can be a Server Component if auth is handled by layout/middleware
 // or a simple client component that just renders the container.
 // For now, let's assume DashboardLayout handles auth redirection.
-import { Suspense } from 'react';
-import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer';
 import TaskLogsLoadingSkeleton from '@/components/tasks/TaskLogsLoadingSkeleton';
+import TaskLogsContainer from '@/containers/tasks/TaskLogsContainer';
+import Link from 'next/link';
+import { Suspense } from 'react';
 
 export default function TaskLogsPage(): JSX.Element {
   // The TaskLogsContainer will use useAuth() to get the current user's ID
@@ -28,7 +27,7 @@ export default function TaskLogsPage(): JSX.Element {
             Terug naar taken
           </Link>
         </div>
-        
+
         <div className="mb-6">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-semibold mb-4">Overzicht van Activiteiten</h2>
@@ -41,7 +40,7 @@ export default function TaskLogsPage(): JSX.Element {
             </p>
           </div>
         </div>
-        
+
         <Suspense fallback={<TaskLogsLoadingSkeleton />}>
           {/* TaskLogsContainer will fetch logs for the authenticated user by default */}
           <TaskLogsContainer limit={50} title="Mijn Recente Logs" />

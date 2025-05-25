@@ -1,12 +1,11 @@
-import React from 'react';
-
 'use client';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+
+import AIInsightVisualization from '@/components/ai/AIInsightVisualization';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { Inzicht, TaskLog } from '@/types';
-import AIInsightVisualization from '@/components/ai/AIInsightVisualization';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function InzichtenPage(): JSX.Element {
   const router = useRouter();
@@ -16,33 +15,33 @@ export default function InzichtenPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'dag' | 'week' | 'maand'>('all');
-  
+
   const fetchInsights = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const supabaseClient = getSupabaseBrowserClient();
       const { data: { user } } = await supabaseClient.auth.getUser();
-      
+
       if (!user) {
         router.push('/auth/login');
         return;
       }
-      
+
       let query = supabaseClient
         .from('inzichten')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
+
       if (filter !== 'all') {
         query = query.eq('periode', filter);
       }
-      
+
       const { data, error: fetchError } = await query;
-      
+
       if (fetchError) throw fetchError;
-      
+
       setInsights(data || []);
     } catch (error: unknown) {
       console.error('Fout bij ophalen inzichten:', error);
@@ -54,28 +53,28 @@ export default function InzichtenPage(): JSX.Element {
 
   useEffect(() => {
     fetchInsights();
-  return undefined; // Add default return
+    return undefined; // Add default return
   }, [fetchInsights]);
-  
+
   // Fetch logs for a specific insight when expanded
   useEffect(() => {
     const fetchLogsForInsight = async (insightId: string) => {
       // Skip if we already have logs for this insight
       if (logs[insightId]) return;
-      
+
       try {
         const insight = insights.find(i => i.id === insightId);
         if (!insight) return;
-        
+
         const supabaseClient = getSupabaseBrowserClient();
         const { data: { user } } = await supabaseClient.auth.getUser();
-        
+
         if (!user) return;
-        
+
         // Determine date range based on insight period
         const endDate = new Date();
         let startDate = new Date();
-        
+
         if (insight.periode === 'dag') {
           startDate.setDate(startDate.getDate() - 7); // Last week for daily insights
         } else if (insight.periode === 'week') {
@@ -83,7 +82,7 @@ export default function InzichtenPage(): JSX.Element {
         } else if (insight.periode === 'maand') {
           startDate.setDate(startDate.getDate() - 90); // Last 3 months for monthly insights
         }
-        
+
         const { data, error: fetchError } = await supabaseClient
           .from('task_logs')
           .select('*')
@@ -91,9 +90,9 @@ export default function InzichtenPage(): JSX.Element {
           .gte('start_tijd', startDate.toISOString())
           .lte('start_tijd', endDate.toISOString())
           .order('start_tijd', { ascending: true });
-        
+
         if (fetchError) throw fetchError;
-        
+
         setLogs(prevLogs => ({
           ...prevLogs,
           [insightId]: data || []
@@ -102,17 +101,17 @@ export default function InzichtenPage(): JSX.Element {
         console.error('Fout bij ophalen logs voor inzicht:', error);
       }
     };
-    
+
     if (expandedInsightId) {
       fetchLogsForInsight(expandedInsightId);
     }
   }, [expandedInsightId, insights, logs]);
-  
+
   // Toggle expanded insight
   const toggleExpand = (id: string) => {
     setExpandedInsightId(prevId => (prevId === id ? null : id));
   };
-  
+
   // Format date for display
   const formatDate = (dateString: Date | string) => {
     const date = new Date(dateString);
@@ -122,10 +121,10 @@ export default function InzichtenPage(): JSX.Element {
       year: 'numeric'
     });
   };
-  
+
   // Helper for trend icon
   const getTrendIcon = (trendType: string | undefined) => {
-    switch(trendType?.toLowerCase()) {
+    switch (trendType?.toLowerCase()) {
       case 'positief':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -152,7 +151,7 @@ export default function InzichtenPage(): JSX.Element {
         );
     }
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -163,56 +162,52 @@ export default function InzichtenPage(): JSX.Element {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">AI-Inzichten</h1>
-        
+
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              filter === 'all'
+            className={`px-3 py-1 rounded-md text-sm ${filter === 'all'
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             Alle inzichten
           </button>
           <button
             onClick={() => setFilter('dag')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              filter === 'dag'
+            className={`px-3 py-1 rounded-md text-sm ${filter === 'dag'
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             Dagelijks
           </button>
           <button
             onClick={() => setFilter('week')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              filter === 'week'
+            className={`px-3 py-1 rounded-md text-sm ${filter === 'week'
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             Wekelijks
           </button>
           <button
             onClick={() => setFilter('maand')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              filter === 'maand'
+            className={`px-3 py-1 rounded-md text-sm ${filter === 'maand'
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             Maandelijks
           </button>
         </div>
       </div>
-      
+
       <div className="mb-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-4">Over AI-Inzichten</h2>
@@ -225,7 +220,7 @@ export default function InzichtenPage(): JSX.Element {
           </p>
         </div>
       </div>
-      
+
       {error && (
         <div className="mb-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
@@ -239,7 +234,7 @@ export default function InzichtenPage(): JSX.Element {
           </div>
         </div>
       )}
-      
+
       {insights.length > 0 ? (
         <div className="space-y-6">
           {insights.map(insight => (
@@ -259,26 +254,26 @@ export default function InzichtenPage(): JSX.Element {
                     <p className="text-gray-800 font-medium">{insight.beschrijving}</p>
                     <div className="flex items-center mt-2 text-xs text-gray-500">
                       <span className="mr-3 capitalize">
-                        {insight.periode === 'dag' ? 'Dagelijks inzicht' : 
-                         insight.periode === 'week' ? 'Wekelijks inzicht' : 'Maandelijks inzicht'}
+                        {insight.periode === 'dag' ? 'Dagelijks inzicht' :
+                          insight.periode === 'week' ? 'Wekelijks inzicht' : 'Maandelijks inzicht'}
                       </span>
                       <span>Gegenereerd op {formatDate(insight.created_at)}</span>
                     </div>
                   </div>
                 </div>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedInsightId === insight.id ? 'transform rotate-180' : ''}`} 
-                  viewBox="0 0 20 20" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedInsightId === insight.id ? 'transform rotate-180' : ''}`}
+                  viewBox="0 0 20 20"
                   fill="currentColor"
                   aria-hidden="true"
                 >
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-              
+
               {expandedInsightId === insight.id && (
-                <div 
+                <div
                   id={`insight-details-${insight.id}`}
                   className="border-t border-gray-200"
                 >
@@ -303,11 +298,11 @@ export default function InzichtenPage(): JSX.Element {
           </svg>
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Geen inzichten gevonden</h2>
           <p className="text-gray-500 mb-6">
-            {filter === 'all' 
-              ? 'Er zijn nog geen AI-inzichten beschikbaar.' 
+            {filter === 'all'
+              ? 'Er zijn nog geen AI-inzichten beschikbaar.'
               : `Er zijn nog geen ${filter === 'dag' ? 'dagelijkse' : filter === 'week' ? 'wekelijkse' : 'maandelijkse'} inzichten beschikbaar.`}
           </p>
-          <Link 
+          <Link
             href="/taken"
             className="px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors"
           >

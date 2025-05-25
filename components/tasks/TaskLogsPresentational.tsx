@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 
 import Link from 'next/link';
 
@@ -92,14 +91,14 @@ export default function TaskLogsPresentational({
           <div key={log.id} className="overflow-hidden rounded-lg border transition-all duration-200">
             <button
               type="button"
-              onClick={() => onToggleExpandAction(log.id)}
+              onClick={() => onToggleExpand(log.id)}
               className="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-inset hover:bg-gray-50"
               aria-expanded={expandedLogId === log.id} // Pass boolean directly
               aria-controls={`log-details-${log.id}`}
             >
               <div>
                 <h3 className="font-medium text-gray-900">
-                  {log.tasks?.titel || 'Onbekende taak'} 
+                  {log.tasks?.titel || 'Onbekende taak'}
                 </h3>
                 <p className="text-sm text-gray-500">
                   {utilFormatDate(log.start_tijd)} {/* Use utilFormatDate */}
@@ -117,7 +116,7 @@ export default function TaskLogsPresentational({
                 </svg>
               </div>
             </button>
-            
+
             {expandedLogId === log.id && (
               <div id={`log-details-${log.id}`} className="border-t border-gray-200 bg-gray-50 px-4 py-3">
                 <div className="mb-3 grid grid-cols-1 gap-4 md:grid-cols-2">

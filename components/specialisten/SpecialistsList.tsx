@@ -1,9 +1,8 @@
-import React from 'react';
 
-import { Specialist } from '@/types'; // Assuming Specialist type is defined in types/index.ts or similar
+import { Profile } from '@/types'; // Using Profile type directly
 
 interface SpecialistsListProps {
-  specialists: Specialist[];
+  specialists: Profile[];
   onRemove: (specialistId: string) => void;
 }
 
@@ -16,38 +15,15 @@ export default function SpecialistsList({ specialists, onRemove }: SpecialistsLi
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               {specialist.voornaam} {specialist.achternaam}
             </h2>
-            <p className="text-gray-600 mb-4">{specialist.email}</p>
-            
+            {specialist.email && (
+              <p className="text-gray-600 mb-4">{specialist.email}</p>
+            )}
+
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Toegangsrechten:</h3>
-              <ul className="text-sm text-gray-600">
-                {specialist.toegangsrechten.includes('view_tasks') && (
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Kan uw taken bekijken
-                  </li>
-                )}
-                {specialist.toegangsrechten.includes('view_logs') && (
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Kan uw logs bekijken
-                  </li>
-                )}
-                {specialist.toegangsrechten.includes('create_tasks') && (
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Kan taken voor u aanmaken
-                  </li>
-                )}
-              </ul>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Specialist Type:</h3>
+              <p className="text-sm text-gray-600 capitalize">{specialist.type}</p>
             </div>
-            
+
             <div className="flex justify-end">
               <button
                 onClick={() => onRemove(specialist.id)}

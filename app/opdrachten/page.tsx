@@ -1,14 +1,9 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import TaskList from '@/components/tasks/TaskList';
+import Link from 'next/link';
 
 export default function OpdrachtenPage(): JSX.Element {
-  const _router = useRouter();
-  const supabase = createClientComponentClient();
 
   // Function to handle cookie operations
   const handleCookieOperations = async () => {
@@ -23,27 +18,11 @@ export default function OpdrachtenPage(): JSX.Element {
     document.cookie = "testCookie=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   };
 
-  // Fetch tasks data
-  const _fetchTasks = async () => {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching tasks:', error);
-      return [];
-    }
-
-    return data || [];
-  };
-
   // Use React Query or SWR for data fetching in a real app
-  const { data: tasks, isLoading, isError, error } = {
+  const { data: tasks, isLoading, isError } = {
     data: [],
     isLoading: false,
-    isError: false,
-    error: null
+    isError: false
   };
 
   return (
@@ -66,7 +45,7 @@ export default function OpdrachtenPage(): JSX.Element {
       {isLoading ? (
         <p>Laden...</p>
       ) : isError ? (
-        <p>Er is een fout opgetreden: {error?.message}</p>
+        <p>Er is een fout opgetreden bij het laden van opdrachten.</p>
       ) : tasks.length === 0 ? (
         <p>Geen opdrachten gevonden.</p>
       ) : (

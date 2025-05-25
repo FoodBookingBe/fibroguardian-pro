@@ -1,21 +1,20 @@
-import React from 'react';
-
 'use client';
 
+
+import { TaskLog } from '@/types';
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
+  TimeScale,
   Title,
   Tooltip,
-  Legend,
-  TimeScale, 
 } from 'chart.js';
+import 'chartjs-adapter-date-fns';
 import { Line } from 'react-chartjs-2'; // react-chartjs-2 na chart.js
-import 'chartjs-adapter-date-fns'; 
-import { TaskLog } from '@/types';
 
 ChartJS.register(
   CategoryScale,
@@ -67,7 +66,7 @@ export default function PainTrendChart({ taskLogs }: PainTrendChartProps) {
         type: 'time' as const,
         time: {
           // unit: 'day' as const, // Tijdelijk verwijderd om auto-detectie te testen
-          tooltipFormat: 'dd MMM yyyy HH:mm' as const, 
+          tooltipFormat: 'dd MMM yyyy HH:mm' as const,
           displayFormats: { // Zorg dat deze overeenkomen met wat je wilt zien
             millisecond: 'HH:mm:ss.SSS',
             second: 'HH:mm:ss',

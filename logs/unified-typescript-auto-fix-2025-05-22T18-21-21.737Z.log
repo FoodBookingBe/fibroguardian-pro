@@ -1,0 +1,50 @@
+[2025-05-22T18:21:22.109Z] Starting Unified TypeScript Auto-Fix System
+[2025-05-22T18:21:22.489Z] Found 233 TypeScript files to check
+[2025-05-22T18:21:22.489Z] Processing batch 1 of 12
+[2025-05-22T18:21:22.518Z] Processing batch 2 of 12
+[2025-05-22T18:21:22.539Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\overzicht\page.tsx
+[2025-05-22T18:21:22.554Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\rapporten\page.tsx
+[2025-05-22T18:21:22.558Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\reflecties\page.tsx
+[2025-05-22T18:21:22.559Z] Processing batch 3 of 12
+[2025-05-22T18:21:22.630Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\specialisten\page.tsx
+[2025-05-22T18:21:22.916Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\edit\page.tsx
+[2025-05-22T18:21:23.339Z] Processing batch 4 of 12
+[2025-05-22T18:21:23.349Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:21:23.600Z] Processing batch 5 of 12
+[2025-05-22T18:21:23.606Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\common\ErrorBoundary.tsx
+[2025-05-22T18:21:23.608Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:21:23.611Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:21:23.640Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:21:23.654Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:21:23.656Z] Processing batch 6 of 12
+[2025-05-22T18:21:23.683Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:21:23.709Z] Processing batch 7 of 12
+[2025-05-22T18:21:23.716Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:21:23.720Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:21:23.725Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:21:23.729Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:21:23.738Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\subscription\withFeatureAccess.tsx
+[2025-05-22T18:21:23.742Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:21:23.775Z] Processing batch 8 of 12
+[2025-05-22T18:21:23.811Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:21:23.812Z] Processing batch 9 of 12
+[2025-05-22T18:21:23.829Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:21:23.832Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\api\auth\callback\route.ts
+[2025-05-22T18:21:23.835Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\api\auth\[...supabase]\route.ts
+[2025-05-22T18:21:23.853Z] Processing batch 10 of 12
+[2025-05-22T18:21:23.863Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\app\api\tasks\[id]\route.ts
+[2025-05-22T18:21:23.878Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\hooks\useSupabaseQuery.ts
+[2025-05-22T18:21:23.884Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\analytics\eventTracking.ts
+[2025-05-22T18:21:23.888Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:21:23.890Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:21:23.900Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:21:23.904Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\logger.ts
+[2025-05-22T18:21:23.908Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\performance-metrics.ts
+[2025-05-22T18:21:23.915Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:21:23.916Z] Processing batch 11 of 12
+[2025-05-22T18:21:23.937Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\lib\supabase-server.ts
+[2025-05-22T18:21:23.946Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\tests\task-logs.spec.ts
+[2025-05-22T18:21:23.959Z] Processing batch 12 of 12
+[2025-05-22T18:21:23.974Z] Fixed specific issues in C:\Users\nick\Desktop\FibroGuardian\utils\memoize.ts
+[2025-05-22T18:21:23.986Z] Applied 31 fixes in total
+[2025-05-22T18:21:23.987Z] Unified TypeScript Auto-Fix System completed

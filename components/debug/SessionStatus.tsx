@@ -1,6 +1,5 @@
-import React from 'react';
-
 'use client';
+
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; // Import useAuth
 
 export default function SessionStatus(): JSX.Element {
@@ -14,11 +13,11 @@ export default function SessionStatus(): JSX.Element {
     } else if (session && !user) {
       statusMessage = 'Sessie gevonden, maar geen user object. Controleer Supabase logs.';
     }
-     else {
+    else {
       statusMessage = 'Geen actieve sessie gevonden.';
     }
   }
-  
+
   return (
     <div className="p-2 bg-gray-100 text-sm text-gray-700 rounded mb-4">
       <strong>Session Debug:</strong> {statusMessage}

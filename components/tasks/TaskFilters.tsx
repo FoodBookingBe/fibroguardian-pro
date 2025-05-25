@@ -1,8 +1,7 @@
-import React from 'react';
-
 'use client';
-import { useState, useEffect } from 'react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Define a callback type for when filters change
 type OnFilterChange = (filters: { type?: string; pattern?: string }) => void;
@@ -14,7 +13,7 @@ interface TaskFiltersProps {
 export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Initialize state from URL parameters if available
   const [typeFilter, setTypeFilter] = useState<string>(searchParams.get('type') || '');
   const [patternFilter, setPatternFilter] = useState<string>(searchParams.get('pattern') || '');
@@ -44,10 +43,10 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
     } else {
       params.delete('pattern'); // Verwijder als leeg
     }
-    
+
     const queryString = params.toString();
     router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
-    
+
     // Call the callback if provided
     if (onFilterChange) {
       onFilterChange({
@@ -67,7 +66,7 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
             id="type-filter"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={typeFilter}
-            onChange={(e: unknown) => setTypeFilter(e.target.value)}
+            onChange={(e) => setTypeFilter(e.target.value)}
           >
             <option value="">Alle Types</option>
             <option value="taak">Taak</option>
@@ -80,7 +79,7 @@ export default function TaskFilters({ onFilterChange }: TaskFiltersProps) {
             id="pattern-filter"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             value={patternFilter}
-            onChange={(e: unknown) => setPatternFilter(e.target.value)}
+            onChange={(e) => setPatternFilter(e.target.value)}
           >
             <option value="">Alle Patronen</option>
             <option value="eenmalig">Eenmalig</option>

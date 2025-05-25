@@ -1,9 +1,8 @@
-import React from 'react';
-
 'use client';
-import { useState, useMemo } from 'react'; // Changed useEffect to useMemo
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+
 import { TaskLog } from '@/types';
+import { useMemo, useState } from 'react'; // Changed useEffect to useMemo
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // Define the keys for metrics explicitly for better type safety
 type MetricKey = 'pijn' | 'vermoeidheid' | 'energie_voor' | 'energie_na' | 'hartslag';
@@ -46,7 +45,7 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
         })
       };
     })
-    .sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
+      .sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime());
   }, [logs]);
 
   const metrics: Array<{ key: MetricKey; label: string; color: string }> = [
@@ -71,27 +70,26 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6" aria-labelledby="health-metrics-title">
       <h2 id="health-metrics-title" className="text-lg font-semibold mb-4 text-gray-800">Gezondheidsmetrieken</h2>
-      
+
       {/* Metriek selectie */}
       <div className="mb-4">
         <label id="metric-selector-label" className="sr-only">Selecteer metriek</label>
-        <div 
-          className="flex flex-wrap gap-2 mb-3" 
-          role="radiogroup" 
+        <div
+          className="flex flex-wrap gap-2 mb-3"
+          role="radiogroup"
           aria-labelledby="metric-selector-label"
         >
           {metrics.map(metric => (
             <button
               key={metric.key}
               type="button"
-              onClick={() => setActiveMetric(metric.key)} 
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                activeMetric === metric.key
+              onClick={() => setActiveMetric(metric.key)}
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${activeMetric === metric.key
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                }`}
               role="radio"
-              aria-checked={activeMetric === metric.key ? 'true' : 'false'} 
+              aria-checked={activeMetric === metric.key ? 'true' : 'false'}
               aria-label={`Bekijk ${metric.label} data`}
             >
               {metric.label}
@@ -105,7 +103,7 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
         {chartData.length > 0 ? (
           <>
             <div className="sr-only" aria-live="assertive">
-              Grafiek van {currentMetric?.label || activeMetric} gegevens over tijd. 
+              Grafiek van {currentMetric?.label || activeMetric} gegevens over tijd.
               {chartData.map((item, index) => (
                 <span key={index}>
                   {item.name}: {item[activeMetric as MetricKey]}
@@ -120,29 +118,29 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
                 aria-label={`Lijndiagram van ${currentMetric?.label || activeMetric} over tijd`}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end" 
-                  height={60} 
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                   tick={{ fontSize: 10 }}
                   aria-label="Tijd"
                 />
-                <YAxis 
-                  domain={activeMetric === 'hartslag' ? [40, 'auto'] : [0, 20]} 
+                <YAxis
+                  domain={activeMetric === 'hartslag' ? [40, 'auto'] : [0, 20]}
                   allowDataOverflow={true}
                   tick={{ fontSize: 10 }}
                   aria-label={currentMetric?.label || activeMetric.toString()}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${value} ${activeMetric === 'hartslag' ? 'BPM' : '/ 20'}`, currentMetric?.label || activeMetric]} 
+                  formatter={(value: number) => [`${value} ${activeMetric === 'hartslag' ? 'BPM' : '/ 20'}`, currentMetric?.label || activeMetric]}
                   labelFormatter={(label: string) => `Datum: ${label}`}
                 />
-                <Legend verticalAlign="top" height={36}/>
-                <Line 
-                  type="monotone" 
-                  dataKey={activeMetric} 
-                  stroke={currentMetric?.color || '#8884d8'} 
+                <Legend verticalAlign="top" height={36} />
+                <Line
+                  type="monotone"
+                  dataKey={activeMetric}
+                  stroke={currentMetric?.color || '#8884d8'}
                   activeDot={{ r: 6 }}
                   strokeWidth={2}
                   name={currentMetric?.label || activeMetric.toString()}
@@ -183,7 +181,7 @@ export default function HealthMetrics({ logs }: HealthMetricsProps) {
             <>Hartslag wordt gemeten in BPM (slagen per minuut).</>
           ) : (
             <>
-              {currentMetric?.label || activeMetric} wordt gemeten op een schaal van 1-20, 
+              {currentMetric?.label || activeMetric} wordt gemeten op een schaal van 1-20,
               waarbij 1 de laagste waarde is en 20 de hoogste.
             </>
           )}

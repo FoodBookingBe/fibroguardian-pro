@@ -1,20 +1,21 @@
 
+'use client';
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-'use client';
-import React, { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { useUpsertReflectie } from '@/hooks/useMutations';
-import { ReflectieFormData as ReflectieUpsertData } from '@/types'; // Renaming for clarity if ReflectieFormData is also used for form state
-import { ErrorMessage } from '@/lib/error-handler';
-import { useFocusManagement } from '@/utils/accessibility';
 import ReflectieFormPresentational, { ReflectieFormState, StemmingP } from '@/components/reflecties/ReflectieFormPresentational';
 import { useNotification } from '@/context/NotificationContext';
+import { useUpsertReflectie } from '@/hooks/useMutations';
+import { ErrorMessage } from '@/lib/error-handler';
+import { ReflectieFormData as ReflectieUpsertData } from '@/types'; // Renaming for clarity if ReflectieFormData is also used for form state
+import { useFocusManagement } from '@/utils/accessibility';
+import { useRouter } from 'next/navigation';
+import React, { FormEvent, useState } from 'react';
 
 interface ReflectieFormContainerProps {
   initialDatum?: string; // YYYY-MM-DD
@@ -26,23 +27,23 @@ export default function ReflectieFormContainer({ initialDatum }: ReflectieFormCo
   const router = useRouter();
   const { user } = useAuth();
   const { addNotification } = useNotification();
-  
+
   const vandaag = new Date().toISOString().split('T')[0];
-  
+
   const [formState, setFormState] = useState<ReflectieFormState>({
     datum: initialDatum || vandaag,
     stemming: 'neutraal' as StemmingP,
     notitie: '',
   });
 
-  const { 
-    mutate: upsertReflectie, 
-    isPending: isUpserting, 
+  const {
+    mutate: upsertReflectie,
+    isPending: isUpserting,
     error: upsertHookError,
     isError: isUpsertError,
     isSuccess: isUpsertSuccess
   } = useUpsertReflectie();
-  
+
   const stemmingOpties: StemmingP[] = [
     'zeer goed', 'goed', 'neutraal', 'matig', 'slecht', 'zeer slecht'
   ];
@@ -58,17 +59,17 @@ export default function ReflectieFormContainer({ initialDatum }: ReflectieFormCo
       default: return 'bg-gray-200 text-gray-700';
     }
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormState(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleStemmingSelect = (stemming: StemmingP) => {
     setFormState(prev => ({ ...prev, stemming }));
   };
-  
-  const handleSubmit = async (e: FormEvent) => {
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
       addNotification({ type: 'error', message: 'U moet ingelogd zijn om een reflectie op te slaan.' });
@@ -81,20 +82,20 @@ export default function ReflectieFormContainer({ initialDatum }: ReflectieFormCo
     }
 
     const dataToUpsert: ReflectieUpsertData = {
-        datum: formState.datum, 
-        stemming: formState.stemming,
-        notitie: formState.notitie,
-        // user_id will be added by the hook or API based on the authenticated user
+      datum: formState.datum,
+      stemming: formState.stemming,
+      notitie: formState.notitie,
+      // user_id will be added by the hook or API based on the authenticated user
     };
-    
+
     upsertReflectie(dataToUpsert, {
       onSuccess: () => {
         addNotification({ type: 'success', message: 'Reflectie succesvol opgeslagen!' });
         // Delay redirect slightly to allow user to see success message if not using global notifications that persist
-        setTimeout(() => router.push('/reflecties'), 500); 
+        setTimeout(() => router.push('/reflecties'), 500);
         router.refresh(); // Ensure server components on the target page are updated
       },
-      onError: (error: unknown) => {
+      onError: () => {
         // Notification is handled by the hook's global error handling via NotificationContext
         // but if specific local display is needed, it can be done here too.
         // addNotification({ type: 'error', message: (error as ErrorMessage).userMessage || 'Opslaan van reflectie mislukt.' });
@@ -105,7 +106,7 @@ export default function ReflectieFormContainer({ initialDatum }: ReflectieFormCo
   const handleCancel = () => {
     router.back();
   };
-  
+
   const submitButtonRef = useFocusManagement<HTMLButtonElement>(isUpsertError);
 
   return (

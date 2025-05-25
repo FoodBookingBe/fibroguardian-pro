@@ -1,16 +1,15 @@
-import React from 'react';
 
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server'; // Updated import
 
 export const dynamic = 'force-dynamic';
-export const _revalidate = 0; // Disable caching
+export const revalidate = 0; // Disable caching
 
 export default async function AuthTestPage() {
   const supabase = getSupabaseServerComponentClient(); // Use the new standardized client
-  
+
   // Controleer of gebruiker is ingelogd
   const { data: { user }, error: getUserError } = await supabase.auth.getUser();
-  
+
   // Fetch profile if user exists
   let profile = null;
   if (user && !getUserError) {
@@ -29,10 +28,10 @@ export default async function AuthTestPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Authentication Test Page</h1>
-      
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">User & Profile Status</h2>
-        
+
         {getUserError ? (
           <p className="text-red-600 font-medium">Error fetching user: {getUserError.message}</p>
         ) : user ? (

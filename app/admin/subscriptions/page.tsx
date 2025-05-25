@@ -1,8 +1,7 @@
-import React from 'react';
 
 // app/admin/subscriptions/pag(e as any).tsx
-import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 import AdminSubscriptionsList, { SubscriptionWithUserProfile } from '@/components/admin/AdminSubscriptionsList';
+import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 import { Profile } from '@/types'; // Import the Profile type
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +19,7 @@ export default async function AdminSubscriptionsPage() {
       .order('created_at', { ascending: false });
 
     if (abonnementsError) {
-      consol(e as any).error("Error fetching subscriptions:", abonnementsError);
+      console.error("Error fetching subscriptions:", abonnementsError);
       throw abonnementsError; // Throw to be caught by the outer catch block
     }
 
@@ -33,7 +32,7 @@ export default async function AdminSubscriptionsPage() {
         .select('id, voornaam, achternaam'); // Only select needed fields
 
       if (profilesError) {
-        consol(e as any).error("Error fetching profiles:", profilesError);
+        console.error("Error fetching profiles:", profilesError);
         // Continue with subscriptions but profiles will be empty/default
       }
 
@@ -47,15 +46,15 @@ export default async function AdminSubscriptionsPage() {
         const profile = profilesMap.get(sub.user_id);
         return {
           ...sub,
-          profiles: profile 
-            ? { voornaam: profil(e as any).voornaam, achternaam: profil(e as any).achternaam } 
+          profiles: profile
+            ? { voornaam: profile.voornaam, achternaam: profile.achternaam }
             : { voornaam: null, achternaam: null }, // Default if no profile found
         };
       }) as SubscriptionWithUserProfile[]; // Cast needed as 'profiles' is added
     }
 
   } catch (e: unknown) {
-    consol(e as any).error("Error in data fetching for subscriptions page:", e);
+    console.error("Error in data fetching for subscriptions page:", e);
     fetchError = (e as any).message || "An unexpected error occurred.";
   }
 

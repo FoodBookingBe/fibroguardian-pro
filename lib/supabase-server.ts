@@ -21,7 +21,7 @@ const serverClientCache = new Map<string, SupabaseClient<Database>>();
 
 /**
  * Get a Supabase client for use in Server Components
- * 
+ *
  * @returns A Supabase client configured for server components
  */
 export const _getSupabaseServerComponentClient = (): SupabaseClient<Database> => {
@@ -30,14 +30,14 @@ export const _getSupabaseServerComponentClient = (): SupabaseClient<Database> =>
     const cookieString = cookieStore.getAll()
       .map(cookie => `${cookie.name}=${cookie.value}`)
       .join('; ');
-    
+
     // Use cookie string as cache key to reuse clients with the same auth context
     const cacheKey = `server-component-${cookieString}`;
-    
+
     if (serverClientCache.has(cacheKey)) {
       return serverClientCache.get(cacheKey)!;
     }
-    
+
     const client = createSSRServerClient<Database>(
       supabaseUrl,
       supabaseAnonKey,
@@ -68,7 +68,7 @@ export const _getSupabaseServerComponentClient = (): SupabaseClient<Database> =>
         }
       }
     );
-    
+
     // Cache the client for future requests with the same cookies
     serverClientCache.set(cacheKey, client);
     return client;
@@ -78,16 +78,19 @@ export const _getSupabaseServerComponentClient = (): SupabaseClient<Database> =>
   }
 };
 
+// Export without underscore for easier usage
+export const getSupabaseServerComponentClient = _getSupabaseServerComponentClient;
+
 /**
  * Get a Supabase client for use in Route Handlers and Middleware
  * This client can set and remove cookies
- * 
+ *
  * @returns A Supabase client configured for route handlers
  */
 export const _getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
   try {
     const cookieStore = cookies();
-    
+
     return createSSRServerClient<Database>(
       supabaseUrl,
       supabaseAnonKey,
@@ -97,12 +100,10 @@ export const _getSupabaseRouteHandlerClient = (): SupabaseClient<Database> => {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options} // Type assertion fixed
-const typedOptions = options as Record<string, unknown> ;);
+            cookieStore.set({ name, value, ...options });
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options} // Type assertion fixed
-const typedOptions = options as Record<string, unknown> ;);
+            cookieStore.set({ name, value: '', ...options, maxAge: 0 });
           },
         },
         global: {
@@ -121,3 +122,6 @@ const typedOptions = options as Record<string, unknown> ;);
     throw error;
   }
 };
+
+// Export without underscore for easier usage
+export const getSupabaseRouteHandlerClient = _getSupabaseRouteHandlerClient;

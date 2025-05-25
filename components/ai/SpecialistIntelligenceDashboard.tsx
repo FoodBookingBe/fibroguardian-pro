@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
 import { AlertMessage } from '@/components/common/AlertMessage';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { AIService } from '@/utils/ai-service';
 
 // Types for the Specialist Intelligence Dashboard
 interface Patient {
@@ -74,8 +73,8 @@ interface SpecialistIntelligenceDashboardProps {
  * Specialist Intelligence Dashboard component
  * Provides AI-driven insights for specialists to better manage their patients
  */
-export default function SpecialistIntelligenceDashboard({ 
-  className = '' 
+export default function SpecialistIntelligenceDashboard({
+  className = ''
 }: SpecialistIntelligenceDashboardProps): JSX.Element {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<SpecialistAIDashboardData | null>(null);
@@ -87,30 +86,30 @@ export default function SpecialistIntelligenceDashboard({
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!user?.id) return;
-      
+
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const supabase = getSupabaseBrowserClient();
-        
+
         // Check if user is a specialist
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('type')
           .eq('id', user.id)
           .single();
-        
+
         if (profileError || !profile || profile.type !== 'specialist') {
           throw new Error('Alleen specialisten hebben toegang tot dit dashboard');
         }
-        
+
         // In a real implementation, this would call the AI service
         // For now, we'll simulate the data
-        
+
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Simulated dashboard data
         const simulatedData: SpecialistAIDashboardData = {
           criticalPatients: [
@@ -208,7 +207,7 @@ export default function SpecialistIntelligenceDashboard({
             }
           ]
         };
-        
+
         setDashboardData(simulatedData);
       } catch (err) {
         console.error('Error fetching specialist dashboard data:', err);
@@ -217,7 +216,7 @@ export default function SpecialistIntelligenceDashboard({
         setIsLoading(false);
       }
     };
-    
+
     fetchDashboardData();
   }, [user?.id]);
 
@@ -262,53 +261,49 @@ export default function SpecialistIntelligenceDashboard({
   return (
     <div className={`${className} rounded-lg bg-white p-6 shadow-md`}>
       <h2 className="mb-6 text-xl font-semibold text-gray-800">Specialist Intelligence Dashboard</h2>
-      
+
       {/* Dashboard Tabs */}
       <div className="mb-6 border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('alerts')}
-            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-              activeTab === 'alerts'
+            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'alerts'
                 ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
+              }`}
           >
             Alerts & Voorspellingen
           </button>
           <button
             onClick={() => setActiveTab('patterns')}
-            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-              activeTab === 'patterns'
+            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'patterns'
                 ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
+              }`}
           >
             Symptoompatronen
           </button>
           <button
             onClick={() => setActiveTab('treatments')}
-            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-              activeTab === 'treatments'
+            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'treatments'
                 ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
+              }`}
           >
             Behandeleffectiviteit
           </button>
           <button
             onClick={() => setActiveTab('knowledge')}
-            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-              activeTab === 'knowledge'
+            className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'knowledge'
                 ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
+              }`}
           >
             Kennishiaten
           </button>
         </nav>
       </div>
-      
+
       {/* Alerts & Predictions Tab */}
       {activeTab === 'alerts' && (
         <div>
@@ -351,14 +346,12 @@ export default function SpecialistIntelligenceDashboard({
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="flex items-center">
-                          <div className={`mr-2 h-2.5 w-2.5 rounded-full ${
-                            (patient.risk_score || 0) > 0.7 ? 'bg-red-500' : 
-                            (patient.risk_score || 0) > 0.4 ? 'bg-yellow-500' : 'bg-green-500'
-                          }`}></div>
-                          <span className={`text-sm ${
-                            (patient.risk_score || 0) > 0.7 ? 'text-red-800' : 
-                            (patient.risk_score || 0) > 0.4 ? 'text-yellow-800' : 'text-green-800'
-                          }`}>
+                          <div className={`mr-2 h-2.5 w-2.5 rounded-full ${(patient.risk_score || 0) > 0.7 ? 'bg-red-500' :
+                              (patient.risk_score || 0) > 0.4 ? 'bg-yellow-500' : 'bg-green-500'
+                            }`}></div>
+                          <span className={`text-sm ${(patient.risk_score || 0) > 0.7 ? 'text-red-800' :
+                              (patient.risk_score || 0) > 0.4 ? 'text-yellow-800' : 'text-green-800'
+                            }`}>
                             {formatPercentage(patient.risk_score || 0)}
                           </span>
                         </div>
@@ -374,35 +367,33 @@ export default function SpecialistIntelligenceDashboard({
               </table>
             </div>
           </div>
-          
+
           <div>
             <h3 className="mb-4 text-lg font-medium text-gray-900">Voorspellende Alerts</h3>
             <div className="space-y-4">
               {dashboardData.predictiveAlerts.map(alert => (
-                <div 
-                  key={alert.id} 
-                  className={`rounded-lg border p-4 ${
-                    alert.urgency === 'high' ? 'border-red-200 bg-red-50' :
-                    alert.urgency === 'medium' ? 'border-yellow-200 bg-yellow-50' :
-                    'border-blue-200 bg-blue-50'
-                  }`}
+                <div
+                  key={alert.id}
+                  className={`rounded-lg border p-4 ${alert.urgency === 'high' ? 'border-red-200 bg-red-50' :
+                      alert.urgency === 'medium' ? 'border-yellow-200 bg-yellow-50' :
+                        'border-blue-200 bg-blue-50'
+                    }`}
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <h4 className="text-base font-medium text-gray-900">
                       {alert.patient_name} - {
                         alert.alert_type === 'symptom_flare' ? 'Symptoomverergering' :
-                        alert.alert_type === 'treatment_opportunity' ? 'Behandelkans' :
-                        'Risicofactor'
+                          alert.alert_type === 'treatment_opportunity' ? 'Behandelkans' :
+                            'Risicofactor'
                       }
                     </h4>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      alert.urgency === 'high' ? 'bg-red-100 text-red-800' :
-                      alert.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${alert.urgency === 'high' ? 'bg-red-100 text-red-800' :
+                        alert.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-blue-100 text-blue-800'
+                      }`}>
                       {alert.urgency === 'high' ? 'Hoge urgentie' :
-                       alert.urgency === 'medium' ? 'Gemiddelde urgentie' :
-                       'Lage urgentie'}
+                        alert.urgency === 'medium' ? 'Gemiddelde urgentie' :
+                          'Lage urgentie'}
                     </span>
                   </div>
                   <p className="mb-2 text-sm text-gray-700">{alert.description}</p>
@@ -415,7 +406,7 @@ export default function SpecialistIntelligenceDashboard({
                     <span className="text-xs text-gray-500">
                       Betrouwbaarheid: {formatPercentage(alert.confidence)}
                     </span>
-                    <a 
+                    <a
                       href={`/specialisten/patient/${alert.patient_id}`}
                       className="text-sm font-medium text-purple-600 hover:text-purple-900"
                     >
@@ -428,7 +419,7 @@ export default function SpecialistIntelligenceDashboard({
           </div>
         </div>
       )}
-      
+
       {/* Symptom Patterns Tab */}
       {activeTab === 'patterns' && (
         <div>
@@ -438,14 +429,13 @@ export default function SpecialistIntelligenceDashboard({
               <div key={pattern.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <div className="mb-2 flex items-center justify-between">
                   <h4 className="text-base font-medium text-gray-900">{pattern.name}</h4>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    pattern.trend === 'increasing' ? 'bg-red-100 text-red-800' :
-                    pattern.trend === 'decreasing' ? 'bg-green-100 text-green-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${pattern.trend === 'increasing' ? 'bg-red-100 text-red-800' :
+                      pattern.trend === 'decreasing' ? 'bg-green-100 text-green-800' :
+                        'bg-blue-100 text-blue-800'
+                    }`}>
                     {pattern.trend === 'increasing' ? 'Toenemend' :
-                     pattern.trend === 'decreasing' ? 'Afnemend' :
-                     'Stabiel'}
+                      pattern.trend === 'decreasing' ? 'Afnemend' :
+                        'Stabiel'}
                   </span>
                 </div>
                 <p className="mb-4 text-sm text-gray-700">{pattern.description}</p>
@@ -468,7 +458,7 @@ export default function SpecialistIntelligenceDashboard({
           </div>
         </div>
       )}
-      
+
       {/* Treatment Effectiveness Tab */}
       {activeTab === 'treatments' && (
         <div>
@@ -506,7 +496,7 @@ export default function SpecialistIntelligenceDashboard({
           </div>
         </div>
       )}
-      
+
       {/* Knowledge Gaps Tab */}
       {activeTab === 'knowledge' && (
         <div>
@@ -522,7 +512,7 @@ export default function SpecialistIntelligenceDashboard({
                 </div>
                 <p className="mb-3 text-sm text-gray-700">{gap.description}</p>
                 <p className="text-sm text-gray-600">Betreft {gap.patient_count} patiënten</p>
-                
+
                 {gap.suggested_resources && gap.suggested_resources.length > 0 && (
                   <div className="mt-4">
                     <p className="mb-2 text-sm font-medium text-gray-700">Aanbevolen bronnen:</p>
@@ -533,10 +523,10 @@ export default function SpecialistIntelligenceDashboard({
                     </ul>
                   </div>
                 )}
-                
+
                 <div className="mt-4">
-                  <a 
-                    href="/specialisten/kennisbank" 
+                  <a
+                    href="/specialisten/kennisbank"
                     className="text-sm font-medium text-purple-600 hover:text-purple-900"
                   >
                     Kennisbank raadplegen

@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  AreaChart,
+import React, { useEffect, useState } from 'react';
+import {
   Area,
+  AreaChart,
+  Bar,
   BarChart,
-  Bar
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 
@@ -57,20 +57,20 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [trend, setTrend] = useState<'improving' | 'worsening' | 'stable' | null>(null);
   const [averageValue, setAverageValue] = useState<number | null>(null);
-  
+
   // Fetch data based on selected metric and time range
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const supabase = getSupabaseBrowserClient();
         const now = new Date();
         const startDate = new Date();
-        
+
         // Calculate start date based on time range
         switch (timeRange) {
           case 'week':
@@ -86,13 +86,13 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             startDate.setFullYear(now.getFullYear() - 1);
             break;
         }
-        
+
         let result;
-        
+
         // Fetch data based on metric type
         if (metric === 'pain' || metric === 'fatigue') {
           const scoreField = metric === 'pain' ? 'pijn_score' : 'vermoeidheid_score';
-          
+
           // Fetch from reflecties table
           const { data: reflectieData, error: reflectieError } = await supabase
             .from('reflecties')
@@ -101,11 +101,11 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             .gte('datum', startDate.toISOString())
             .lte('datum', now.toISOString())
             .order('datum', { ascending: true });
-          
+
           if (reflectieError) {
             throw reflectieError;
           }
-          
+
           // Transform data for chart
           result = reflectieData
             .filter(item => item[scoreField as keyof typeof item] !== null)
@@ -114,18 +114,18 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               value: item[scoreField as keyof typeof item] as number,
               timestamp: new Date(item.datum).getTime()
             }));
-          
+
           // Calculate trend
           if (result.length >= 2) {
             const firstValues = result.slice(0, Math.ceil(result.length / 3)).map(item => item.value);
             const lastValues = result.slice(-Math.ceil(result.length / 3)).map(item => item.value);
-            
+
             const firstAvg = firstValues.reduce((sum, val) => sum + val, 0) / firstValues.length;
             const lastAvg = lastValues.reduce((sum, val) => sum + val, 0) / lastValues.length;
-            
+
             const diff = lastAvg - firstAvg;
             const threshold = 1.5; // Threshold for determining significant change
-            
+
             if (Math.abs(diff) < threshold) {
               setTrend('stable');
             } else if ((metric === 'pain' || metric === 'fatigue') && diff > 0) {
@@ -133,7 +133,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             } else if ((metric === 'pain' || metric === 'fatigue') && diff < 0) {
               setTrend('improving');
             }
-            
+
             // Calculate average
             const allValues = result.map(item => item.value);
             setAverageValue(allValues.reduce((sum, val) => sum + val, 0) / allValues.length);
@@ -147,11 +147,11 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             .gte('datum', startDate.toISOString())
             .lte('datum', now.toISOString())
             .order('datum', { ascending: true });
-          
+
           if (moodError) {
             throw moodError;
           }
-          
+
           // Map mood strings to numeric values for visualization
           const moodMap: Record<string, number> = {
             'zeer slecht': 1,
@@ -161,7 +161,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             'goed': 5,
             'zeer goed': 6
           };
-          
+
           // Transform data for chart
           result = moodData
             .filter(item => item.stemming && moodMap[item.stemming.toLowerCase()])
@@ -171,18 +171,18 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               mood: item.stemming,
               timestamp: new Date(item.datum).getTime()
             }));
-          
+
           // Calculate trend for mood (higher is better)
           if (result.length >= 2) {
             const firstValues = result.slice(0, Math.ceil(result.length / 3)).map(item => item.value);
             const lastValues = result.slice(-Math.ceil(result.length / 3)).map(item => item.value);
-            
+
             const firstAvg = firstValues.reduce((sum, val) => sum + val, 0) / firstValues.length;
             const lastAvg = lastValues.reduce((sum, val) => sum + val, 0) / lastValues.length;
-            
+
             const diff = lastAvg - firstAvg;
             const threshold = 0.5; // Threshold for determining significant change
-            
+
             if (Math.abs(diff) < threshold) {
               setTrend('stable');
             } else if (diff > 0) {
@@ -190,7 +190,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             } else {
               setTrend('worsening');
             }
-            
+
             // Calculate average
             const allValues = result.map(item => item.value);
             setAverageValue(allValues.reduce((sum, val) => sum + val, 0) / allValues.length);
@@ -204,28 +204,28 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             .gte('created_at', startDate.toISOString())
             .lte('created_at', now.toISOString())
             .order('created_at', { ascending: true });
-          
+
           if (taskError) {
             throw taskError;
           }
-          
+
           // Group tasks by date and calculate completion rate
           const tasksByDate: Record<string, { completed: number, total: number }> = {};
-          
+
           taskData.forEach(task => {
             const date = new Date(task.created_at).toLocaleDateString();
-            
+
             if (!tasksByDate[date]) {
               tasksByDate[date] = { completed: 0, total: 0 };
             }
-            
+
             tasksByDate[date].total++;
-            
+
             if (task.status === 'completed') {
               tasksByDate[date].completed++;
             }
           });
-          
+
           // Transform data for chart
           result = Object.entries(tasksByDate).map(([date, stats]) => ({
             date,
@@ -234,18 +234,18 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             total: stats.total,
             timestamp: new Date(date).getTime()
           }));
-          
+
           // Calculate trend for task completion (higher is better)
           if (result.length >= 2) {
             const firstValues = result.slice(0, Math.ceil(result.length / 3)).map(item => item.value);
             const lastValues = result.slice(-Math.ceil(result.length / 3)).map(item => item.value);
-            
+
             const firstAvg = firstValues.reduce((sum, val) => sum + val, 0) / firstValues.length;
             const lastAvg = lastValues.reduce((sum, val) => sum + val, 0) / lastValues.length;
-            
+
             const diff = lastAvg - firstAvg;
             const threshold = 5; // Threshold for determining significant change in percentage
-            
+
             if (Math.abs(diff) < threshold) {
               setTrend('stable');
             } else if (diff > 0) {
@@ -253,13 +253,13 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             } else {
               setTrend('worsening');
             }
-            
+
             // Calculate average
             const allValues = result.map(item => item.value);
             setAverageValue(allValues.reduce((sum, val) => sum + val, 0) / allValues.length);
           }
         }
-        
+
         // Sort data by timestamp
         if (result && result.length > 0) {
           result.sort((a, b) => a.timestamp - b.timestamp);
@@ -274,10 +274,10 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [user, metric, timeRange]);
-  
+
   // Get chart color based on metric
   const getChartColor = () => {
     switch (metric) {
@@ -293,7 +293,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         return '#8b5cf6'; // Purple
     }
   };
-  
+
   // Get chart label based on metric
   const getChartLabel = () => {
     switch (metric) {
@@ -309,41 +309,41 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         return 'Waarde';
     }
   };
-  
+
   // Get trend message based on trend and metric
   const getTrendMessage = () => {
     if (!trend) return <></>; // Empty fragment instead of null
-    
+
     switch (metric) {
       case 'pain':
-        return trend === 'improving' 
-          ? 'Uw pijnscores vertonen een dalende trend. Goed bezig!' 
-          : trend === 'worsening' 
-            ? 'Uw pijnscores vertonen een stijgende trend. Bespreek dit met uw zorgverlener.' 
+        return trend === 'improving'
+          ? 'Uw pijnscores vertonen een dalende trend. Goed bezig!'
+          : trend === 'worsening'
+            ? 'Uw pijnscores vertonen een stijgende trend. Bespreek dit met uw zorgverlener.'
             : 'Uw pijnscores zijn stabiel.';
       case 'fatigue':
-        return trend === 'improving' 
-          ? 'Uw vermoeidheidsscores vertonen een dalende trend. Goed bezig!' 
-          : trend === 'worsening' 
-            ? 'Uw vermoeidheidsscores vertonen een stijgende trend. Bespreek dit met uw zorgverlener.' 
+        return trend === 'improving'
+          ? 'Uw vermoeidheidsscores vertonen een dalende trend. Goed bezig!'
+          : trend === 'worsening'
+            ? 'Uw vermoeidheidsscores vertonen een stijgende trend. Bespreek dit met uw zorgverlener.'
             : 'Uw vermoeidheidsscores zijn stabiel.';
       case 'mood':
-        return trend === 'improving' 
-          ? 'Uw stemming vertoont een positieve trend. Goed bezig!' 
-          : trend === 'worsening' 
-            ? 'Uw stemming vertoont een negatieve trend. Bespreek dit met uw zorgverlener.' 
+        return trend === 'improving'
+          ? 'Uw stemming vertoont een positieve trend. Goed bezig!'
+          : trend === 'worsening'
+            ? 'Uw stemming vertoont een negatieve trend. Bespreek dit met uw zorgverlener.'
             : 'Uw stemming is stabiel.';
       case 'tasks':
-        return trend === 'improving' 
-          ? 'Uw taakvoltooing vertoont een stijgende trend. Goed bezig!' 
-          : trend === 'worsening' 
-            ? 'Uw taakvoltooing vertoont een dalende trend. Probeer kleinere taken te plannen.' 
+        return trend === 'improving'
+          ? 'Uw taakvoltooing vertoont een stijgende trend. Goed bezig!'
+          : trend === 'worsening'
+            ? 'Uw taakvoltooing vertoont een dalende trend. Probeer kleinere taken te plannen.'
             : 'Uw taakvoltooing is stabiel.';
       default:
         return <></>; // Empty fragment instead of null
     }
   };
-  
+
   // Render chart based on chart type
   const renderChart = () => {
     if (loading) {
@@ -357,14 +357,14 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         </div>
       );
     }
-    
+
     if (error) {
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-red-500 text-center">
             <p className="mb-2">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
             >
               Probeer opnieuw
@@ -373,7 +373,7 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         </div>
       );
     }
-    
+
     if (data.length === 0) {
       return (
         <div className="flex items-center justify-center h-full">
@@ -384,10 +384,10 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
         </div>
       );
     }
-    
+
     const color = getChartColor();
     const label = getChartLabel();
-    
+
     switch (chartType) {
       case 'line':
         return (
@@ -396,24 +396,23 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                name={label} 
-                stroke={color} 
-                strokeWidth={2} 
-                dot={{ r: 4, strokeWidth: 1 }} 
-                activeDot={{ r: 6 }} 
+              <Line
+                type="monotone"
+                dataKey="value"
+                name={label}
+                stroke={color}
+                strokeWidth={2}
+                dot={{ r: 4, strokeWidth: 1 }}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
         );
-      
+
       case 'area':
         return (
           <ResponsiveContainer width="100%" height="100%">
@@ -421,23 +420,22 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                name={label} 
-                stroke={color} 
+              <Area
+                type="monotone"
+                dataKey="value"
+                name={label}
+                stroke={color}
                 fill={`${color}33`} // Add transparency to fill color
-                strokeWidth={2} 
+                strokeWidth={2}
               />
             </AreaChart>
           </ResponsiveContainer>
         );
-      
+
       case 'bar':
         return (
           <ResponsiveContainer width="100%" height="100%">
@@ -445,21 +443,20 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ backgroundColor: 'white', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                formatter={(value: unknown) => [value, label]}
               />
               <Legend />
               <Bar dataKey="value" name={label} fill={color} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         );
-      
+
       default:
         return <></>; // Empty fragment instead of null
     }
   };
-  
+
   return (
     <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -469,12 +466,12 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
           {metric === 'mood' && 'Stemmingsverloop'}
           {metric === 'tasks' && 'Taakvoltooing'}
         </h2>
-        
+
         {showControls && (
           <div className="flex flex-wrap gap-2">
             <select
               value={metric}
-              onChange={(e: unknown) => setMetric(e.target.value as MetricType)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMetric(e.target.value as MetricType)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer metriek"
             >
@@ -483,10 +480,10 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <option value="mood">Stemming</option>
               <option value="tasks">Taken</option>
             </select>
-            
+
             <select
               value={timeRange}
-              onChange={(e: unknown) => setTimeRange(e.target.value as TimeRange)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTimeRange(e.target.value as TimeRange)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer tijdsperiode"
             >
@@ -495,10 +492,10 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
               <option value="quarter">Kwartaal</option>
               <option value="year">Jaar</option>
             </select>
-            
+
             <select
               value={chartType}
-              onChange={(e: unknown) => setChartType(e.target.value as ChartType)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setChartType(e.target.value as ChartType)}
               className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
               aria-label="Selecteer grafiektype"
             >
@@ -509,17 +506,16 @@ export const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
           </div>
         )}
       </div>
-      
+
       <div style={{ height: `${height}px` }} className="mb-4">
         {renderChart()}
       </div>
-      
+
       {trend && averageValue !== null && (
-        <div className={`mt-4 p-3 rounded-lg ${
-          trend === 'improving' ? 'bg-green-50 text-green-700' :
+        <div className={`mt-4 p-3 rounded-lg ${trend === 'improving' ? 'bg-green-50 text-green-700' :
           trend === 'worsening' ? 'bg-red-50 text-red-700' :
-          'bg-blue-50 text-blue-700'
-        }`}>
+            'bg-blue-50 text-blue-700'
+          }`}>
           <div className="flex items-center">
             {trend === 'improving' && (
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

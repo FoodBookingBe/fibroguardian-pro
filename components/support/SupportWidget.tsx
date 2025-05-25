@@ -1,10 +1,10 @@
 'use client';
-import React, { useState, useEffect, FormEvent } from 'react'; // Import React en FormEvent
+import React, { FormEvent, useEffect, useState } from 'react'; // Import React en FormEvent
 // import { Button } from '@/components/ds/atoms/Button'; // Placeholder
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
-import { _useAuth as useAuth } from '@/components/auth/AuthProvider'; 
-import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
-import { MessageSquare, X, ChevronUp, ChevronDown, Search, HelpCircle } from 'lucide-react';
+import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { ChevronDown, ChevronUp, HelpCircle, MessageSquare, Search, X } from 'lucide-react';
 
 interface FAQItem {
   question: string;
@@ -47,15 +47,23 @@ const faqs: FAQItem[] = [
 ];
 
 // Basis Button component
-const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown> ;: unknown) => (
-  <button 
+const Button = ({ onClick, children, variant = 'primary', size = 'md', className: btnClassName = '', type = 'button', disabled, ...props }: {
+  onClick?: () => void;
+  children: React.ReactNode;
+  variant?: 'primary' | 'ghost' | 'outline';
+  size?: 'sm' | 'md';
+  className?: string;
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  loading?: boolean;
+  [key: string]: any;
+}) => (
+  <button
     type={type}
-    onClick={onClick} 
+    onClick={onClick}
     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-60 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
     disabled={disabled}
-    {...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>;
+    {...props}
   >
     {children}
   </button>
@@ -71,19 +79,19 @@ export function SupportWidget(): JSX.Element {
 
   const { user, profile } = useAuth(); // Haal user en profile op
   const { hasAccess } = useFeatureAccess(); // Voor priority support check
-  
+
   const filteredFAQs = searchQuery
-    ? faqs.filter(faq => 
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.categories.some(cat => cat.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+    ? faqs.filter(faq =>
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.categories.some(cat => cat.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
     : faqs;
-  
+
   const handleToggleFAQ = (index: number) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
-  
+
   const handleContactSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -99,7 +107,7 @@ export function SupportWidget(): JSX.Element {
           userId: user?.id,
         })
       });
-      
+
       if (response.ok) {
         setContactFormData({ subject: '', message: '' });
         setShowContactForm(false);
@@ -115,7 +123,7 @@ export function SupportWidget(): JSX.Element {
       setIsSubmitting(false);
     }
   };
-  
+
   // Sluit widget bij Escape toets
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -135,18 +143,17 @@ export function SupportWidget(): JSX.Element {
       >
         <HelpCircle size={28} />
       </button>
-      
-      <div 
-        className={`fixed bottom-5 right-5 z-50 w-[calc(100%-2.5rem)] max-w-sm bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col transition-all duration-300 ease-in-out max-h-[calc(100vh-3.75rem)] ${
-          isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
-        }`}
+
+      <div
+        className={`fixed bottom-5 right-5 z-50 w-[calc(100%-2.5rem)] max-w-sm bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col transition-all duration-300 ease-in-out max-h-[calc(100vh-3.75rem)] ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+          }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="support-widget-title"
       >
         <header className="flex items-center justify-between bg-gray-100 p-3 border-b border-gray-200 rounded-t-xl">
           <h3 id="support-widget-title" className="font-semibold text-gray-800 text-md">Hulp & Ondersteuning</h3>
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full"
             aria-label="Sluit support widget"
@@ -154,7 +161,7 @@ export function SupportWidget(): JSX.Element {
             <X size={20} />
           </button>
         </header>
-        
+
         <div className="p-4 border-b border-gray-200">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -163,11 +170,11 @@ export function SupportWidget(): JSX.Element {
               placeholder="Zoek in FAQs..."
               className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               value={searchQuery}
-              onChange={(e: unknown) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
-        
+
         <div className="flex-grow overflow-y-auto p-4 space-y-2">
           {filteredFAQs.length > 0 ? (
             filteredFAQs.map((faq, index) => (
@@ -205,17 +212,17 @@ export function SupportWidget(): JSX.Element {
             </div>
           )}
         </div>
-        
+
         <footer className="p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
           {showContactForm ? (
             <form onSubmit={handleContactSubmit} className="space-y-3">
               <div>
                 <label htmlFor="support-subject" className="block text-xs font-medium text-gray-600 mb-0.5">Onderwerp</label>
-                <input type="text" id="support-subject" className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.subject} onChange={(e: unknown) => setContactFormData({...contactFormData, subject: e.target.value})} required />
+                <input type="text" id="support-subject" className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.subject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContactFormData({ ...contactFormData, subject: e.target.value })} required />
               </div>
               <div>
                 <label htmlFor="support-message" className="block text-xs font-medium text-gray-600 mb-0.5">Bericht</label>
-                <textarea id="support-message" rows={3} className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.message} onChange={(e: unknown) => setContactFormData({...contactFormData, message: e.target.value})} required></textarea>
+                <textarea id="support-message" rows={3} className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500" value={contactFormData.message} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContactFormData({ ...contactFormData, message: e.target.value })} required></textarea>
               </div>
               <div className="flex justify-end space-x-2 pt-1">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowContactForm(false)} disabled={isSubmitting}>Annuleren</Button>

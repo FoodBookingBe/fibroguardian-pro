@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { 
-  ChangeCategory, 
-  ChangeImpact, 
-  getChangelogByImpact, 
-  getChangelogForVersion,
-  changelog
+import {
+  ChangeCategory,
+  ChangeImpact,
+  changelog,
+  getChangelogByImpact,
+  getChangelogForVersion
 } from '@/utils/changelog';
 
 interface ChangelogViewerProps {
@@ -35,28 +35,28 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
   // Filter and sort changelog entries
   const filteredEntries = useMemo(() => {
     let result = [...changelog];
-    
+
     // Apply version filter
     if (filterVersion) {
       result = getChangelogForVersion(filterVersion);
     }
-    
+
     // Apply category filter
     if (filterCategory) {
       result = result.filter(entry => entry.category === filterCategory);
     }
-    
+
     // Apply impact filter
     if (filterImpact) {
-      result = getChangelogByImpact(filterImpact).filter(entry => 
-        result.some(e => 
-          e.version === entry.version && 
-          e.category === entry.category && 
+      result = getChangelogByImpact(filterImpact).filter(entry =>
+        result.some(e =>
+          e.version === entry.version &&
+          e.category === entry.category &&
           e.description === entry.description
         )
       );
     }
-    
+
     // Sort entries
     if (sortByDate) {
       result.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -65,18 +65,18 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
       result.sort((a, b) => {
         const versionCompare = b.version.localeCompare(a.version, undefined, { numeric: true });
         if (versionCompare !== 0) return versionCompare;
-        
+
         const impactLevels: Record<ChangeImpact, number> = {
           'critical': 4,
           'high': 3,
           'medium': 2,
           'low': 1
         };
-        
+
         return impactLevels[b.impact] - impactLevels[a.impact];
       });
     }
-    
+
     return result;
   }, [filterVersion, filterCategory, filterImpact, sortByDate]);
 
@@ -152,7 +152,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
   return (
     <div className={`${className} rounded-lg bg-white p-6 shadow-md`}>
       <h2 className="mb-6 text-xl font-semibold text-gray-800">Systeem Changelog</h2>
-      
+
       {/* Filters */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
         <div>
@@ -162,7 +162,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="version-filter"
             value={filterVersion}
-            onChange={(e: unknown) => setFilterVersion(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterVersion(e.target.value)}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle versies</option>
@@ -173,7 +173,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
             ))}
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="category-filter" className="mb-1 block text-sm font-medium text-gray-700">
             Categorie
@@ -181,7 +181,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="category-filter"
             value={filterCategory}
-            onChange={(e: unknown) => setFilterCategory(e.target.value as ChangeCategory | '')}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterCategory(e.target.value as ChangeCategory | '')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle categorieën</option>
@@ -194,7 +194,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
             <option value="ux">UX</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="impact-filter" className="mb-1 block text-sm font-medium text-gray-700">
             Impact
@@ -202,7 +202,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="impact-filter"
             value={filterImpact}
-            onChange={(e: unknown) => setFilterImpact(e.target.value as ChangeImpact | '')}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterImpact(e.target.value as ChangeImpact | '')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="">Alle impact levels</option>
@@ -212,7 +212,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
             <option value="low">Low</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="sort-by" className="mb-1 block text-sm font-medium text-gray-700">
             Sorteren op
@@ -220,7 +220,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           <select
             id="sort-by"
             value={sortByDate ? 'date' : 'version'}
-            onChange={(e: unknown) => setSortByDate(e.target.value === 'date')}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortByDate(e.target.value === 'date')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
           >
             <option value="date">Datum</option>
@@ -228,7 +228,7 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
           </select>
         </div>
       </div>
-      
+
       {/* Changelog entries */}
       <div className="space-y-4">
         {filteredEntries.length === 0 ? (
@@ -252,22 +252,22 @@ export default function ChangelogViewer({ className = '' }: ChangelogViewerProps
                   <span className="font-medium">v{entry.version}</span> - {formatDate(entry.timestamp)}
                 </div>
               </div>
-              
+
               <h3 className="mb-2 text-base font-medium text-gray-900">{entry.description}</h3>
-              
+
               {entry.rollbackPlan && (
                 <div className="mt-2 text-sm text-gray-700">
                   <span className="font-medium">Rollback plan:</span> {entry.rollbackPlan}
                 </div>
               )}
-              
+
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                 {entry.author && (
                   <div className="text-sm text-gray-500">
                     <span className="font-medium">Auteur:</span> {entry.author}
                   </div>
                 )}
-                
+
                 {entry.relatedIssues && entry.relatedIssues.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {entry.relatedIssues.map(issue => (

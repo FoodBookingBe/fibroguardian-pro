@@ -1,6 +1,5 @@
-import React from 'react';
-
 'use client';
+
 import { useEffect } from 'react';
 
 export default function Error({
@@ -12,7 +11,7 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('Dashboard error:', error);
-  return undefined; // Add default return
+    return undefined; // Add default return
   }, [error]);
 
   return (

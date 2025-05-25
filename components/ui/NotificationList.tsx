@@ -1,8 +1,7 @@
-import React from 'react';
 
 // components/ui/NotificationList.tsx
-import { Notification, NotificationAction } from '@/context/NotificationContext'; // Import NotificationAction
-import { useEffect, useState, ReactNode } from 'react'; // Import ReactNode
+import { Notification } from '@/context/NotificationContext';
+import { ReactNode, useEffect, useState } from 'react'; // Import ReactNode
 
 interface NotificationListProps {
   notifications: Notification[];
@@ -13,14 +12,14 @@ export function NotificationList({ notifications, onDismiss }: NotificationListP
   if (!notifications || notifications.length === 0) {
     return <></>; // Empty fragment instead of null
   }
-  
+
   return (
     <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-3 max-w-xs sm:max-w-sm w-full"> {/* Increased z-index, gap, w-full */}
       {notifications.map(notification => (
-        <NotificationItem 
+        <NotificationItem
           key={notification.id}
-          notification={notification} 
-          onDismiss={onDismiss} 
+          notification={notification}
+          onDismiss={onDismiss}
         />
       ))}
     </div>
@@ -34,19 +33,19 @@ interface NotificationItemProps {
 
 function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   useEffect(() => {
     setIsVisible(true);
-  return undefined; // Add default return
+    return undefined; // Add default return
   }, []);
-  
+
   const typeStyles = {
     success: 'bg-green-100 border-green-500 text-green-800', // Adjusted colors for better contrast/look
     error: 'bg-red-100 border-red-500 text-red-800',
     warning: 'bg-yellow-100 border-yellow-500 text-yellow-800',
     info: 'bg-blue-100 border-blue-500 text-blue-800',
   };
-  
+
   // Default icons, can be overridden by notification.icon
   const defaultTypeIcons: Record<Notification['type'], ReactNode> = {
     success: (
@@ -72,12 +71,12 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
   };
 
   const iconToRender = notification.icon || defaultTypeIcons[notification.type];
-  
+
   return (
-    <div 
-      className={`transform transition-all duration-300 ease-in-out ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} border-l-4 ${typeStyles[notification.type]} p-4 shadow-lg rounded-md flex items-start w-full`} 
+    <div
+      className={`transform transition-all duration-300 ease-in-out ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} border-l-4 ${typeStyles[notification.type]} p-4 shadow-lg rounded-md flex items-start w-full`}
       role="alert"
-      aria-live={notification.type === 'error' ? 'assertive' : 'polite'} 
+      aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
     >
       <div className="flex-shrink-0 mr-3">
         {iconToRender}
@@ -89,7 +88,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
           <p className="text-sm font-medium">{notification.message}</p>
         )}
         {notification.action && (
-          <button 
+          <button
             onClick={notification.action.onClick}
             className="mt-2 text-xs font-semibold underline hover:opacity-80" // Adjusted style
           >
@@ -99,7 +98,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
       </div>
       <button
         type="button"
-        className="ml-3 -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400" 
+        className="ml-3 -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
         onClick={() => onDismiss(notification.id)}
         aria-label="Sluiten"
       >

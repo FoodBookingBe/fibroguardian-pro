@@ -1,6 +1,5 @@
-import React from 'react';
-
 'use client';
+
 import Link from 'next/link';
 import { ReactElement } from 'react'; // Import ReactElement for icon type
 
@@ -64,7 +63,7 @@ export default function QuickActions(): JSX.Element {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-lg font-semibold mb-4 text-gray-800">Snelle Acties</h2> {/* Adjusted text color */}
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {actions.map((action, index) => (
           <Link

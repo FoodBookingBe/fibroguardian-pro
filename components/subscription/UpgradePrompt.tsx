@@ -1,8 +1,7 @@
-import React from 'react';
-
 'use client';
-import { useState } from 'react'; // useEffect was unused
+
 import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 // import { Button } from '@/components/ds/atoms/Button'; // Placeholder
 // import { Card } from '@/components/ds/atoms/Card'; // Placeholder
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'; // Correct pad
@@ -31,12 +30,12 @@ export function UpgradePrompt({
   const { hasAccess, userType, isLoadingSubscription } = useFeatureAccess();
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true); // Beheer zichtbaarheid lokaal
-  
+
   // Als gebruiker al toegang heeft, of subscription nog laadt, of prompt is gesloten, toon niets
   if (isLoadingSubscription || hasAccess(featureId) || !isVisible) {
     return <></>; // Empty fragment instead of null
   }
-  
+
   const feature = subscriptionFeatures.find(f => f.id === featureId);
   if (!feature) {
     console.warn(`UpgradePrompt: Feature met ID '${featureId}' niet gevonden.`);
@@ -48,40 +47,60 @@ export function UpgradePrompt({
   const lowestPlanWithFeature = plans.find(
     plan => plan.id !== 'free' && feature.tiers.includes(plan.id)
   );
-  
+
   const defaultTitle = `Upgrade voor ${feature.name}`;
   const defaultDescription = `Deze premium functie is beschikbaar in het ${lowestPlanWithFeature?.name || 'betaalde'} abonnement en hoger. Ontgrendel meer waarde!`;
 
   const handleUpgradeClick = () => {
     router.push('/pricing'); // Stuur naar prijzenpagina
   };
-  
+
   const handleDismiss = () => {
     setIsVisible(false);
     if (onClose) {
       onClose();
     }
   };
-  
+
   // Basis Button component als ds/atoms/Button niet bestaat
-  const Button = ({ onClick, children, variant = 'primary', className: btnClassName = '', icon, iconPosition, ...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown> ;: unknown) => (
-    <button 
-      onClick={onClick} 
-      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-      {...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>;
+  const Button = ({
+    onClick,
+    children,
+    variant = 'primary',
+    className: btnClassName = '',
+    icon,
+    iconPosition = 'left',
+    ...props
+  }: {
+    onClick?: () => void;
+    children: React.ReactNode;
+    variant?: 'primary' | 'secondary';
+    className?: string;
+    icon?: React.ReactNode;
+    iconPosition?: 'left' | 'right';
+    [key: string]: any;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${btnClassName} ${variant === 'primary' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+      {...props}
     >
-      {iconPosition === 'left' && icon && <span className="mr-2">{icon}</span>}
+      {icon && iconPosition === 'left' && <span className="mr-2">{icon}</span>}
       {children}
-      {iconPosition === 'right' && icon && <span className="ml-2">{icon}</span>}
+      {icon && iconPosition === 'right' && <span className="ml-2">{icon}</span>}
     </button>
   );
   // Basis Card component
-  const Card = ({ children, className: cardClassName = '', ...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown> ;: unknown) => (
-    <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props} // Type assertion fixed
-const typedProps = props as Record<string, unknown>;>
+  const Card = ({
+    children,
+    className: cardClassName = '',
+    ...props
+  }: {
+    children: React.ReactNode;
+    className?: string;
+    [key: string]: any;
+  }) => (
+    <div className={`bg-white rounded-lg shadow-md ${cardClassName}`} {...props}>
       {children}
     </div>
   );
@@ -103,10 +122,10 @@ const typedProps = props as Record<string, unknown>;>
           <p className="text-gray-600 mb-6 text-sm">
             {description || defaultDescription}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
             {showDismissButton && (
-              <Button variant="ghost" onClick={handleDismiss} className="w-full sm:w-auto border border-gray-300">
+              <Button variant="secondary" onClick={handleDismiss} className="w-full sm:w-auto border border-gray-300">
                 Later
               </Button>
             )}
@@ -118,7 +137,7 @@ const typedProps = props as Record<string, unknown>;>
       </div>
     );
   }
-  
+
   if (variant === 'banner') {
     return (
       <div className={`bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-4 rounded-lg shadow-lg ${className}`}>
@@ -133,15 +152,15 @@ const typedProps = props as Record<string, unknown>;>
           </div>
           <div className="flex-shrink-0 flex space-x-3">
             {showDismissButton && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="secondary"
                 className="text-white border border-purple-300 hover:bg-white hover:bg-opacity-10"
                 onClick={handleDismiss}
               >
                 Later
               </Button>
             )}
-            <Button 
+            <Button
               className="bg-white text-purple-700 hover:bg-purple-50 shadow"
               onClick={handleUpgradeClick}
             >
@@ -152,7 +171,7 @@ const typedProps = props as Record<string, unknown>;>
       </div>
     );
   }
-  
+
   // Default: inline variant
   return (
     <Card className={`p-4 border border-purple-200 bg-purple-50 ${className}`}>
@@ -162,8 +181,8 @@ const typedProps = props as Record<string, unknown>;>
       <p className="text-purple-700 text-sm mt-1 mb-3">
         {description || defaultDescription}
       </p>
-      <Button 
-        size="sm" 
+      <Button
+        size="sm"
         onClick={handleUpgradeClick}
         className="bg-purple-600 text-white hover:bg-purple-700"
       >

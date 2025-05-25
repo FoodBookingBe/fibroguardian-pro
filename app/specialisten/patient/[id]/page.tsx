@@ -1,12 +1,11 @@
-import React from 'react';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import PatientAllTasksList from '@/components/specialisten/PatientAllTasksList'; // Importeer nieuwe lijst
+import PatientInsightCard from '@/components/specialisten/PatientInsightCard';
 import { getSupabaseServerComponentClient } from '@/lib/supabase-server';
 import { Profile } from '@/types'; // Task niet meer direct nodig hier
-import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import PatientInsightCard from '@/components/specialisten/PatientInsightCard';
-import PatientAllTasksList from '@/components/specialisten/PatientAllTasksList'; // Importeer nieuwe lijst
+import { notFound } from 'next/navigation';
 
 interface PatientDetailPageProps {
   params: {
@@ -23,7 +22,7 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
   if (specialistUserError || !specialistUser) {
     console.error('PatientDetailPage: Specialist not authenticated.', specialistUserError);
     // DashboardLayout of middleware zou moeten redirecten als niet ingelogd
-    return notFound(); 
+    return notFound();
   }
 
   // 1. Controleer of de ingelogde specialist gekoppeld is aan deze patiënt
@@ -42,7 +41,7 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
   if (!connection) {
     console.warn(`PatientDetailPage: Specialist ${specialistUser.id} is niet gekoppeld aan patient ${patientId}. Toegang geweigerd.`);
     // Je kunt hier een specifiekere "geen toegang" pagina tonen of redirecten
-    return notFound(); 
+    return notFound();
   }
 
   // 2. Haal het profiel van de patiënt op
@@ -70,7 +69,7 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
         <div className="mb-6">
           <Link href="/specialisten/patienten" className="text-purple-600 hover:text-purple-800">&larr; Terug naar patiëntenlijst</Link>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-6">
           <h1 className="text-2xl md:text-3xl font-bold text-purple-800 mb-4">
             Patiënt Details: {patient.voornaam} {patient.achternaam}

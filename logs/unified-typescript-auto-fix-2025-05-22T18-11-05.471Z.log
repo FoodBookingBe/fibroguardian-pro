@@ -1,0 +1,159 @@
+[2025-05-22T18:11:05.489Z] Starting Unified TypeScript Auto-Fix System
+[2025-05-22T18:11:05.918Z] Found 233 TypeScript files to check
+[2025-05-22T18:11:05.919Z] Processing batch 1 of 12
+[2025-05-22T18:11:05.974Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\auth\login\page.tsx
+[2025-05-22T18:11:05.988Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\auth\register\page.tsx
+[2025-05-22T18:11:06.167Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\dashboard\dashboard-client.tsx
+[2025-05-22T18:11:06.220Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\dashboard\error.tsx
+[2025-05-22T18:11:06.305Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\inzichten\page.tsx
+[2025-05-22T18:11:06.348Z] Processing batch 2 of 12
+[2025-05-22T18:11:06.432Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\mijn-specialisten\mijn-specialisten-client.tsx
+[2025-05-22T18:11:06.491Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\offline\help\page.tsx
+[2025-05-22T18:11:06.497Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\layout.tsx
+[2025-05-22T18:11:06.506Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\profile\page.tsx
+[2025-05-22T18:11:06.525Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\onboarding\welcome\page.tsx
+[2025-05-22T18:11:06.537Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\overzicht\overzicht-client.tsx
+[2025-05-22T18:11:06.588Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\rapporten\page.tsx
+[2025-05-22T18:11:06.594Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\reflecties\page.tsx
+[2025-05-22T18:11:06.594Z] Processing batch 3 of 12
+[2025-05-22T18:11:06.608Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\specialisten\page.tsx
+[2025-05-22T18:11:06.622Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\logs\page.tsx
+[2025-05-22T18:11:06.629Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\edit\page.tsx
+[2025-05-22T18:11:06.639Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\logs\page.tsx
+[2025-05-22T18:11:06.648Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\taken\[taskId]\start\page.tsx
+[2025-05-22T18:11:06.655Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\app\voortgang\page.tsx
+[2025-05-22T18:11:06.664Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AddUserForm.tsx
+[2025-05-22T18:11:06.678Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminStatsCards.tsx
+[2025-05-22T18:11:06.682Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminSubscriptionsList.tsx
+[2025-05-22T18:11:06.713Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\AdminUsersList.tsx
+[2025-05-22T18:11:06.715Z] Processing batch 4 of 12
+[2025-05-22T18:11:06.721Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\ChangelogViewer.tsx
+[2025-05-22T18:11:06.728Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\charts\TaskCompletionChart.tsx
+[2025-05-22T18:11:06.732Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\charts\UserSignupsChart.tsx
+[2025-05-22T18:11:06.795Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\DynamicAdminComponents.tsx
+[2025-05-22T18:11:06.890Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:11:06.899Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:11:06.904Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\admin\EditUserForm.tsx
+[2025-05-22T18:11:06.911Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\RecentUsersTable.tsx
+[2025-05-22T18:11:06.945Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\UserManagementControls.tsx
+[2025-05-22T18:11:06.958Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\admin\UsersPageClientView.tsx
+[2025-05-22T18:11:06.977Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIAssistant.tsx
+[2025-05-22T18:11:07.014Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIInsightVisualization.tsx
+[2025-05-22T18:11:07.032Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\AIRecommendationCard.tsx
+[2025-05-22T18:11:07.118Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\KnowledgeEntryForm.tsx
+[2025-05-22T18:11:07.163Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\ai\SpecialistIntelligenceDashboard.tsx
+[2025-05-22T18:11:07.399Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\auth\AuthForm.tsx
+[2025-05-22T18:11:07.475Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\auth\AuthProvider.tsx
+[2025-05-22T18:11:07.540Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\EnergyTrendChart.tsx
+[2025-05-22T18:11:07.627Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\FatigueTrendChart.tsx
+[2025-05-22T18:11:07.653Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\HeartRateTrendChart.tsx
+[2025-05-22T18:11:07.699Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\PainTrendChart.tsx
+[2025-05-22T18:11:07.764Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\charts\ProgressVisualization.tsx
+[2025-05-22T18:11:07.781Z] Processing batch 5 of 12
+[2025-05-22T18:11:07.833Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\common\LazyImage.tsx
+[2025-05-22T18:11:07.894Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\common\OfflineIndicator.tsx
+[2025-05-22T18:11:07.913Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\common\ServiceWorkerInitializer.tsx
+[2025-05-22T18:11:07.947Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\AIInsightsPresentational.tsx
+[2025-05-22T18:11:08.027Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\DailyPlanner.tsx
+[2025-05-22T18:11:08.110Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\HealthMetrics.tsx
+[2025-05-22T18:11:08.312Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\HealthMetricsChart.tsx
+[2025-05-22T18:11:08.463Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dashboard\QuickActions.tsx
+[2025-05-22T18:11:08.509Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\debug\SessionStatus.tsx
+[2025-05-22T18:11:08.544Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:11:08.576Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\dev\PerformanceDashboard.tsx
+[2025-05-22T18:11:08.630Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\DashboardLayout.tsx
+[2025-05-22T18:11:08.929Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\SidebarPresentational.tsx
+[2025-05-22T18:11:09.295Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\layout\TopbarPresentational.tsx
+[2025-05-22T18:11:09.579Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:11:09.692Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\onboarding\GuidedTour.tsx
+[2025-05-22T18:11:09.747Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\ProgressIndicator.tsx
+[2025-05-22T18:11:09.799Z] Processing batch 6 of 12
+[2025-05-22T18:11:09.811Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\onboarding\StepNavigation.tsx
+[2025-05-22T18:11:09.843Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\rapporten\RapportGeneratorPresentational.tsx
+[2025-05-22T18:11:09.882Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectieFormPresentational.tsx
+[2025-05-22T18:11:09.930Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectiesList.tsx
+[2025-05-22T18:11:10.030Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\reflecties\ReflectiesListContainer.tsx
+[2025-05-22T18:11:10.178Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\settings\ProfileFormPresentational.tsx
+[2025-05-22T18:11:10.594Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\AddPatientButtonPresentational.tsx
+[2025-05-22T18:11:10.877Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\AddSpecialistButtonPresentational.tsx
+[2025-05-22T18:11:10.948Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:11:10.999Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:11:11.045Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\specialisten\CreateTaskAssignmentForm.tsx
+[2025-05-22T18:11:11.209Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\DynamicSpecialistComponents.tsx
+[2025-05-22T18:11:11.376Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientAllTasksList.tsx
+[2025-05-22T18:11:11.399Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientDetailsPresentational.tsx
+[2025-05-22T18:11:11.420Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientInsightCard.tsx
+[2025-05-22T18:11:11.463Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\PatientList.tsx
+[2025-05-22T18:11:11.782Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistCard.tsx
+[2025-05-22T18:11:12.462Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistsListContainer.tsx
+[2025-05-22T18:11:12.610Z] Processing batch 7 of 12
+[2025-05-22T18:11:12.701Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\specialisten\SpecialistTaskCreator.tsx
+[2025-05-22T18:11:12.812Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:11:12.832Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\PricingTables.tsx
+[2025-05-22T18:11:13.000Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:11:13.035Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\SubscriptionManagement.tsx
+[2025-05-22T18:11:13.133Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:11:13.150Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\subscription\UpgradePrompt.tsx
+[2025-05-22T18:11:13.211Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:11:13.218Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\support\SupportWidget.tsx
+[2025-05-22T18:11:13.265Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\AddTaskButton.tsx
+[2025-05-22T18:11:13.331Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskCard.tsx
+[2025-05-22T18:11:13.367Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskExecutionPresentational.tsx
+[2025-05-22T18:11:13.447Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskFilters.tsx
+[2025-05-22T18:11:13.527Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskFormPresentational.tsx
+[2025-05-22T18:11:13.547Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskItemCard.tsx
+[2025-05-22T18:11:13.560Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskList.tsx
+[2025-05-22T18:11:13.577Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\components\tasks\TaskLogsPresentational.tsx
+[2025-05-22T18:11:13.595Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\components\ui\ConditionalRender.tsx
+[2025-05-22T18:11:13.625Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\AIAssistantContainer.tsx
+[2025-05-22T18:11:13.650Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\AIRecommendationsContainer.tsx
+[2025-05-22T18:11:13.664Z] Processing batch 8 of 12
+[2025-05-22T18:11:13.667Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\KnowledgeManagementContainer.tsx
+[2025-05-22T18:11:13.700Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\ai\SpecialistIntelligenceDashboardContainer.tsx
+[2025-05-22T18:11:13.729Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\auth\AuthFormContainer.tsx
+[2025-05-22T18:11:13.749Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\AIInsightsContainer.tsx
+[2025-05-22T18:11:13.804Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\dashboard\DailyPlannerContainer.tsx
+[2025-05-22T18:11:13.830Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\layout\SidebarContainer.tsx
+[2025-05-22T18:11:13.866Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\layout\TopbarContainer.tsx
+[2025-05-22T18:11:14.045Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\rapporten\RapportGeneratorContainer.tsx
+[2025-05-22T18:11:14.084Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\reflecties\ReflectieFormContainer.tsx
+[2025-05-22T18:11:14.150Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\settings\ProfileFormContainer.tsx
+[2025-05-22T18:11:14.159Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\settings\ProfileFormContainer.tsx
+[2025-05-22T18:11:14.176Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddPatientButtonContainer.tsx
+[2025-05-22T18:11:14.195Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\AddSpecialistButtonContainer.tsx
+[2025-05-22T18:11:14.216Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\PatientDetailsContainer.tsx
+[2025-05-22T18:11:14.231Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\specialisten\PatientDetailsContainer.tsx
+[2025-05-22T18:11:14.246Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:11:14.250Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskExecutionContainer.tsx
+[2025-05-22T18:11:14.267Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskFormContainer.tsx
+[2025-05-22T18:11:14.277Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskFormContainer.tsx
+[2025-05-22T18:11:14.316Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TaskLogsContainer.tsx
+[2025-05-22T18:11:14.334Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\containers\tasks\TasksPageContainer.tsx
+[2025-05-22T18:11:14.348Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\context\OnboardingContext.tsx
+[2025-05-22T18:11:14.373Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:11:14.378Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\performance\imageLazyOptimizer.tsx
+[2025-05-22T18:11:14.380Z] Processing batch 9 of 12
+[2025-05-22T18:11:14.384Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\react-query-provider.tsx
+[2025-05-22T18:11:15.559Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:11:15.614Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\ai-recommendations\route.ts
+[2025-05-22T18:11:15.905Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\auth\callback\route.ts
+[2025-05-22T18:11:16.027Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\auth\callback\route.ts
+[2025-05-22T18:11:16.165Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\auth\[...supabase]\route.ts
+[2025-05-22T18:11:18.151Z] Processing batch 10 of 12
+[2025-05-22T18:11:18.797Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\app\api\tasks\[id]\route.ts
+[2025-05-22T18:11:18.983Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\app\api\tasks\[id]\route.ts
+[2025-05-22T18:11:19.378Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\hooks\useProfile.ts
+[2025-05-22T18:11:19.627Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\analytics\eventTracking.ts
+[2025-05-22T18:11:19.665Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\analytics\userJourney.ts
+[2025-05-22T18:11:20.033Z] Fixed "use client" directive placement in C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:11:20.044Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\feedback\feedbackCollector.ts
+[2025-05-22T18:11:20.054Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\logger.ts
+[2025-05-22T18:11:20.276Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\monitoring\performance-metrics.ts
+[2025-05-22T18:11:20.317Z] Fixed type assertions in C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:11:20.321Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\onboarding\onboardingEngine.ts
+[2025-05-22T18:11:20.342Z] Processing batch 11 of 12
+[2025-05-22T18:11:20.778Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\lib\supabase-server.ts
+[2025-05-22T18:11:20.860Z] File may need manual review for JSX type assertions: C:\Users\nick\Desktop\FibroGuardian\tests\task-logs.spec.ts
+[2025-05-22T18:11:20.951Z] Processing batch 12 of 12
+[2025-05-22T18:11:22.279Z] Applied 112 fixes in total
+[2025-05-22T18:11:22.280Z] Unified TypeScript Auto-Fix System completed

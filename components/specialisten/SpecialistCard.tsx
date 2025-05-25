@@ -1,3 +1,4 @@
+'use client';
 
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
@@ -5,10 +6,9 @@ declare module "react" {
     addNotification?: unknown;
   }
 }
-'use client'; // Client component if it has interactive elements like delete button
-import React from 'react';
+
 import { Profile } from '@/types';
-import { useNotification } from '@/context/NotificationContext'; // For potential local feedback
+import React from 'react';
 
 interface SpecialistCardProps {
   specialist: Profile;
@@ -36,7 +36,7 @@ function SpecialistCard({ specialist, onDelete, isDeleting }: SpecialistCardProp
     <div className="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-shadow duration-200 ease-in-out flex flex-col justify-between">
       <div>
         <div className="flex items-center mb-3">
-          <img 
+          <img
             src={specialist.avatar_url || '/icons/icon-128x128.png'} // Fallback avatar
             alt={`Avatar van ${specialist.voornaam} ${specialist.achternaam}`}
             className="h-12 w-12 rounded-full mr-4 object-cover"
@@ -51,18 +51,17 @@ function SpecialistCard({ specialist, onDelete, isDeleting }: SpecialistCardProp
         {/* Add more specialist details if available and relevant */}
         {/* Example: <p className="text-sm text-gray-500">Contact: {specialist.email_from_profiles_table}</p> */}
       </div>
-      
+
       {onDelete && (
         <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end">
           <button
             type="button"
             onClick={handleDeleteClick}
             disabled={isDeleting}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-              confirmDelete
-                ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400'
-                : 'bg-gray-200 text-gray-700 hover:bg-red-100 hover:text-red-600 focus:ring-gray-400'
-            } ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${confirmDelete
+              ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400'
+              : 'bg-gray-200 text-gray-700 hover:bg-red-100 hover:text-red-600 focus:ring-gray-400'
+              } ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
             aria-label={confirmDelete ? `Bevestig verwijderen van ${specialist.voornaam}` : `Verwijder ${specialist.voornaam}`}
           >
             {isDeleting ? (

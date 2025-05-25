@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/monitoring/logger';
+import { getSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 
 // Schema for GET request query parameters
 const GetPatternsQuerySchema = z.object({
@@ -28,7 +28,7 @@ const AnalyzePatternSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get and validate query parameters
   const url = new URL(request.url);
   const queryParams = {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     minConfidence: url.searchParams.get('minConfidence') ? parseFloat(url.searchParams.get('minConfidence')!) : 0.6,
     limit: url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')!) : 10
   };
-  
+
   const queryParamsResult = GetPatternsQuerySchema.safeParse(queryParams);
   if (!queryParamsResult.success) {
     return NextResponse.json(
@@ -55,24 +55,24 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   // Check if user is a specialist or admin
   const isSpecialistOrAdmin = profile.type === 'specialist' || profile.type === 'admin';
-  
+
   // If user is not a specialist or admin and trying to access another patient's data
   if (!isSpecialistOrAdmin && queryParamsResult.data.patientId && queryParamsResult.data.patientId !== user.id) {
     return NextResponse.json(
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       { status: 403 }
     );
   }
-  
+
   try {
     // If patientId is provided, check if specialist has access to this patient
     if (profile.type === 'specialist' && queryParamsResult.data.patientId) {
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
         .eq('patient_id', queryParamsResult.data.patientId)
         .eq('status', 'accepted')
         .single();
-      
+
       if (connectionError || !connection) {
         return NextResponse.json(
           { error: 'Forbidden', message: 'You do not have permission to access this patient\'s data' },
@@ -99,21 +99,21 @@ export async function GET(request: NextRequest) {
         );
       }
     }
-    
+
     // Determine the patient ID to use
     const patientId = queryParamsResult.data.patientId || (profile.type === 'patient' ? user.id : null);
-    
+
     if (!patientId) {
       return NextResponse.json(
         { error: 'Bad Request', message: 'Patient ID is required' },
         { status: 400 }
       );
     }
-    
+
     // Calculate date range based on timeframe
     const endDate = new Date();
     const startDate = new Date();
-    
+
     switch (queryParamsResult.data.timeframe) {
       case 'week':
         startDate.setDate(endDate.getDate() - 7);
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
         startDate.setFullYear(endDate.getFullYear() - 1);
         break;
     }
-    
+
     // Fetch patterns from the database
     let query = supabase
       .from('pattern_recognition')
@@ -137,26 +137,26 @@ export async function GET(request: NextRequest) {
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString())
       .gte('confidence', queryParamsResult.data.minConfidence);
-    
+
     // Apply pattern type filter if not 'all'
     if (queryParamsResult.data.patternType !== 'all') {
       query = query.eq('pattern_type', queryParamsResult.data.patternType);
     }
-    
+
     // Apply limit
     query = query
       .order('confidence', { ascending: false })
       .limit(queryParamsResult.data.limit);
-    
+
     const { data: patterns, error: patternsError } = await query;
-    
+
     if (patternsError) {
       return NextResponse.json(
         { error: 'Database error', message: 'Error fetching patterns', details: patternsError.message },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({ patterns });
   } catch (error) {
     logger.error('Error fetching patterns:', error);
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   const supabase = getSupabaseRouteHandlerClient();
-  
+
   // Authenticate user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -182,21 +182,21 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
   }
-  
+
   // Get user profile to check permissions
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, type')
     .eq('id', user.id)
     .single();
-  
+
   if (profileError) {
     return NextResponse.json(
       { error: 'Database error', message: 'Error fetching user profile' },
       { status: 500 }
     );
   }
-  
+
   // Only specialists and admins can trigger pattern analysis
   if (profile.type !== 'specialist' && profile.type !== 'admin') {
     return NextResponse.json(
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
       { status: 403 }
     );
   }
-  
+
   // Parse and validate request body
   let body;
   try {
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   const bodyResult = AnalyzePatternSchema.safeParse(body);
   if (!bodyResult.success) {
     return NextResponse.json(
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+
   // Check if specialist has access to this patient
   if (profile.type === 'specialist') {
     const { data: connection, error: connectionError } = await supabase
@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
       .eq('patient_id', bodyResult.data.patientId)
       .eq('status', 'accepted')
       .single();
-    
+
     if (connectionError || !connection) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'You do not have permission to analyze this patient\'s data' },
@@ -241,12 +241,12 @@ export async function POST(request: NextRequest) {
       );
     }
   }
-  
+
   try {
     // Calculate date range based on timeframe
     const endDate = new Date();
     const startDate = new Date();
-    
+
     switch (bodyResult.data.timeframe) {
       case 'week':
         startDate.setDate(endDate.getDate() - 7);
@@ -261,11 +261,11 @@ export async function POST(request: NextRequest) {
         startDate.setFullYear(endDate.getFullYear() - 1);
         break;
     }
-    
+
     // Fetch patient data for analysis
     let reflecties = [];
     let taskLogs = [];
-    
+
     if (bodyResult.data.dataType === 'reflecties' || bodyResult.data.dataType === 'both') {
       const { data: reflectiesData, error: reflectiesError } = await supabase
         .from('reflecties')
@@ -274,17 +274,17 @@ export async function POST(request: NextRequest) {
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: true });
-      
+
       if (reflectiesError) {
         return NextResponse.json(
           { error: 'Database error', message: 'Error fetching reflections', details: reflectiesError.message },
           { status: 500 }
         );
       }
-      
+
       reflecties = reflectiesData || [];
     }
-    
+
     if (bodyResult.data.dataType === 'task_logs' || bodyResult.data.dataType === 'both') {
       const { data: taskLogsData, error: taskLogsError } = await supabase
         .from('task_logs')
@@ -293,17 +293,17 @@ export async function POST(request: NextRequest) {
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: true });
-      
+
       if (taskLogsError) {
         return NextResponse.json(
           { error: 'Database error', message: 'Error fetching task logs', details: taskLogsError.message },
           { status: 500 }
         );
       }
-      
+
       taskLogs = taskLogsData || [];
     }
-    
+
     // Check if we have enough data for analysis
     if (reflecties.length === 0 && taskLogs.length === 0) {
       return NextResponse.json(
@@ -311,11 +311,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Generate some example patterns for demonstration
     // In a real implementation, this would use more sophisticated algorithms
     const patterns = generateExamplePatterns(bodyResult.data.patientId, reflecties, taskLogs, bodyResult.data.patternType);
-    
+
     // Store recognized patterns in the database
     if (patterns.length > 0) {
       const { error: insertError } = await supabase
@@ -329,13 +329,13 @@ export async function POST(request: NextRequest) {
           confidence: pattern.confidence,
           created_by: user.id
         })));
-      
+
       if (insertError) {
         logger.error('Error storing patterns:', insertError);
       }
     }
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       patterns,
       meta: {
         reflectiesCount: reflecties.length,
@@ -358,7 +358,7 @@ export async function POST(request: NextRequest) {
  * In a real implementation, this would use more sophisticated algorithms
  */
 function generateExamplePatterns(
-  patientId: string,
+  _patientId: string,
   reflecties: unknown[],
   taskLogs: unknown[],
   patternType: string
@@ -376,7 +376,7 @@ function generateExamplePatterns(
     data: Record<string, any>;
     confidence: number;
   }> = [];
-  
+
   // Add some example patterns based on the requested pattern type
   if (patternType === 'symptom' || patternType === 'all') {
     if (reflecties.length >= 5) {
@@ -391,7 +391,7 @@ function generateExamplePatterns(
       });
     }
   }
-  
+
   if (patternType === 'activity' || patternType === 'all') {
     if (taskLogs.length >= 5) {
       patterns.push({
@@ -405,7 +405,7 @@ function generateExamplePatterns(
       });
     }
   }
-  
+
   if (patternType === 'treatment' || patternType === 'all') {
     if (taskLogs.length >= 5 && reflecties.length >= 5) {
       patterns.push({
@@ -420,6 +420,6 @@ function generateExamplePatterns(
       });
     }
   }
-  
+
   return patterns;
 }

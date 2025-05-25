@@ -1,23 +1,24 @@
 
+'use client';
+
 // Fix voor ontbrekende property 'addNotification' op Element type
 declare module "react" {
   interface Element {
     addNotification?: unknown;
   }
 }
-'use client';
-import React, { useState, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { _useAuth as useAuth } from '@/components/auth/AuthProvider';
-import { useProfile } from '@/hooks/useSupabaseQuery';
-import { useUpdateProfile } from '@/hooks/useMutations';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
-import { Profile } from '@/types';
-import { useNotification } from '@/context/NotificationContext';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { ErrorMessage } from '@/lib/error-handler';
-import ProfileFormPresentational, { ProfileFormData } from '@/components/settings/ProfileFormPresentational';
 import { AlertMessage } from '@/components/common/AlertMessage';
+import ProfileFormPresentational, { ProfileFormData } from '@/components/settings/ProfileFormPresentational';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { useNotification } from '@/context/NotificationContext';
+import { useUpdateProfile } from '@/hooks/useMutations';
+import { useProfile } from '@/hooks/useSupabaseQuery';
+import { ErrorMessage } from '@/lib/error-handler';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Profile } from '@/types';
+import { useRouter } from 'next/navigation';
+import React, { FormEvent, useEffect, useState } from 'react';
 
 // Helper to initialize form state from Profile data
 const profileToFormState = (profile?: Profile | null): ProfileFormData => {
@@ -35,28 +36,28 @@ export default function ProfileFormContainer(): JSX.Element {
   const { user } = useAuth();
   const userId = user?.id;
 
-  const { 
-    data: profileData, 
-    isLoading: isLoadingProfile, 
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
     error: fetchProfileError,
     isError: isFetchProfileError
   } = useProfile(userId, { enabled: !!userId });
 
-  const [formData, setFormData] = useState<ProfileFormData>(profileToFormState(profileData));
+  const [formData, setFormData] = useState<ProfileFormData>(profileToFormState(profileData as any));
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profileData?.avatar_url || null);
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
   const { addNotification } = useNotification();
 
   useEffect(() => {
     if (profileData) {
-      setFormData(profileToFormState(profileData));
+      setFormData(profileToFormState(profileData as any));
       setAvatarUrl(profileData.avatar_url || null);
     }
   }, [profileData]);
 
-  const { 
-    mutate: updateProfile, 
-    isPending: isUpdatingProfile, 
+  const {
+    mutate: updateProfile,
+    isPending: isUpdatingProfile,
     error: updateProfileHookError,
     isError: isUpdateProfileError,
     isSuccess: isUpdateProfileSuccess
@@ -92,7 +93,7 @@ export default function ProfileFormContainer(): JSX.Element {
       if (!urlData?.publicUrl) {
         throw new Error('Kon geen publieke URL krijgen voor de profielfoto.');
       }
-      
+
       setAvatarUrl(urlData.publicUrl);
 
       updateProfile({ id: user.id, data: { avatar_url: urlData.publicUrl } }, {
@@ -109,11 +110,11 @@ export default function ProfileFormContainer(): JSX.Element {
       addNotification({ type: 'error', message: (error as any).message || 'Fout bij uploaden van profielfoto.' });
     } finally {
       setUploadingAvatar(false);
-      e.target.value = ''; 
+      e.target.value = '';
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user?.id) return;
 
@@ -121,7 +122,7 @@ export default function ProfileFormContainer(): JSX.Element {
       ...formData,
       geboortedatum: formData.geboortedatum ? new Date(formData.geboortedatum) : undefined,
     };
-    
+
     updateProfile({ id: user.id, data: profileUpdateData }, {
       onSuccess: () => {
         addNotification({ type: 'success', message: 'Profiel succesvol bijgewerkt!' });
@@ -144,7 +145,7 @@ export default function ProfileFormContainer(): JSX.Element {
       </div>
     );
   }
-  
+
   const typedFetchProfileError = fetchProfileError as ErrorMessage | null;
   if (isFetchProfileError && typedFetchProfileError) {
     return (
