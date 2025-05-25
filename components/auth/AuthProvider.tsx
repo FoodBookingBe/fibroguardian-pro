@@ -238,14 +238,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoadingAuth(true);
     logAuthEvent('AUTH_INITIALIZED');
 
+    // DEBUG: Log environment variables in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[AuthProvider] Environment check:', {
+        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasSupabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      });
+    }
+
     const supabase = supabaseRef.current;
     if (!supabase) {
-      // This might happen if the effect runs before the client initialization effect.
-      // However, getSession should ideally wait or be called after client is ensured.
-      // For now, we'll let it proceed, but this indicates a potential timing issue if supabase is null.
-      // The main useEffect for auth state changes will re-run once supabaseRef.current is set.
       console.warn("[AuthProvider] Supabase client not yet initialized in auth state effect. Will retry.");
-      setLoadingAuth(false); // Avoid infinite loading if client never initializes
+      setLoadingAuth(false);
       return;
     }
     const initStart = performance.now();
